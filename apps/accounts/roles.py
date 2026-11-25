@@ -20,7 +20,13 @@ class GroupedPermissionCheckboxes(forms.CheckboxSelectMultiple):
     template_name = "accounts/permission_checkboxes.html"
 
     def optgroups(self, name, value, attrs=None):
-        labels = {"academics": "Academic", "accounts": "Accounts"}
+        labels = {
+            "academics": "Academic",
+            "accounts": "Accounts",
+            "competencies": "Kompetensi",
+            "evidence": "Bukti",
+            "assessments": "Asesmen",
+        }
         groups: dict[str, list[dict[str, Any]]] = {}
         for _, options, _ in super().optgroups(name, value, attrs):
             for option in options:
@@ -38,7 +44,15 @@ class GroupedPermissionCheckboxes(forms.CheckboxSelectMultiple):
 class AccessRoleForm(forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(
         label="Hak akses",
-        queryset=Permission.objects.filter(content_type__app_label__in=["accounts", "academics"])
+        queryset=Permission.objects.filter(
+            content_type__app_label__in=[
+                "accounts",
+                "academics",
+                "assessments",
+                "competencies",
+                "evidence",
+            ]
+        )
         .select_related("content_type")
         .order_by("content_type__app_label", "name", "pk"),
         widget=GroupedPermissionCheckboxes,

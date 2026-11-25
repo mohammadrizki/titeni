@@ -1,0 +1,141 @@
+{% extends "core/base.html" %}
+{% block title %}{% if publication %}Peta artefak terbit{% elif saved %}Draf peta artefak tersimpan{% else %}Pratinjau peta artefak{% endif %} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:blueprint_draft' program.pk version.pk as blueprint_url %}
+  {% if saved %}
+    {% url 'academics:evidence:artifact_map' program.pk version.pk as map_url %}
+    {% include "core/breadcrumbs.html" with current="Versi peta artefak" parent_url=academic_url parent_label="Akademik" section_url=map_url section_label="Pratinjau peta artefak" only %}
+  {% else %}
+    {% include "core/breadcrumbs.html" with current="Pratinjau peta artefak" parent_url=academic_url parent_label="Akademik" section_url=blueprint_url section_label="Draf blueprint asesmen" only %}
+  {% endif %}
+  <h1 class="heading mt-3">{% if publication %}Peta artefak terbit versi {{ saved.number }}{% elif saved %}Draf peta artefak versi {{ saved.number }}{% else %}Pratinjau peta artefak{% endif %}</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">Draf blueprint versi {{ snapshot.blueprint_number }} · Draf kompetensi versi {{ snapshot.framework_number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="artifact_map" only %}
+  <div class="academic-tab-panel">
+    {% if saved %}
+      <p>Disimpan {{ saved.created_at|date:"d M Y H:i" }}</p>
+      {% if publication %}
+        <p class="mt-2">Berlaku mulai {{ publication.effective_on|date:"d M Y" }}</p>
+        <h2 class="section-title mt-4">Persyaratan yang diterbitkan</h2>
+        {% include "evidence/published_requirements.html" with publication=publication only %}
+      {% elif can_publish %}
+        <a class="button mt-4" href="{% url 'academics:evidence:publish_artifact_map' program.pk saved.pk %}">Terbitkan peta</a>
+      {% endif %}
+      <a class="nav-link" href="{{ map_url }}">Kembali ke pratinjau</a>
+    {% else %}
+      <form method="post" action="{% url 'academics:evidence:save_artifact_map' program.pk version.pk %}">
+        {% csrf_token %}
+        <button class="button" type="submit">Simpan versi draf</button>
+      </form>
+      <a class="nav-link" href="{% url 'academics:evidence:evidence_requirements' program.pk version.pk %}">Kelola persyaratan bukti</a>
+      {% if history %}
+        <h2 class="section-title mt-4">Versi tersimpan</h2>
+        <ul>
+          {% for entry in history %}
+            <li><a class="nav-link" href="{% url 'academics:evidence:saved_artifact_map' program.pk entry.pk %}">Versi {{ entry.number }} · {{ entry.created_at|date:"d M Y H:i" }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endif %}
+
+    <h2 class="section-title mt-4">Rancangan bukti per komponen</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Komponen asesmen</th><th scope="col">Tahap kurikulum</th><th scope="col">Target kompetensi</th><th scope="col">Sumber dan jenis bukti</th><th scope="col">Sampling</th>{% if not saved %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for component in snapshot.components %}
+            <tr>
+              <th scope="row">{{ component.label }}</th>
+              <td>{{ component.stage }}</td>
+              <td>
+                <ul>
+                  {% for target in component.targets %}
+                    <li>{{ target }}</li>
+                  {% empty %}
+                    <li>Belum dipetakan</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  {% for source in component.sources %}
+                    <li>{{ source }}</li>
+                  {% empty %}
+                    <li>Belum ditautkan</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  {% for sampling in component.sampling %}
+                    <li>{{ sampling.context }} · min. {{ sampling.minimum }} observasi</li>
+                  {% empty %}
+                    <li>Belum dirancang</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              {% if not saved %}<td>
+                {% url 'academics:row_action' program.pk 'komponen' component.id 'lihat' as preview_url %}
+                {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+              </td>{% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="{% if saved %}5{% else %}6{% endif %}">Blueprint ini belum memiliki komponen asesmen.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Cakupan butir kompetensi</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir kompetensi</th><th scope="col">Komponen blueprint</th><th scope="col">Sumber dari registri</th><th scope="col">Milestone perkembangan</th>{% if not saved %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for row in snapshot.coverage %}
+            <tr>
+              <th scope="row">{{ row.label }}</th>
+              <td>
+                <ul>
+                  {% for target in row.blueprint %}
+                    <li>{{ target }}</li>
+                  {% empty %}
+                    <li>Belum dipetakan</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  {% for source in row.registry %}
+                    <li>{{ source }}</li>
+                  {% empty %}
+                    <li>Belum dipetakan</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  {% for milestone in row.milestones %}
+                    <li>{{ milestone }}</li>
+                  {% empty %}
+                    <li>Belum dirancang</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              {% if not saved %}<td>
+                {% url 'academics:row_action' program.pk 'butir' row.id 'lihat' as preview_url %}
+                {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+              </td>{% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="{% if saved %}4{% else %}5{% endif %}">Draf kerangka ini belum memiliki butir kompetensi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "evidence/plan_requirements.html" %}
+  </div>
+</section>
+{% endblock %}

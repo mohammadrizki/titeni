@@ -20,7 +20,7 @@
     <table class="data-table" aria-labelledby="judul-{{ action }}">
       <thead><tr>
         {% for header in headers %}<th scope="col">{{ header }}</th>{% endfor %}
-        <th scope="col" class="text-right">Aksi</th>
+        <th scope="col" class="table-action-column text-right">Aksi</th>
       </tr></thead>
       <tbody>
         {% for record in records %}

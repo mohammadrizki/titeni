@@ -1,0 +1,39 @@
+{% if has_blueprint_proposals %}
+  <h2 class="section-title mt-4">Usulan persyaratan dari blueprint</h2>
+  <p class="mt-2">Setiap usulan mencakup satu konteks sampling. Jumlah minimum berlaku untuk observasi pada konteks tersebut.</p>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Komponen asal</th><th scope="col">Konteks</th><th scope="col">Minimum observasi</th><th scope="col">Target kompetensi</th><th scope="col">Sumber dan jenis bukti</th>{% if not saved %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for proposal in snapshot.blueprint_proposals %}
+          <tr>
+            <th scope="row">{{ proposal.component }}</th>
+            <td>{{ proposal.context }}</td>
+            <td>{{ proposal.minimum_observations }}</td>
+            <td><ul>{% for target in proposal.targets %}<li>{{ target.label }}</li>{% endfor %}</ul></td>
+            <td><ul>{% for source in proposal.sources %}<li>{{ source.label }}</li>{% endfor %}</ul></td>
+            {% if not saved %}<td>
+              {% url 'academics:row_action' program.pk 'komponen' proposal.component_id 'lihat' as preview_url %}
+              {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+            </td>{% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="{% if saved %}5{% else %}6{% endif %}">Usulan tersedia setelah komponen memiliki target kompetensi, sumber bukti, dan rancangan sampling.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% if snapshot.requirements %}
+  <h2 class="section-title mt-4">Persyaratan bukti manual</h2>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Persyaratan</th><th scope="col">Butir kompetensi</th><th scope="col">Sumber dan jenis bukti</th><th scope="col">Jumlah minimum</th><th scope="col">Konteks</th></tr></thead>
+      <tbody>
+        {% for requirement in snapshot.requirements %}
+          <tr><td>{{ requirement.label }}</td><td>{{ requirement.competency }}</td><td>{{ requirement.source }}</td><td>{{ requirement.minimum }}</td><td>{{ requirement.context|default:"—" }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}

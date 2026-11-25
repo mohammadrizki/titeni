@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% block title %}Pelaksanaan asesmen · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% include "core/breadcrumbs.html" with current="Pelaksanaan asesmen" parent_url=academic_url parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Pelaksanaan asesmen</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="events" only %}
+  <div class="academic-tab-panel">
+    {% if form %}
+      <form class="editor" method="post">
+        {% csrf_token %}
+        {% include "core/add_row.html" with add_label="Tambah pelaksanaan asesmen" %}
+      </form>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Pelaksanaan</th><th scope="col">Komponen</th><th scope="col">Draf blueprint</th><th scope="col">Tanggal</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for event in events %}
+            <tr>
+              <th scope="row">{{ event.name }}</th>
+              <td>{{ event.component }}</td>
+              <td>Versi {{ event.component.version.number }}</td>
+              <td>{{ event.occurred_on|date:"d M Y" }}</td>
+              <td>
+                {% url 'academics:assessments:attempts' program.pk event.pk as preview_url %}
+                {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Belum ada pelaksanaan asesmen.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

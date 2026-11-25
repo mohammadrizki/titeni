@@ -1,9 +1,20 @@
 from django.urls import include, path
 
-from apps.academics import cohorts, curriculum, views
+from apps.academics import cohorts, curriculum, row_actions, views
 
 app_name = "academics"
 urlpatterns = [
+    path("prodi/<int:program_id>/sumber-bukti/", include("apps.evidence.urls")),
+    path(
+        "prodi/<int:program_id>/baris/<slug:kind>/<int:row_id>/<slug:action>/",
+        row_actions.row_action,
+        name="row_action",
+    ),
+    path(
+        "pendaftaran-prodi/<int:program_id>/pratinjau/",
+        row_actions.preview_program,
+        name="preview_program",
+    ),
     path("prodi/<int:program_id>/blueprint/", include("apps.assessments.urls")),
     path("prodi/<int:program_id>/kompetensi/", include("apps.competencies.urls")),
     path("prodi/<int:program_id>/kohort/", cohorts.cohorts, name="cohorts"),

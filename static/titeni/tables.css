@@ -32,3 +32,11 @@
 .table-add-row[open] > summary {
   margin-block-end: .5rem;
 }
+
+.academic-row-actions {
+  white-space: nowrap;
+}
+
+.data-table .table-action-column {
+  width: 15%;
+}

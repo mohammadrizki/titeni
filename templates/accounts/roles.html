@@ -20,7 +20,7 @@
       <table class="data-table role-matrix" aria-label="Matriks peran dan hak akses">
         <thead><tr>
           {% for field in form %}<th scope="col">{{ field.label }}</th>{% endfor %}
-          <th scope="col">Aksi</th>
+          <th scope="col" class="table-action-column">Aksi</th>
         </tr></thead>
         <tbody>
           <tr id="role-form-row"{% if form.errors %} data-inline-add-open{% endif %}>

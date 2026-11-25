@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "apps.assessments",
     "apps.competencies",
     "apps.core",
+    "apps.evidence",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,6 +75,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+EVIDENCE_ARTIFACT_ROOT = Path(
+    env.str("EVIDENCE_ARTIFACT_ROOT", default=str(BASE_DIR / "private_evidence"))
+)
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG

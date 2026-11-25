@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
 import pytest
 from django.contrib.auth.models import Permission
@@ -7,8 +7,8 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.academics.models import AcademicPeriod, Curriculum, Institution, StudyProgram
-from apps.accounts.models import ProgramConfigurationGrant, User
+from apps.academics.models import AcademicPeriod, Cohort, Curriculum, Institution, StudyProgram
+from apps.accounts.models import AccessRole, ProgramConfigurationGrant, User, UserRoleAssignment
 
 pytestmark = pytest.mark.django_db
 
@@ -197,3 +197,132 @@ def test_curriculum_drafts_are_versioned_and_program_scoped(client: Client) -> N
     assert client.post(new_url, follow=True).status_code == 200
     assert curriculum.versions.get(number=2).stages.count() == 0
     assert first.stages.get().name == "Klinik"
+
+
+def test_period_row_actions_require_scope_permissions_and_confirmation(client: Client) -> None:
+
+    manager = User.objects.create_user(username="row-manager")
+    institution = Institution.objects.create(name="Fakultas", updated_by=manager)
+    program, other = [
+        StudyProgram.objects.create(
+            institution=institution,
+            code=code,
+            name=code,
+            education_stage=StudyProgram.Stage.PROFESSIONAL,
+            created_by=manager,
+        )
+        for code in ("one", "two")
+    ]
+    period, foreign = [
+        AcademicPeriod.objects.create(
+            program=scope,
+            code="2026",
+            name="Periode awal",
+            starts_on=date(2026, 1, 1),
+            ends_on=date(2026, 12, 31),
+            created_by=manager,
+        )
+        for scope in (program, other)
+    ]
+    ProgramConfigurationGrant.objects.create(
+        account=manager, program=program, granted_by=manager, starts_on=timezone.localdate()
+    )
+    client.force_login(manager)
+
+    def row(action: str, row_id: int = period.pk) -> str:
+        return reverse("academics:row_action", args=[program.pk, "periode", row_id, action])
+
+    index = reverse("academics:periods", args=[program.pk])
+    preview = client.get(row("lihat"))
+    assert preview.status_code == 200 and "Periode awal" in preview.content.decode()
+    assert client.post(row("lihat")).status_code == 405
+    assert client.get(row("lihat", foreign.pk)).status_code == 404
+    assert client.get(row("sunting")).status_code == 403
+    assert client.post(row("hapus")).status_code == 403
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            content_type__app_label="academics",
+            codename__in=["change_academicperiod", "delete_academicperiod"],
+        )
+    )
+    page = client.get(index).content.decode()
+    for action in ("lihat", "sunting", "hapus"):
+        assert f'href="{row(action)}"' in page
+    assert 'aria-label="Simpan"' in client.get(row("sunting")).content.decode()
+    changes = {
+        "code": "2026",
+        "name": "Periode revisi",
+        "starts_on": "2026-01-01",
+        "ends_on": "2026-12-31",
+    }
+    assert client.post(row("sunting", foreign.pk), changes).status_code == 404
+    invalid = client.post(row("sunting"), {**changes, "ends_on": "2025-01-01"})
+    assert invalid.status_code == 200
+    period.refresh_from_db()
+    assert period.name == "Periode awal"
+    assert client.post(row("sunting"), changes).headers["Location"] == index
+    period.refresh_from_db()
+    assert period.name == "Periode revisi" and period.created_by == manager
+    assert client.get(row("hapus")).status_code == 200
+    assert AcademicPeriod.objects.filter(pk=period.pk).exists()
+    cohort = Cohort.objects.create(period=period, code="a", name="A", created_by=manager)
+    assert client.post(row("hapus")).status_code == 409
+    cohort.delete()
+    assert client.post(row("hapus")).headers["Location"] == index
+    assert not AcademicPeriod.objects.filter(pk=period.pk).exists()
+
+
+def test_program_role_can_manage_curriculum_only_in_assigned_program(client: Client) -> None:
+    manager = User.objects.create_user(username="kaprodi")
+    faculty = Institution.objects.create(name="Fakultas", updated_by=manager)
+    programs = [
+        StudyProgram.objects.create(
+            institution=faculty,
+            code=code,
+            name=code,
+            education_stage=StudyProgram.Stage.PROFESSIONAL,
+            created_by=manager,
+        )
+        for code in ("satu", "dua")
+    ]
+    for program in programs:
+        ProgramConfigurationGrant.objects.create(
+            account=manager, program=program, granted_by=manager, starts_on=timezone.localdate()
+        )
+    role = AccessRole.objects.create(
+        name="Kaprodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
+    )
+    role.permissions.add(
+        *Permission.objects.filter(
+            content_type__app_label="academics",
+            codename__in=["change_curriculum", "delete_curriculum"],
+        )
+    )
+    UserRoleAssignment.objects.create(
+        account=manager, role=role, program=programs[0], assigned_by=manager
+    )
+    client.force_login(manager)
+    for program, allowed in zip(programs, (True, False), strict=True):
+        curriculum = Curriculum.objects.create(program=program, code="2026", name="Kurikulum 2026")
+        draft = curriculum.versions.create(number=1, created_by=manager)
+        arguments = [program.pk, "kurikulum", curriculum.pk]
+        edit = reverse("academics:row_action", args=[*arguments, "sunting"])
+        delete = reverse("academics:row_action", args=[*arguments, "hapus"])
+        index = reverse("academics:curricula", args=[program.pk])
+        page = client.get(index).content.decode()
+        assert (edit in page) == allowed
+        assert (delete in page) == allowed
+        data = {"code": "2026", "name": "Kurikulum revisi"}
+        if allowed:
+            assert client.post(edit, data).headers["Location"] == index
+            curriculum.refresh_from_db()
+            assert curriculum.name == data["name"]
+            stage = draft.stages.create(code="a", name="Tahap A", created_by=manager)
+            assert client.post(delete).status_code == 409
+            assert draft.stages.filter(pk=stage.pk).exists()
+            stage.delete()
+            assert client.post(delete).headers["Location"] == index
+            assert not Curriculum.objects.filter(pk=curriculum.pk).exists()
+        else:
+            assert client.post(edit, data).status_code == 403
+            assert client.post(delete).status_code == 403

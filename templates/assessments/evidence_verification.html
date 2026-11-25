@@ -1,0 +1,96 @@
+{% extends "core/base.html" %}
+{% block title %}Verifikasi bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:attempt_evidence' program.pk event.pk attempt.pk as evidence_url %}
+  {% include "core/breadcrumbs.html" with current="Verifikasi bukti" parent_url=academic_url parent_label="Akademik" section_url=evidence_url section_label="Bukti percobaan" only %}
+  <h1 class="heading mt-3">Verifikasi bukti</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ event.name }} · {{ attempt.participation.enrollment.learner }} · Percobaan ke-{{ attempt.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="event_detail" only %}
+  <div class="academic-tab-panel">
+    <dl>
+      <dt class="font-semibold">Referensi</dt><dd>{{ record.reference }}</dd>
+      <dt class="font-semibold mt-2">Sumber dan jenis bukti</dt><dd>{{ record.source_link.capability }}</dd>
+      <dt class="font-semibold mt-2">Konteks pengamatan</dt><dd>{{ record.context|default:"—" }}</dd>
+      <dt class="font-semibold mt-2">Pencatat</dt><dd>{{ record.created_by.get_username }} · {{ record.created_at|date:"d M Y H:i" }}</dd>
+      {% if record.import_batch_id %}<dt class="font-semibold mt-2">Pencatatan</dt><dd>Impor CSV · Batch {{ record.import_batch_id }}</dd>{% endif %}
+      <dt class="font-semibold mt-2">Versi</dt><dd>{{ record.revision_number }}</dd>
+      {% if record.supersedes_id %}
+        <dt class="font-semibold mt-2">Koreksi</dt><dd>{{ record.correction_reason }} · <a class="text-accent underline" href="{% url 'academics:assessments:verify_evidence' program.pk event.pk attempt.pk record.supersedes_id %}">Lihat versi sebelumnya</a></dd>
+      {% endif %}
+      <dt class="font-semibold mt-2">Status</dt>
+      <dd>{% if successor %}Digantikan · <a class="text-accent underline" href="{% url 'academics:assessments:verify_evidence' program.pk event.pk attempt.pk successor.pk %}">Lihat versi pengganti</a>{% elif invalidation %}Dibatalkan{% elif verification %}{{ verification.get_status_display }}{% else %}Belum diputuskan{% endif %}</dd>
+      {% if verification %}
+        <dt class="font-semibold mt-2">Keputusan verifikasi tercatat</dt><dd>{{ verification.get_status_display }}</dd>
+        <dt class="font-semibold mt-2">Alasan verifikasi</dt><dd>{{ verification.reason }}</dd>
+        <dt class="font-semibold mt-2">Verifikator</dt><dd>{{ verification.created_by.get_username }} · {{ verification.created_at|date:"d M Y H:i" }}</dd>
+      {% endif %}
+      {% if invalidation %}
+        <dt class="font-semibold mt-2">Alasan pembatalan</dt><dd>{{ invalidation.reason }}</dd>
+        <dt class="font-semibold mt-2">Dibatalkan oleh</dt><dd>{{ invalidation.created_by.get_username }} · {{ invalidation.created_at|date:"d M Y H:i" }}</dd>
+      {% endif %}
+    </dl>
+    {% if form %}
+      <form class="editor mt-4" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="verify">
+        {{ form.as_p }}
+        <button class="button" type="submit">Simpan keputusan</button>
+      </form>
+    {% endif %}
+    {% if correction_form %}
+      <details class="mt-4"{% if correction_form.errors %} open{% endif %}>
+        <summary class="button button-secondary">Koreksi bukti</summary>
+        <form class="editor mt-4" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="correct">
+          {{ correction_form.as_p }}
+          <button class="button" type="submit">Simpan versi koreksi</button>
+        </form>
+      </details>
+    {% endif %}
+    {% if invalidation_form %}
+      <details class="mt-4"{% if invalidation_form.errors %} open{% endif %}>
+        <summary class="button button-secondary">Batalkan bukti</summary>
+        <form class="editor mt-4" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="invalidate">
+          {{ invalidation_form.as_p }}
+          <button class="button button-danger" type="submit">Simpan pembatalan</button>
+        </form>
+      </details>
+    {% endif %}
+    <h2 class="section-title mt-4">Lampiran PDF</h2>
+    {% if can_upload_artifact %}
+      <form class="editor mt-4" method="post" enctype="multipart/form-data" action="{% url 'academics:assessments:upload_artifact' program.pk event.pk attempt.pk record.pk %}">
+        {% csrf_token %}
+        <label for="artifact-file">Pilih PDF tanpa identitas pasien</label>
+        <input id="artifact-file" type="file" name="file" accept=".pdf,application/pdf" aria-describedby="artifact-limit" required>
+        <span id="artifact-limit" class="helptext">Maksimum 10 MiB per berkas.</span>
+        <button class="button mt-2" type="submit">Unggah PDF</button>
+      </form>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Nama berkas</th><th scope="col">Ukuran</th><th scope="col">Pengunggah</th><th scope="col">Waktu unggah</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for artifact in artifacts %}
+            <tr>
+              <th scope="row">{{ artifact.original_name }}</th>
+              <td>{{ artifact.size_bytes|filesizeformat }}</td>
+              <td>{{ artifact.created_by.get_username }}</td>
+              <td>{{ artifact.created_at|date:"d M Y H:i" }}</td>
+              <td><a class="nav-link" href="{% url 'academics:assessments:download_artifact' program.pk event.pk attempt.pk record.pk artifact.pk %}">Unduh PDF</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Belum ada lampiran.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <a class="nav-link mt-4" href="{{ evidence_url }}">Kembali ke bukti percobaan</a>
+  </div>
+</section>
+{% endblock %}

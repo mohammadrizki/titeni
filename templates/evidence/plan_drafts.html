@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% block title %}Draf rencana bukti individual · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:enrollments' program.pk enrollment.cohort_id as enrollment_url %}
+  {% include "core/breadcrumbs.html" with current="Draf rencana bukti individual" parent_url=academic_url parent_label="Akademik" section_url=enrollment_url section_label="Pendaftaran mahasiswa" only %}
+  <h1 class="heading mt-3">Draf rencana bukti individual</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ enrollment.learner }} · {{ enrollment.cohort.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="enrollments" only %}
+  <div class="academic-tab-panel">
+    {% if baseline %}
+      <h2 class="section-title">Baseline rencana bukti</h2>
+      <p class="mt-2">Peta artefak versi {{ baseline.publication.version.number }} · Efektif {{ baseline.publication.effective_on|date:"d M Y" }}</p>
+      {% include "evidence/published_requirements.html" with publication=baseline.publication only %}
+      {% if can_reconcile %}<a class="nav-link mt-4" href="{% url 'academics:evidence:reconcile' program.pk enrollment.pk %}">Rekonsiliasi bukti</a>{% endif %}
+    {% elif not selected %}
+      <p>Pendaftaran ini belum memiliki baseline.</p>
+    {% endif %}
+    {% if selected %}
+      <p>Draf ini belum menjadi baseline aktif mahasiswa.</p>
+      <p class="mt-2">Peta artefak versi {{ selected.artifact_map_version.number }} · Disimpan {{ selected.created_at|date:"d M Y H:i" }}</p>
+      {% include "evidence/plan_requirements.html" with saved=selected %}
+      {% if not snapshot.requirements and not snapshot.blueprint_proposals %}
+        <p class="mt-4">Versi peta ini belum memuat persyaratan atau usulan yang dapat ditinjau.</p>
+      {% endif %}
+      <a class="nav-link mt-4" href="{% url 'academics:evidence:plan_drafts' program.pk enrollment.pk %}">Kembali ke daftar draf</a>
+    {% else %}
+      {% if form %}
+        <form class="editor" method="post">
+          {% csrf_token %}
+          {% include "core/add_row.html" with add_label="Buat draf rencana bukti" %}
+        </form>
+      {% endif %}
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead><tr><th scope="col">Versi peta artefak</th><th scope="col">Waktu pembuatan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+          <tbody>
+            {% for draft in plans %}
+              <tr>
+                <td>{{ draft.artifact_map_version.number }}</td>
+                <td>{{ draft.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                  {% url 'academics:evidence:plan_draft' program.pk enrollment.pk draft.pk as preview_url %}
+                  {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">Belum ada draf rencana bukti.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

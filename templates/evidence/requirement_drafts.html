@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% load academic_rows %}
+{% block title %}Draf persyaratan bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:evidence:artifact_map' program.pk version.pk as map_url %}
+  {% include "core/breadcrumbs.html" with current="Draf persyaratan bukti" parent_url=academic_url parent_label="Akademik" section_url=map_url section_label="Pratinjau peta artefak" only %}
+  <h1 class="heading mt-3">Draf persyaratan bukti</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">Draf blueprint versi {{ version.number }} · Draf kompetensi versi {{ version.framework_version.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="artifact_map" only %}
+  <div class="academic-tab-panel">
+    <form class="editor" method="post">
+      {% csrf_token %}
+      {% include "core/add_row.html" with add_label="Tambah persyaratan bukti" %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode</th><th scope="col">Persyaratan</th><th scope="col">Butir kompetensi</th><th scope="col">Sumber dan jenis bukti</th><th scope="col">Jumlah minimum</th><th scope="col">Konteks</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for requirement in requirements %}
+            <tr>
+              <td>{{ requirement.code }}</td>
+              <td>{{ requirement.name }}</td>
+              <td>{{ requirement.competency }}</td>
+              <td>{{ requirement.capability }}</td>
+              <td>{{ requirement.minimum_count }}</td>
+              <td>{{ requirement.context|default:"—" }}</td>
+              <td class="academic-row-actions">{% academic_row requirement "persyaratan-bukti" program user %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7">Belum ada persyaratan bukti manual.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

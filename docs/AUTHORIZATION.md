@@ -16,7 +16,7 @@ Pemberian dan pencabutan peran mencatat pemberi, waktu, alasan dan cakupan dalam
 
 ## Izin konfigurasi yang tersedia
 
-Superuser dapat menyimpan definisi peran melalui matriks Peran & Hak Akses, dengan pilihan izin dan ruang lingkup Sistem, Program studi, atau Lainnya. Di tabel Pengguna, superuser dapat menugaskan beberapa peran sekaligus. Setiap peran berlingkup prodi mengikat penugasan pada satu program yang dipilih. Penugasan mencatat pemberi dan waktu serta mencegah duplikasi pada cakupan yang sama. Ruang lingkup Lainnya menunggu definisi target. Evaluasi izin dari matriks dan pencabutan penugasan peran belum tersedia. Penugasan konfigurasi prodi saat ini menggunakan pemeriksaan cakupan yang sudah tersedia.
+Superuser dapat menyimpan definisi peran melalui matriks Peran & Hak Akses, dengan pilihan izin dan ruang lingkup Sistem, Program studi, atau Lainnya. Di tabel Pengguna, superuser dapat menugaskan beberapa peran sekaligus. Setiap peran berlingkup prodi mengikat penugasan pada satu program yang dipilih. Penugasan mencatat pemberi dan waktu serta mencegah duplikasi pada cakupan yang sama. Ruang lingkup Lainnya menunggu definisi target. Izin peran berlingkup prodi dari matriks digunakan untuk sunting dan hapus baris Akademik. Penerapan untuk alur lain dan pencabutan penugasan peran menyusul. Penugasan konfigurasi prodi saat ini menggunakan pemeriksaan cakupan yang sudah tersedia.
 
 Operasi tingkat fakultas memerlukan `accounts.access_system_workspace` dan izin tindakan Django untuk profil fakultas, registrasi prodi, atau penugasan konfigurasi. Penugasan diberikan kepada akun aktif selain pemberi dan berlaku pada satu prodi dalam rentang tanggalnya. Pemberian dan pencabutan mencatat pelaku dan waktu. Pencabutan juga memerlukan izin perubahan penugasan. Daftar prodi dan operasi periode memakai penugasan yang berlaku, termasuk untuk operator sistem. Penugasan konfigurasi ini memberi akses ke periode akademik. Kebijakan akses rekaman pendidikan mengikuti relasi akademik pada inkrement berikutnya.
 
@@ -27,3 +27,45 @@ Daftar dan perubahan draf kompetensi mengikuti cakupan penugasan konfigurasi akt
 seperti draf kurikulum. Halaman draf memeriksa versi terhadap prodi pada URL.
 Pilihan induk dan target milestone dibatasi pada versi kerangka yang sedang
 dibuka, sedangkan tahap milestone dibatasi pada prodi itu.
+
+Aksi baris Akademik mengambil rekaman dari prodi dengan penugasan konfigurasi
+aktif. Pratinjau pendaftaran juga memerlukan izin melihat pendaftaran. Sunting
+dan hapus memerlukan izin `change_*` dan `delete_*` untuk model terkait.
+Izin dapat berasal dari Django atau penugasan peran untuk prodi yang sama.
+Penghapusan memerlukan konfirmasi dan permintaan POST. Foreign key melindungi
+rekaman yang dirujuk.
+
+Rencana bukti individual memerlukan akses melihat pendaftaran dan penugasan
+konfigurasi aktif pada prodi mahasiswa. Izin melihat draf
+`evidence.view_learnerevidenceplan` dan membuat draf
+`evidence.add_learnerevidenceplan` dapat diberikan lewat izin Django atau peran
+berlingkup prodi yang sama. Membuat draf juga memerlukan izin melihat draf.
+
+Penerbitan peta memerlukan penugasan konfigurasi aktif dan
+`evidence.add_artifactmappublication`. Izin Kaprodi diberikan untuk prodi
+yang ditugaskan. Baseline ditampilkan melalui izin baca rencana individual
+yang sama.
+
+Pelaksanaan asesmen memerlukan izin lihat pelaksanaan serta penugasan
+konfigurasi prodi aktif. Melihat percobaan memerlukan izin lihat percobaan
+dan pendaftaran. Membaca bukti juga memerlukan izin lihat bukti. Pembuatan
+tiap jenis rekaman memerlukan izin tambah untuk modelnya. Izin dapat berasal
+dari Django atau penugasan peran prodi yang sama, melalui kategori Asesmen
+dan Bukti di matriks.
+
+Verifikasi bukti memerlukan akses baca bukti, penugasan konfigurasi aktif, dan
+`evidence.add_evidenceverification` dari peran berlingkup prodi yang sama.
+Izin global saja tidak memberikan hak verifikasi. Pencatat tidak dapat
+memutuskan verifikasi bukti yang ia catat.
+
+Koreksi memerlukan akses baca bukti dan izin mencatat bukti. Pembatalan
+memerlukan penugasan verifikator di prodi yang sama. Pencatat tidak dapat
+membatalkan catatan sendiri. Versi historis tetap dapat dibaca oleh
+pengguna yang memiliki akses bukti.
+
+Rekonsiliasi memerlukan akses baca rencana individual dan bukti pada prodi yang
+sama. Menyimpan penempatan juga memerlukan izin `evidence.add_evidenceplacement`.
+
+Unduhan PDF memakai pemeriksaan izin baca bukti serta cakupan prodi, pelaksanaan,
+percobaan, versi bukti, dan lampiran. Unggahan juga memerlukan izin mencatat
+bukti. Versi lama tetap dapat diunduh oleh pengguna yang memiliki izin baca.

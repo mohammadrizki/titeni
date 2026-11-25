@@ -1,0 +1,25 @@
+<div class="table-wrap mt-4">
+  <table class="data-table">
+    <thead><tr><th scope="col">Asal</th><th scope="col">Persyaratan</th><th scope="col">Konteks</th><th scope="col">Minimum</th><th scope="col">Target kompetensi</th><th scope="col">Sumber bukti</th><th scope="col">Tenggat</th><th scope="col">Penanggung jawab</th></tr></thead>
+    <tbody>
+      {% for row in publication.requirements %}
+        <tr>
+          <td>{% if row.origin == "manual" %}Manual{% else %}Blueprint{% endif %}</td>
+          <th scope="row">{% firstof row.entry.label row.entry.component %}</th>
+          <td>{{ row.entry.context|default:"—" }}</td>
+          {% if row.origin == "manual" %}
+            <td>{{ row.entry.minimum }} bukti</td>
+            <td>{{ row.entry.competency }}</td>
+            <td>{{ row.entry.source }}</td>
+          {% else %}
+            <td>{{ row.entry.minimum_observations }} observasi</td>
+            <td><ul>{% for target in row.entry.targets %}<li>{{ target.label }}</li>{% endfor %}</ul></td>
+            <td><ul>{% for source in row.entry.sources %}<li>{{ source.label }}</li>{% endfor %}</ul></td>
+          {% endif %}
+          <td>{{ row.due_on|default:"—" }}</td>
+          <td>{{ row.responsible|default:"—" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

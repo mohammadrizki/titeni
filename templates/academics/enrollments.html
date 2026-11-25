@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load academic_rows %}
 {% block title %}Pendaftaran mahasiswa · Titeni{% endblock %}
 {% block content %}
 <section class="mx-auto px-4 py-12">
@@ -13,12 +14,12 @@
     {% if form %}<form class="editor mt-4" method="post">{% csrf_token %}{% include "core/add_row.html" with add_label="Tambah pendaftaran mahasiswa" %}</form>{% endif %}
     <div class="table-wrap mt-4">
       <table class="data-table">
-        <thead><tr><th scope="col">Nama pengguna</th><th scope="col">Tanggal pendaftaran</th></tr></thead>
+        <thead><tr><th scope="col">Nama pengguna</th><th scope="col">Tanggal pendaftaran</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
         <tbody>
           {% for enrollment in enrollments %}
-            <tr><td>{{ enrollment.learner.account.username }}</td><td>{{ enrollment.enrolled_on|date:"d M Y" }}</td></tr>
+            <tr><td>{{ enrollment.learner.account.username }}</td><td>{{ enrollment.enrolled_on|date:"d M Y" }}</td><td class="academic-row-actions">{% academic_row enrollment "mahasiswa" program user %}{% if can_view_plans %}<a class="nav-link" href="{% url 'academics:evidence:plan_drafts' program.pk enrollment.pk %}">Rencana bukti</a>{% endif %}</td></tr>
           {% empty %}
-            <tr><td colspan="2">Belum ada mahasiswa terdaftar.</td></tr>
+            <tr><td colspan="3">Belum ada mahasiswa terdaftar.</td></tr>
           {% endfor %}
         </tbody>
       </table>

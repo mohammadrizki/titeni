@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% load academic_rows %}
+{% block title %}Registri sumber bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% include "core/breadcrumbs.html" with current="Registri sumber bukti" parent_url=academic_url parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Registri sumber bukti</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="source_registry" only %}
+  <div class="academic-tab-panel">
+    <h2 class="section-title mt-4">Sumber bukti</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="source">
+      {% include "core/add_row.html" with form=forms.source add_label="Tambah sumber bukti" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode sumber</th><th scope="col">Nama sumber</th><th scope="col">Cara memperoleh bukti</th><th scope="col">Cara memverifikasi bukti</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for row in sources %}
+            <tr>
+              <td>{{ row.code }}</td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.acquisition }}</td>
+              <td>{{ row.verification }}</td>
+              <td class="academic-row-actions">{% academic_row row "sumber-bukti" program user %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Belum ada sumber bukti.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Jenis bukti</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="type">
+      {% include "core/add_row.html" with form=forms.type add_label="Tambah jenis bukti" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode jenis</th><th scope="col">Nama jenis bukti</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for row in types %}
+            <tr>
+              <td>{{ row.code }}</td>
+              <td>{{ row.name }}</td>
+              <td class="academic-row-actions">{% academic_row row "jenis-bukti" program user %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada jenis bukti.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Kapabilitas sumber</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="capability">
+      {% include "core/add_row.html" with form=forms.capability add_label="Tambah kapabilitas sumber" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Sumber bukti</th><th scope="col">Jenis bukti</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for row in capabilities %}
+            <tr>
+              <td>{{ row.source }}</td>
+              <td>{{ row.evidence_type }}</td>
+              <td class="academic-row-actions">{% academic_row row "kapabilitas-sumber" program user %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada kapabilitas sumber.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Pemetaan kompetensi</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="competency">
+      {% include "core/add_row.html" with form=forms.competency add_label="Tambah pemetaan kompetensi" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Sumber bukti</th><th scope="col">Versi draf kompetensi</th><th scope="col">Butir kompetensi</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for row in competencies %}
+            <tr>
+              <td>{{ row.source }}</td>
+              <td>{{ row.competency.version.number }}</td>
+              <td>{{ row.competency }}</td>
+              <td class="academic-row-actions">{% academic_row row "kompetensi-sumber" program user %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Belum ada pemetaan kompetensi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

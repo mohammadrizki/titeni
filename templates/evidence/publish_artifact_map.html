@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% block title %}Terbitkan peta artefak · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:evidence:saved_artifact_map' program.pk version.pk as map_url %}
+  {% include "core/breadcrumbs.html" with current="Terbitkan peta artefak" parent_url=academic_url parent_label="Akademik" section_url=map_url section_label="Peta artefak tersimpan" only %}
+  <h1 class="heading mt-3">Terbitkan peta artefak</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">Versi {{ version.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="artifact_map" only %}
+  <div class="academic-tab-panel">
+    <form class="editor" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <h2 class="section-title">Pilih persyaratan yang berlaku</h2>
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead><tr><th scope="col">Asal</th><th scope="col">Persyaratan</th><th scope="col">Konteks</th><th scope="col">Tenggat</th><th scope="col">Penanggung jawab</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{% if row.origin == "manual" %}Manual{% else %}Blueprint{% endif %}</td>
+                <th scope="row">
+                  {% firstof row.entry.label row.entry.component %}
+                  {% if row.origin == "manual" %}
+                    <div>{{ row.entry.minimum }} bukti · {{ row.entry.competency }} · {{ row.entry.source }}</div>
+                  {% else %}
+                    <div>{{ row.entry.minimum_observations }} observasi</div>
+                    <ul>{% for target in row.entry.targets %}<li>{{ target.label }}</li>{% endfor %}</ul>
+                    <ul>{% for source in row.entry.sources %}<li>{{ source.label }}</li>{% endfor %}</ul>
+                  {% endif %}
+                </th>
+                <td>{{ row.entry.context|default:"—" }}</td>
+                <td>{{ row.form.due_on.label_tag }}{{ row.form.due_on }}{{ row.form.due_on.errors }}</td>
+                <td>{{ row.form.responsible.label_tag }}{{ row.form.responsible }}{{ row.form.responsible.errors }}</td>
+                <td>{{ row.form.selected }} {{ row.form.selected.label_tag }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6">Versi ini belum memuat persyaratan yang dapat dipilih.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-4">
+        {% if rows %}<button class="button" type="submit">Terbitkan versi {{ version.number }}</button>{% endif %}
+        <a class="nav-link" href="{{ map_url }}">Batal</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

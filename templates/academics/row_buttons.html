@@ -1,0 +1,3 @@
+<a class="item-action" href="{{ preview_url }}" title="Pratinjau" aria-label="Pratinjau">{% include "competencies/action_icon.html" with icon="preview" only %}</a>
+{% if edit_url %}<a class="item-action" href="{{ edit_url }}" title="Sunting" aria-label="Sunting">{% include "competencies/action_icon.html" with icon="edit" only %}</a>{% endif %}
+{% if delete_url %}<a class="item-action item-action-danger" href="{{ delete_url }}" title="Hapus" aria-label="Hapus">{% include "competencies/action_icon.html" with icon="delete" only %}</a>{% endif %}

@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% block title %}Impor bukti CSV · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:attempt_evidence' program.pk event.pk attempt.pk as evidence_url %}
+  {% include "core/breadcrumbs.html" with current="Impor bukti CSV" parent_url=academic_url parent_label="Akademik" section_url=evidence_url section_label="Bukti percobaan" only %}
+  <h1 class="heading mt-3">Impor bukti CSV</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ event.name }} · {{ attempt.participation.enrollment.learner }} · Percobaan ke-{{ attempt.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="event_detail" only %}
+  <div class="academic-tab-panel">
+    <p>Gunakan CSV UTF-8, maksimal 100 baris data dan 128 KiB. Kolom konteks boleh dikosongkan. Gunakan referensi tanpa informasi pasien.</p>
+    <pre class="table-wrap mt-2"><code>kode_sumber,kode_jenis_bukti,referensi,konteks
+observasi,catatan,SIM-2026-01,Rawat jalan</code></pre>
+    <form class="editor mt-4" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="preview">
+      {{ form.as_p }}
+      <button class="button" type="submit">Pratinjau CSV</button>
+    </form>
+    {% if error %}<p class="mt-4" role="alert">{{ error }}</p>{% endif %}
+    {% if imported is not None %}
+      <p class="mt-4" role="status">{{ imported }} bukti diimpor. {{ skipped }} entri identik dilewati.</p>
+    {% endif %}
+    {% if rows %}
+      <h2 class="section-title mt-4">Hasil pemeriksaan baris</h2>
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead><tr><th scope="col">Baris</th><th scope="col">Kode sumber</th><th scope="col">Kode jenis</th><th scope="col">Referensi</th><th scope="col">Konteks</th><th scope="col">Hasil</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr><th scope="row">{{ row.line }}</th><td>{{ row.source }}</td><td>{{ row.evidence_type }}</td><td>{{ row.reference }}</td><td>{{ row.context|default:"—" }}</td><td>{{ row.message }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if token %}
+        <form class="mt-4" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="import">
+          <input type="hidden" name="preview_token" value="{{ token }}">
+          <button class="button" type="submit">Impor bukti</button>
+        </form>
+      {% endif %}
+    {% endif %}
+    <a class="nav-link mt-4" href="{{ evidence_url }}">Kembali ke bukti percobaan</a>
+  </div>
+</section>
+{% endblock %}

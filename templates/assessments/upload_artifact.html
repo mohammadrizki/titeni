@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Lampiran bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:assessments:verify_evidence' program.pk event.pk attempt.pk record.pk as evidence_url %}
+  <h1 class="heading">Lampiran bukti</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ record.reference }} · Versi {{ record.revision_number }}</p>
+  <form class="editor mt-4" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Unggah PDF</button>
+  </form>
+  <a class="nav-link mt-4" href="{{ evidence_url }}">Kembali ke detail bukti</a>
+</section>
+{% endblock %}

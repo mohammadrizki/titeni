@@ -13,6 +13,7 @@ from apps.academics.enrollment import enroll_account
 from apps.academics.models import AcademicPeriod, Cohort, StudyProgram
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import User
+from apps.evidence.plans import can_access_plan
 
 
 class CohortForm(forms.ModelForm):
@@ -103,6 +104,7 @@ def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpRe
             "program": cohort.period.program,
             "cohort": cohort,
             "form": form if can_enroll else None,
+            "can_view_plans": can_access_plan(actor, program_id, "view"),
             "enrollments": cohort.enrollments.select_related("learner__account"),
         },
     )

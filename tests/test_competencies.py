@@ -1,11 +1,12 @@
 import pytest
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.academics.models import Curriculum, Institution, StudyProgram
-from apps.accounts.models import ProgramConfigurationGrant, User
+from apps.accounts.models import AccessRole, ProgramConfigurationGrant, User, UserRoleAssignment
 from apps.competencies.models import (
     CompetencyFrameworkVersion,
     CompetencyIndicator,
@@ -152,3 +153,26 @@ def test_competency_drafts_scope_hierarchy_and_milestones(client: Client) -> Non
     assert saved_standard.versions.filter(created_by=manager).count() == 2
     assert second_description in client.get(first_url).content.decode()
     assert second_description not in client.get(second_url).content.decode()
+
+    edit = reverse("academics:row_action", args=[program.pk, "butir", item.pk, "sunting"])
+    delete = reverse("academics:row_action", args=[program.pk, "butir", item.pk, "hapus"])
+    assert client.get(edit).status_code == 403
+    role = AccessRole.objects.create(
+        name="Kaprodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
+    )
+    role.permissions.add(
+        *Permission.objects.filter(
+            content_type__app_label="competencies",
+            codename__in=["change_competencyitem", "delete_competencyitem"],
+        )
+    )
+    UserRoleAssignment.objects.create(
+        account=manager, role=role, program=program, assigned_by=manager
+    )
+    page = client.get(first_url).content.decode()
+    assert edit in page and delete in page
+    data = {"code": item.code, "name": "Komunikasi revisi", "parent": root.pk}
+    assert client.post(edit, data).headers["Location"] == first_url
+    item.refresh_from_db()
+    assert item.name == data["name"]
+    assert client.post(delete).status_code == 409

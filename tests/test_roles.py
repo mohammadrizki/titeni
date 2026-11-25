@@ -13,8 +13,8 @@ def test_superuser_can_configure_scoped_role_without_granting_access(client: Cli
     admin = User.objects.create_superuser(username="admin")
     url = reverse("accounts:roles")
     permissions = Permission.objects.filter(
-        content_type__app_label="academics",
-        codename__in=["add_academicperiod", "change_studyprogram"],
+        content_type__app_label__in=["academics", "competencies"],
+        codename__in=["add_academicperiod", "change_studyprogram", "change_competencyitem"],
     )
     data = {
         "name": "Pengelola Prodi",
@@ -31,6 +31,7 @@ def test_superuser_can_configure_scoped_role_without_granting_access(client: Cli
     assert 'type="checkbox"' in page
     assert 'aria-label="Pilih semua izin Academic"' in page
     assert 'aria-label="Pilih semua izin Accounts"' in page
+    assert 'aria-label="Pilih semua izin Kompetensi"' in page
     assert 'name="permissions"' in page
     assert '<details class="permission-details">' in page
     assert "role-name-cell" in page
@@ -40,6 +41,9 @@ def test_superuser_can_configure_scoped_role_without_granting_access(client: Cli
     assert role.updated_by == admin
     assert role.scope == AccessRole.Scope.PROGRAM
     assert list(role.permissions.order_by("pk")) == list(permissions.order_by("pk"))
+    assert role.permissions.filter(
+        content_type__app_label="competencies", codename="change_competencyitem"
+    ).exists()
     assert client.post(f"{url}?sunting={role.pk}", {**data, "permissions": []}).status_code == 302
     assert not role.permissions.exists()
     assert not operator.has_perm("academics.change_studyprogram")

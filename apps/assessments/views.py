@@ -8,12 +8,21 @@ from django.views.decorators.http import require_http_methods
 
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import User
-from apps.assessments.forms import BlueprintItemForm, BlueprintMappingForm, BlueprintVersionForm
+from apps.assessments.forms import (
+    BlueprintEvidenceSourceForm,
+    BlueprintItemForm,
+    BlueprintMappingForm,
+    BlueprintVersionForm,
+    SamplingRuleForm,
+)
 from apps.assessments.models import (
     AssessmentBlueprint,
     AssessmentBlueprintVersion,
+    AssessmentSamplingRule,
     BlueprintItemCompetency,
+    BlueprintItemEvidenceSource,
 )
+from apps.evidence.models import EvidenceSourceCapability
 
 
 @require_http_methods(["GET", "POST"])
@@ -58,10 +67,17 @@ def blueprint_draft(request: HttpRequest, program_id: int, version_id: int) -> H
     version = get_object_or_404(versions, pk=version_id)
     item_form = BlueprintItemForm(version=version)
     mapping_form = BlueprintMappingForm(version=version)
+    sampling_form = SamplingRuleForm(version=version, prefix="sampling")
+    source_form = BlueprintEvidenceSourceForm(version=version, prefix="source")
     if request.method == "POST":
         with transaction.atomic():
             version = get_object_or_404(versions.select_for_update(of=("self",)), pk=version_id)
-            form: BlueprintItemForm | BlueprintMappingForm
+            form: (
+                BlueprintItemForm
+                | BlueprintMappingForm
+                | SamplingRuleForm
+                | BlueprintEvidenceSourceForm
+            )
             match request.POST.get("action"):
                 case "item":
                     item_form = BlueprintItemForm(request.POST, version=version)
@@ -69,10 +85,25 @@ def blueprint_draft(request: HttpRequest, program_id: int, version_id: int) -> H
                 case "mapping":
                     mapping_form = BlueprintMappingForm(request.POST, version=version)
                     form = mapping_form
+                case "sampling":
+                    sampling_form = SamplingRuleForm(
+                        request.POST, version=version, prefix="sampling"
+                    )
+                    form = sampling_form
+                case "source":
+                    source_form = BlueprintEvidenceSourceForm(
+                        request.POST, version=version, prefix="source"
+                    )
+                    form = source_form
                 case _:
                     return HttpResponse(status=400)
             if form.is_valid():
                 record = form.save(commit=False)
+                if isinstance(record, BlueprintItemEvidenceSource):
+                    get_object_or_404(
+                        EvidenceSourceCapability.objects.select_for_update(),
+                        pk=record.capability_id,
+                    )
                 record.created_by = actor
                 record.save()
                 return redirect(
@@ -88,9 +119,17 @@ def blueprint_draft(request: HttpRequest, program_id: int, version_id: int) -> H
             "version": version,
             "item_form": item_form,
             "mapping_form": mapping_form,
+            "sampling_form": sampling_form,
+            "sampling_rules": AssessmentSamplingRule.objects.filter(
+                item__version=version
+            ).select_related("item"),
+            "source_form": source_form,
+            "evidence_sources": BlueprintItemEvidenceSource.objects.filter(
+                item__version=version
+            ).select_related("item", "capability__source", "capability__evidence_type"),
             "items": version.items.select_related("stage__version__curriculum"),
             "mappings": BlueprintItemCompetency.objects.filter(
                 item__version=version
-            ).select_related("item", "competency"),
+            ).select_related("item", "competency", "indicator"),
         },
     )

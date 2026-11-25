@@ -1,0 +1,90 @@
+{% extends "core/base.html" %}
+{% block title %}Rekonsiliasi bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:evidence:plan_drafts' program.pk baseline.enrollment_id as plan_url %}
+  {% include "core/breadcrumbs.html" with current="Rekonsiliasi bukti" parent_url=academic_url parent_label="Akademik" section_url=plan_url section_label="Rencana bukti" only %}
+  <h1 class="heading mt-3">Rekonsiliasi bukti</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ baseline.enrollment.learner }} · Peta artefak versi {{ baseline.publication.version.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="enrollments" only %}
+  <div class="academic-tab-panel">
+    {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+    <h2 class="section-title">Pencatatan terhadap baseline</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Persyaratan</th><th scope="col">Asal</th><th scope="col">Konteks</th><th scope="col">Jumlah tercatat</th><th scope="col">Minimum rancangan</th></tr></thead>
+        <tbody>
+          {% for requirement, count in progress %}
+            <tr>
+              <th scope="row">{{ requirement.number }}. {{ requirement.label }}</th>
+              <td>{% if requirement.origin == "manual" %}Manual{% else %}Blueprint{% endif %}</td>
+              <td>{{ requirement.entry.context|default:"—" }}</td>
+              <td>{{ count }}</td>
+              <td>{{ requirement.minimum }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Bukti menunggu tinjauan</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Referensi</th><th scope="col">Sumber dan jenis</th><th scope="col">Konteks pengamatan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for row in pending %}
+            <tr>
+              <th scope="row">{{ row.record.reference }} · Versi {{ row.record.revision_number }}</th>
+              <td>{{ row.record.source_link.capability }}</td>
+              <td>{{ row.record.context|default:"Belum tercatat" }}</td>
+              <td>
+                {% if not row.choices %}
+                  Tidak ada persyaratan yang cocok.
+                {% elif can_place %}
+                  <form class="editor" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="record_id" value="{{ row.record.pk }}">
+                    <label for="requirement-{{ row.record.pk }}">Persyaratan</label>
+                    <select id="requirement-{{ row.record.pk }}" name="requirement_number" required>
+                      <option value="">Pilih persyaratan</option>
+                      {% for choice in row.choices %}<option value="{{ choice.requirement.number }}">{{ choice.requirement.number }}. {{ choice.requirement.label }}{% if choice.requirement.entry.context %} · {{ choice.requirement.entry.context }}{% endif %}</option>{% endfor %}
+                    </select>
+                    <label for="reason-{{ row.record.pk }}">Alasan penempatan</label>
+                    <input id="reason-{{ row.record.pk }}" name="reason" maxlength="500" required>
+                    <button class="button mt-2" type="submit">Simpan penempatan</button>
+                  </form>
+                {% else %}
+                  Menunggu pengelola berizin.
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Belum ada bukti menunggu tinjauan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title mt-4">Bukti yang dihitung</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Referensi</th><th scope="col">Persyaratan</th><th scope="col">Cara penempatan</th><th scope="col">Alasan</th></tr></thead>
+        <tbody>
+          {% for row in counted %}
+            <tr>
+              <th scope="row">{{ row.record.reference }} · Versi {{ row.record.revision_number }}</th>
+              <td>{{ row.requirement.number }}. {{ row.requirement.label }}</td>
+              <td>{% if row.placement %}Ditinjau oleh {{ row.placement.created_by.get_username }}{% else %}Otomatis{% endif %}</td>
+              <td>{{ row.placement.reason|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Belum ada bukti yang dihitung.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

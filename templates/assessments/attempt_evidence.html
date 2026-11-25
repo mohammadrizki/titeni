@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% block title %}Bukti percobaan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:attempts' program.pk event.pk as attempts_url %}
+  {% include "core/breadcrumbs.html" with current="Bukti percobaan" parent_url=academic_url parent_label="Akademik" section_url=attempts_url section_label="Percobaan asesmen" only %}
+  <h1 class="heading mt-3">Bukti percobaan</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ event.name }} · {{ event.occurred_on|date:"d M Y" }} · {{ attempt.participation.enrollment.learner }} · Percobaan ke-{{ attempt.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="event_detail" only %}
+  <div class="academic-tab-panel">
+    {% if form %}
+      <a class="button button-secondary" href="{% url 'academics:assessments:import_evidence' program.pk event.pk attempt.pk %}">Impor bukti CSV</a>
+      <form class="editor" method="post">
+        {% csrf_token %}
+        {% include "core/add_row.html" with add_label="Catat referensi bukti" %}
+      </form>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Referensi bukti</th><th scope="col">Sumber dan jenis bukti</th><th scope="col">Dicatat oleh</th><th scope="col">Waktu pencatatan</th><th scope="col">Status verifikasi</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for record in records %}
+            <tr>
+              <th scope="row">{{ record.reference }} · Versi {{ record.revision_number }}</th>
+              <td>{{ record.source_link.capability }}</td>
+              <td>{{ record.created_by.get_username }}</td>
+              <td>{{ record.created_at|date:"d M Y H:i" }}</td>
+              <td>{% if record.superseded_by %}Digantikan{% elif record.invalidation %}Dibatalkan{% elif record.verification %}{{ record.verification.get_status_display }}{% else %}Belum diputuskan{% endif %}</td>
+              <td>
+                {% url 'academics:assessments:verify_evidence' program.pk event.pk attempt.pk record.pk as preview_url %}
+                {% if can_verify and not record.verification and not record.invalidation and not record.superseded_by and record.created_by_id != user.pk %}
+                  <a class="nav-link" href="{{ preview_url }}">Verifikasi</a>
+                {% else %}
+                  {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">Belum ada bukti tercatat.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

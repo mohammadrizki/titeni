@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load academic_rows %}
 {% block title %}Kurikulum · Titeni{% endblock %}
 {% block content %}
 <section class="mx-auto max-w-5xl px-4 py-12">
@@ -14,7 +15,7 @@
     </form>
     <div class="table-wrap mt-4">
       <table class="data-table">
-        <thead><tr><th scope="col">Kode</th><th scope="col">Kurikulum</th><th scope="col">Versi draf</th><th scope="col">Aksi</th></tr></thead>
+        <thead><tr><th scope="col">Kode</th><th scope="col">Kurikulum</th><th scope="col">Versi draf</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
         <tbody>
           {% for curriculum in curricula %}
             <tr>
@@ -26,6 +27,7 @@
                 {% endfor %}
               </td>
               <td>
+                {% academic_row curriculum "kurikulum" program user %}
                 <form method="post" action="{% url 'academics:new_curriculum_version' program.pk curriculum.pk %}">
                   {% csrf_token %}
                   <button class="nav-link" type="submit">Buat draf kosong</button>

@@ -5,5 +5,8 @@
     <a class="academic-tab" href="{% url 'academics:curricula' program.pk %}"{% if active == 'curricula' %} aria-current="page"{% elif active == 'curriculum_version' %} aria-current="location"{% endif %}>Kurikulum</a>
     <a class="academic-tab" href="{% url 'academics:competencies:framework' program.pk %}"{% if active == 'framework' %} aria-current="page"{% elif active == 'draft' %} aria-current="location"{% endif %}>Kompetensi</a>
     <a class="academic-tab" href="{% url 'academics:assessments:blueprints' program.pk %}"{% if active == 'blueprints' %} aria-current="page"{% elif active == 'blueprint_draft' %} aria-current="location"{% endif %}>Blueprint asesmen</a>
+    <a class="academic-tab" href="{% url 'academics:assessments:events' program.pk %}"{% if active == 'events' %} aria-current="page"{% elif active == 'event_detail' %} aria-current="location"{% endif %}>Pelaksanaan asesmen</a>
+    <a class="academic-tab" href="{% url 'academics:evidence:artifact_maps' program.pk %}"{% if active == 'artifact_maps' %} aria-current="page"{% elif active == 'artifact_map' %} aria-current="location"{% endif %}>Peta Artefak</a>
+    <a class="academic-tab" href="{% url 'academics:evidence:registry' program.pk %}"{% if active == 'source_registry' %} aria-current="page"{% endif %}>Sumber bukti</a>
   </div>
 </nav>

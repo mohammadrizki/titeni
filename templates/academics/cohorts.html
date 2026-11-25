@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load academic_rows %}
 {% block title %}Kohort · Titeni{% endblock %}
 {% block content %}
 <section class="mx-auto px-4 py-12">
@@ -11,12 +12,12 @@
     <form class="editor mt-4" method="post">{% csrf_token %}{% include "core/add_row.html" with add_label="Tambah kohort" %}</form>
     <div class="table-wrap mt-4">
       <table class="data-table">
-        <thead><tr><th scope="col">Kode</th><th scope="col">Nama kohort</th><th scope="col">Periode akademik</th><th scope="col">Aksi</th></tr></thead>
+        <thead><tr><th scope="col">Kode</th><th scope="col">Nama kohort</th><th scope="col">Periode akademik</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
         <tbody>
           {% for cohort in cohorts %}
             <tr>
               <td>{{ cohort.code }}</td><td>{{ cohort.name }}</td><td>{{ cohort.period.name }}</td>
-              <td>{% if perms.academics.view_learnerenrollment %}<a class="nav-link" href="{% url 'academics:enrollments' program.pk cohort.pk %}">Daftar mahasiswa</a>{% endif %}</td>
+              <td>{% academic_row cohort "kohort" program user %} {% if perms.academics.view_learnerenrollment %}<a class="nav-link" href="{% url 'academics:enrollments' program.pk cohort.pk %}">Daftar mahasiswa</a>{% endif %}</td>
             </tr>
           {% empty %}
             <tr><td colspan="4">Belum ada kohort.</td></tr>

@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load academic_rows %}
 {% block title %}Draf kurikulum · Titeni{% endblock %}
 {% block content %}
 <section class="mx-auto max-w-5xl px-4 py-12">
@@ -17,12 +18,12 @@
     </form>
     <div class="table-wrap mt-4">
       <table class="data-table">
-        <thead><tr><th scope="col">Kode tahap</th><th scope="col">Nama tahap</th></tr></thead>
+        <thead><tr><th scope="col">Kode tahap</th><th scope="col">Nama tahap</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
         <tbody>
           {% for stage in stages %}
-            <tr><td>{{ stage.code }}</td><td>{{ stage.name }}</td></tr>
+            <tr><td>{{ stage.code }}</td><td>{{ stage.name }}</td><td class="academic-row-actions">{% academic_row stage "tahap" program user %}</td></tr>
           {% empty %}
-            <tr><td colspan="2">Belum ada tahap kurikulum.</td></tr>
+            <tr><td colspan="3">Belum ada tahap kurikulum.</td></tr>
           {% endfor %}
         </tbody>
       </table>

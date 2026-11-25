@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+{% block title %}Peta Artefak · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% include "core/breadcrumbs.html" with current="Peta Artefak" parent_url=academic_url parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Peta Artefak</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="artifact_maps" only %}
+  <div class="academic-tab-panel">
+    <h2 class="section-title">Pratinjau dari draf blueprint</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Draf blueprint</th><th scope="col">Draf kompetensi</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for blueprint in blueprints %}
+            <tr>
+              <th scope="row">Versi {{ blueprint.number }}</th>
+              <td>Versi {{ blueprint.framework_version.number }}</td>
+              <td>
+                {% url 'academics:evidence:artifact_map' program.pk blueprint.pk as preview_url %}
+                {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada draf. <a class="text-accent underline" href="{% url 'academics:assessments:blueprints' program.pk %}">Buka Blueprint asesmen</a>.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="section-title mt-4">Versi peta tersimpan</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Versi peta</th><th scope="col">Draf blueprint</th><th scope="col">Status</th><th scope="col">Tanggal efektif</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for version in versions %}
+            <tr>
+              <th scope="row">Versi {{ version.number }}</th>
+              <td>Versi {{ version.blueprint_version.number }}</td>
+              <td>{% if version.publication %}Terbit{% else %}Draf{% endif %}</td>
+              <td>{{ version.publication.effective_on|date:"d M Y"|default:"—" }}</td>
+              <td>
+                {% url 'academics:evidence:saved_artifact_map' program.pk version.pk as preview_url %}
+                {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Belum ada versi peta tersimpan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

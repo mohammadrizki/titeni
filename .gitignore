@@ -10,3 +10,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+
+/private_evidence/
+for_your_eyes_only/

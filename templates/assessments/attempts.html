@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% block title %}Percobaan asesmen · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:events' program.pk as events_url %}
+  {% include "core/breadcrumbs.html" with current="Percobaan asesmen" parent_url=academic_url parent_label="Akademik" section_url=events_url section_label="Pelaksanaan asesmen" only %}
+  <h1 class="heading mt-3">Percobaan asesmen</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ event.name }} · {{ event.occurred_on|date:"d M Y" }} · {{ event.component }}</p>
+  {% include "academics/program_tabs.html" with program=program active="event_detail" only %}
+  <div class="academic-tab-panel">
+    {% if can_view_attempts %}
+      {% if form %}
+        <form class="editor" method="post">
+          {% csrf_token %}
+          {% include "core/add_row.html" with add_label="Catat percobaan mahasiswa" %}
+        </form>
+      {% endif %}
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead><tr><th scope="col">Mahasiswa</th><th scope="col">Percobaan ke-</th><th scope="col">Waktu pencatatan</th>{% if can_view_evidence %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+          <tbody>
+            {% for attempt in attempts %}
+              <tr>
+                <th scope="row">{{ attempt.participation.enrollment.learner }}</th>
+                <td>{{ attempt.number }}</td>
+                <td>{{ attempt.created_at|date:"d M Y H:i" }}</td>
+                {% if can_view_evidence %}<td><a class="nav-link" href="{% url 'academics:assessments:attempt_evidence' program.pk event.pk attempt.pk %}">Bukti percobaan</a></td>{% endif %}
+              </tr>
+            {% empty %}
+              <tr><td colspan="{% if can_view_evidence %}4{% else %}3{% endif %}">Belum ada percobaan tercatat.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>Daftar percobaan tersedia bagi pengguna yang memiliki izin melihat percobaan dan pendaftaran mahasiswa.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

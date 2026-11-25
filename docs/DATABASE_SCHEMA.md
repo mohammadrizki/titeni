@@ -42,3 +42,75 @@ positif yang unik per blueprint. Setiap draf merujuk satu versi kerangka
 kompetensi, dan tiap komponen merujuk satu tahap kurikulum. Kode komponen unik
 per draf. Pemetaan menggunakan pasangan komponen dan butir yang unik. Formulir
 memeriksa cakupan prodi serta versi kerangka yang dirujuk.
+
+`assessments.0003` menyimpan rancangan sampling per komponen. Konteks unik per
+komponen dan jumlah minimum observasi harus positif. Rancangan mengikuti versi
+blueprint dari komponennya dan menyimpan pelaku serta waktu pembuatan.
+
+## Registri sumber bukti
+
+`evidence.0001` menyimpan sumber dan jenis bukti dengan kode unik per prodi.
+Kapabilitas menyimpan pasangan unik sumber dan jenis. Pemetaan kompetensi
+menyimpan pasangan unik sumber dan butir pada suatu versi kerangka.
+Aplikasi memeriksa kesamaan prodi ketika memilih rujukan. Keempat tabel
+menyimpan pelaku dan waktu pembuatan serta melindungi rekaman yang dirujuk.
+
+`assessments.0004` menghubungkan komponen blueprint ke kapabilitas registri
+(pasangan sumber dan jenis bukti). Pasangan komponen dan kapabilitas unik.
+Kapabilitas yang masih dirujuk dilindungi dari penghapusan dan perubahan jenis
+melalui administrasi. Formulir memeriksa cakupan prodi dan versi blueprint.
+
+`evidence.0002` menyimpan satu peta logis per prodi dan versi bernomor positif
+unik per peta. Versi mengacu ke draf blueprint dan menyimpan salinan tampilan
+komponen, cakupan, milestone dan sampling sebagai JSON. Rujukan blueprint
+dilindungi, dan perubahan konfigurasi sumber tidak menulis ulang salinan lama.
+
+`evidence.0003` menambahkan persyaratan manual pada draf blueprint. Kode unik
+per draf dan jumlah minimum positif. Rujukan butir mengikuti versi kerangka
+blueprint. Kapabilitas harus berada pada prodi pemilik blueprint. Peta yang
+disimpan berikutnya membawa salinan persyaratan manual pada saat penyimpanan.
+
+`evidence.0004` menambahkan draf rencana dengan rujukan terlindungi ke
+pendaftaran dan versi peta artefak. Pasangan pendaftaran dan versi peta unik.
+Draf membaca salinan yang tersimpan pada versi peta untuk menjaga riwayat
+tanpa menduplikasi isinya.
+
+`evidence.0005` menyimpan satu penerbitan per versi peta dan satu versi
+terbit per tanggal efektif dalam satu prodi. Penerbitan menyimpan pilihan
+persyaratan beserta asal, tenggat, dan penanggung jawab. Baseline satu per
+pendaftaran dan merujuk penerbitan asal melalui foreign key terlindungi.
+
+## Pencatatan pelaksanaan dan asal-usul bukti
+
+`assessments.0005` menambahkan pelaksanaan, partisipasi, dan percobaan.
+Partisipasi unik per kombinasi pelaksanaan dan pendaftaran. Nomor percobaan
+positif dan unik per partisipasi. `evidence.0006` mencatat pengenal bukti
+dengan pasangan sumber dan jenis dari komponen pelaksanaan. Rekaman unik
+per percobaan, tautan sumber, dan pengenal. Foreign key melindungi catatan
+yang dirujuk. Pencatatan menyimpan pelaku dan waktu.
+
+`evidence.0007` menyimpan satu keputusan verifikasi per bukti. Status dibatasi
+pada Terverifikasi atau Ditolak, dengan alasan wajib, pelaku, dan waktu.
+Catatan tanpa keputusan ditampilkan sebagai Belum diputuskan.
+
+`evidence.0008` menambahkan nomor versi bukti, rujukan unik ke versi sebelumnya,
+dan alasan koreksi. Semua catatan lama tetap menjadi versi pertama. Pembatalan
+menyimpan alasan, pelaku dan waktu dalam rekaman satu-ke-satu. Kelayakan awal
+untuk rekonsiliasi berasal dari versi terbaru dengan keputusan Terverifikasi
+tanpa rekaman pembatalan.
+
+`evidence.0009` menambahkan konteks pengamatan pada versi bukti serta penempatan
+hasil tinjauan. Satu versi bukti mempunyai maksimum satu penempatan. Penempatan
+merujuk baseline dan nomor persyaratan dalam pilihan publikasi yang tersimpan
+serta mencatat alasan, pelaku, dan waktu. Hitungan memakai bukti yang masih layak.
+
+`evidence.0010` menambahkan batch impor CSV dan rujukan opsional dari bukti
+ke batch asalnya. Batch menyimpan percobaan, digest berkas, jumlah baris baru
+dan baris yang dilewati, pelaku, dan waktu. Bukti manual dan koreksi tetap
+dapat dicatat tanpa batch.
+
+`evidence.0011` menyimpan metadata lampiran PDF. Lampiran merujuk ke versi
+bukti asal dengan foreign key terlindungi, dan hash unik dalam versi yang
+sama. Penyimpanan berkas menggunakan pengenal acak di direktori privat
+`EVIDENCE_ARTIFACT_ROOT`. Direktori ini harus berada di luar direktori
+yang dilayani web atau dikumpulkan sebagai aset statis.

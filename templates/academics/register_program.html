@@ -25,7 +25,7 @@
           <thead>
             <tr>
               {% for field in form %}<th scope="col">{{ field.label }}</th>{% endfor %}
-              <th scope="col">Aksi</th>
+              <th scope="col" class="table-action-column">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -56,6 +56,7 @@
                 <td>{{ program.get_education_stage_display }}</td>
                 <td>
                   <div class="flex gap-1">
+                    <a class="item-action" href="{% url 'academics:preview_program' program.pk %}" title="Pratinjau" aria-label="Pratinjau {{ program.code }}">{% include "competencies/action_icon.html" with icon="preview" only %}</a>
                     {% if perms.academics.change_studyprogram %}
                       <a class="item-action" href="?sunting={{ program.pk }}" title="Sunting" aria-label="Sunting {{ program.code }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
                     {% endif %}
