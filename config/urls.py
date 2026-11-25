@@ -3,8 +3,11 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 from apps.accounts.authentication import EmailAuthenticationForm
+from apps.evidence.external import receive_external_evidence
 
 urlpatterns = [
+    path("impor-hasil-ujian/", include("apps.assessments.exam_imports.urls")),
+    path("integrasi/v1/bukti/", receive_external_evidence, name="receive_external_evidence"),
     path("", TemplateView.as_view(template_name="core/home.html"), name="home"),
     path(
         "masuk/",

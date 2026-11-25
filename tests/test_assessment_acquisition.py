@@ -1,9 +1,12 @@
 from datetime import date
+from io import StringIO
 from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -30,12 +33,14 @@ from apps.evidence.models import (
     ArtifactMapPublication,
     EvidenceArtifact,
     EvidenceImportBatch,
+    EvidenceIntegration,
     EvidenceInvalidation,
     EvidencePlacement,
     EvidenceRecord,
     EvidenceSource,
     EvidenceType,
     EvidenceVerification,
+    ExternalEvidenceReceipt,
     LearnerEvidenceBaseline,
 )
 
@@ -518,3 +523,89 @@ def test_assessment_event_attempt_and_reference_permissions_and_scope(
         assert client.post(verification_url(latest_import.pk), cancel).status_code == 302
         assert client.head(download_url).status_code == 200
         assert EvidenceArtifact.objects.filter(pk=artifact.pk, record=imported_record).exists()
+
+    account = User.objects.create_user(
+        username="sistem-eksternal",
+        email="integrasi@example.test",
+    )
+    command_args = [
+        account.email,
+        program.code,
+        link.capability.source.code,
+    ]
+    output = StringIO()
+    call_command("configure_evidence_integration", *command_args, stdout=output)
+    token = output.getvalue().strip()
+    credential = EvidenceIntegration.objects.get(account=account)
+    assert token.startswith("titeni_") and credential.token_digest != token
+    with pytest.raises(CommandError, match="terikat pada sumber"):
+        call_command(
+            "configure_evidence_integration",
+            account.email,
+            foreign.code,
+            foreign_link.capability.source.code,
+            rotate=True,
+            stdout=StringIO(),
+        )
+
+    endpoint = reverse("receive_external_evidence")
+    api = Client(enforce_csrf_checks=True)
+    api.force_login(actor)
+    payload = {
+        "external_id": "external-01",
+        "attempt_id": first.pk,
+        "evidence_type": link.capability.evidence_type.code,
+        "reference": "REF-EXT-01",
+        "context": "Rawat jalan",
+    }
+
+    def send(data, bearer: str = token):
+        return api.post(
+            endpoint,
+            data,
+            content_type="application/json",
+            headers={"Authorization": f"Bearer {bearer}"},
+        )
+
+    assert api.post(endpoint, payload, content_type="application/json").status_code == 401
+    assert send(payload, "invalid").status_code == 401
+    assert send({**payload, "attempt_id": True}).status_code == 400
+    assert send({**payload, "source": foreign_link.capability.source_id}).status_code == 400
+    assert send({**payload, "context": "\ud800"}).status_code == 400
+    assert send({**payload, "evidence_type": "jenis-lain"}).status_code == 422
+    assert send({**payload, "reference": "REF-A"}).json()["error"] == "reference_conflict"
+    foreign_event = AssessmentEvent.objects.create(
+        component=foreign_item,
+        name="Pelaksanaan lain",
+        occurred_on=date(2026, 8, 1),
+        created_by=actor,
+    )
+    foreign_participation = AssessmentParticipation.objects.create(
+        event=foreign_event,
+        enrollment=foreign_enrollment,
+    )
+    foreign_attempt = foreign_participation.attempts.create(number=1, created_by=actor)
+    assert send({**payload, "attempt_id": foreign_attempt.pk}).status_code == 404
+    assert not ExternalEvidenceReceipt.objects.exists()
+    created = send(payload)
+    assert created.status_code == 201
+    receipt = ExternalEvidenceReceipt.objects.get()
+    assert receipt.record_id == created.json()["record_id"]
+    assert receipt.adapter_version == "v1" and receipt.integration == credential
+    assert receipt.source == link.capability.source and receipt.record.created_by == account
+    assert not EvidenceVerification.objects.filter(record=receipt.record).exists()
+    retry = send(payload)
+    assert retry.status_code == 200
+    assert retry.json() == {**created.json(), "status": "duplicate"}
+    assert send({**payload, "reference": "REF-CHANGED"}).json()["error"] == "external_id_conflict"
+    assert send({**payload, "attempt_id": second.pk}).status_code == 409
+    assert ExternalEvidenceReceipt.objects.count() == 1
+
+    rotated = StringIO()
+    call_command("configure_evidence_integration", *command_args, rotate=True, stdout=rotated)
+    new_token = rotated.getvalue().strip()
+    assert new_token != token and send(payload).status_code == 401
+    assert send(payload, new_token).status_code == 200
+    call_command("configure_evidence_integration", *command_args, disable=True, stdout=StringIO())
+    assert send(payload, new_token).status_code == 401
+    assert ExternalEvidenceReceipt.objects.count() == 1

@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+{% block title %}Impor {{ protocol.name }} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'exam_imports:index' as imports_url %}
+  {% include "core/breadcrumbs.html" with current=protocol.name parent_url=imports_url parent_label="Impor Hasil Ujian" only %}
+  <h1 class="heading mt-3">Impor {{ protocol.name }}</h1>
+  {% if form %}
+    <dl class="mt-4">
+      <dt class="font-semibold">Metode ujian</dt><dd>{{ event.component.method }}</dd>
+      <dt class="font-semibold mt-2">Jenis ujian</dt><dd>{{ event.component.name }}</dd>
+      <dt class="font-semibold mt-2">Tanggal ujian</dt><dd>{{ event.occurred_on|date:"d M Y" }} · {{ event.name }}</dd>
+    </dl>
+    <a class="nav-link mt-2" href="{{ imports_url }}{% querystring method=event.component.method component=event.component_id event=event.pk %}">Ubah aplikasi</a>
+    <p class="mt-2">Unggah berkas {{ extension }} untuk meninjau hasil sebelum menyimpan.</p>
+    <form class="editor mt-4" enctype="multipart/form-data" method="post">
+      {% csrf_token %}
+      <input name="action" type="hidden" value="preview">
+      {{ form.as_p }}
+      <button class="button" type="submit">Pratinjau hasil</button>
+    </form>
+  {% else %}
+    <p class="mt-2">Belum ada pelaksanaan ujian yang dapat Anda gunakan untuk impor.</p>
+  {% endif %}
+  {% if error %}<p class="mt-4" role="alert">{{ error }}</p>{% endif %}
+  {% if results %}
+    <h2 class="section-title mt-4">Pratinjau</h2>
+    {% if results.errors %}
+      <p role="alert">{{ results.errors|length }} baris bermasalah. Perbaiki berkas sebelum mengimpor.</p>
+      <ul>{% for message in results.errors|slice:":50" %}<li>{{ message }}</li>{% endfor %}</ul>
+      {% if results.errors|length > 50 %}<p>Daftar menampilkan 50 kesalahan pertama.</p>{% endif %}
+    {% endif %}
+    <p class="mt-2">{{ results.results|length }} baris dapat dibaca.{% if results.results|length > 50 %} Menampilkan 50 baris pertama.{% endif %}</p>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Baris</th><th scope="col">Pengenal peserta</th><th scope="col">Nilai akhir</th><th scope="col">Nilai mentah</th><th scope="col">Skala maksimum</th><th scope="col">Sesi</th><th scope="col">Status</th></tr></thead>
+        <tbody>
+          {% for row in results.results|slice:":50" %}
+            <tr><td>{{ row.row }}</td><td>{{ row.participant }}</td><td>{{ row.score|default:"—" }}</td><td>{{ row.raw_score|default:"—" }}</td><td>{{ row.maximum|default:"—" }}</td><td>{{ row.session|default:"—" }}</td><td>{{ row.status|default:"—" }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if token %}
+      <form class="mt-4" method="post">
+        {% csrf_token %}
+        <input name="action" type="hidden" value="import">
+        <input name="preview_token" type="hidden" value="{{ token }}">
+        <button class="button" type="submit">Simpan hasil impor</button>
+      </form>
+    {% endif %}
+  {% endif %}
+  {% include "assessments/exam_import_history.html" %}
+</section>
+{% endblock %}

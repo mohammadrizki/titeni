@@ -1,0 +1,19 @@
+  <h2 class="section-title mt-4">Riwayat impor</h2>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Aplikasi</th><th scope="col">Program studi</th><th scope="col">Pelaksanaan ujian</th><th scope="col">Baris</th><th scope="col">Disimpan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for batch in history %}
+          <tr>
+            <td>{{ batch.source_label }}</td><td>{{ batch.event.component.version.blueprint.program }}</td><td>{{ batch.event.name }}</td><td>{{ batch.row_count }}</td><td>{{ batch.created_at|date:"d M Y H:i" }}</td>
+            <td>
+              {% url 'exam_imports:batch' batch.pk as preview_url %}
+              {% include "academics/row_buttons.html" with preview_url=preview_url only %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Belum ada hasil impor.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>

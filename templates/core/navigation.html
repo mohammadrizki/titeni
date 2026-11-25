@@ -1,9 +1,14 @@
+{% load exam_adapters %}
 {% with route=request.resolver_match.view_name %}
 <nav aria-label="Menu aplikasi" class="app-navigation grid gap-1">
   <a class="nav-link" href="{% url 'home' %}"{% if route == "home" %} aria-current="page"{% endif %}>Beranda</a>
   <a class="nav-link" href="{% url 'academics:programs' %}"{% if route == "academics:programs" %} aria-current="page"{% endif %}>Akademik</a>
+  {% has_active_exam_protocols as show_exam_import %}
+  {% if show_exam_import %}
+    <a class="nav-link" href="{% url 'exam_imports:index' %}"{% if route == "exam_imports:index" %} aria-current="page"{% elif route == "exam_imports:adapter" or route == "exam_imports:batch" %} aria-current="location"{% endif %}>Impor Hasil Ujian</a>
+  {% endif %}
   {% if perms.accounts.access_system_workspace %}
-    <details class="app-navigation-group"{% if request.resolver_match.namespace == "accounts" or route == "academics:faculty" or route == "academics:register_program" or route == "academics:delete_program" %} open{% endif %}>
+    <details class="app-navigation-group"{% if request.resolver_match.namespace == "accounts" or route == "academics:faculty" or route == "academics:register_program" or route == "academics:delete_program" or route == "exam_imports:settings" or route == "exam_imports:edit_protocol" %} open{% endif %}>
       <summary class="app-navigation-parent nav-link cursor-pointer">
         <span>Administrasi Sistem</span>
         <svg class="app-navigation-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg>
@@ -16,6 +21,7 @@
           <a class="nav-link" href="{% url 'academics:register_program' %}"{% if route == "academics:register_program" or route == "academics:delete_program" %} aria-current="page"{% endif %}>Program Studi</a>
         {% endif %}
         {% if user.is_superuser %}
+          <a class="nav-link" href="{% url 'exam_imports:settings' %}"{% if route == "exam_imports:settings" or route == "exam_imports:edit_protocol" %} aria-current="page"{% endif %}>Pengaturan Impor Hasil Ujian</a>
           <a class="nav-link" href="{% url 'accounts:roles' %}"{% if route == "accounts:roles" or route == "accounts:delete_role" %} aria-current="page"{% endif %}>Peran &amp; Hak Akses</a>
         {% endif %}
         {% if perms.accounts.view_user %}

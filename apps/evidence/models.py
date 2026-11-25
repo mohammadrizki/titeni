@@ -415,3 +415,36 @@ class EvidenceArtifact(RegistryRecord):
 
     def __str__(self) -> str:
         return self.original_name
+
+
+class EvidenceIntegration(models.Model):
+    account = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    source = models.ForeignKey(EvidenceSource, on_delete=models.PROTECT)
+    token_digest = models.CharField(max_length=64, unique=True)
+    enabled = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.account} · {self.source}"
+
+
+class ExternalEvidenceReceipt(models.Model):
+    integration = models.ForeignKey(EvidenceIntegration, on_delete=models.PROTECT)
+    source = models.ForeignKey(EvidenceSource, on_delete=models.PROTECT)
+    record = models.OneToOneField(
+        EvidenceRecord, on_delete=models.PROTECT, related_name="external_receipt"
+    )
+    external_id = models.CharField(max_length=160)
+    payload_digest = models.CharField(max_length=64)
+    adapter_version = models.CharField(max_length=12)
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "external_id"], name="unique_external_evidence_source_id"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.external_id

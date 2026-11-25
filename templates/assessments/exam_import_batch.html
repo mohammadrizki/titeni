@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% block title %}Hasil impor ujian · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% if protocol_active %}
+    {% url 'exam_imports:adapter' batch.adapter as adapter_url %}
+  {% else %}
+    {% url 'exam_imports:index' as adapter_url %}
+  {% endif %}
+  {% include "core/breadcrumbs.html" with current="Hasil impor" parent_url=adapter_url parent_label="Impor Hasil Ujian" only %}
+  <h1 class="heading mt-3">Hasil impor {{ batch.source_label }}</h1>
+  <p class="mt-2">{{ batch.event.component.version.blueprint.program }}</p>
+  <p class="mt-2">{{ batch.event.name }} · {{ batch.row_count }} baris</p>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Baris</th><th scope="col">Pengenal peserta</th><th scope="col">Nilai akhir</th><th scope="col">Nilai mentah</th><th scope="col">Skala maksimum</th><th scope="col">Sesi</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        {% for row in page %}
+          <tr><td>{{ row.row_number }}</td><td>{{ row.participant }}</td><td>{{ row.score|default:"—" }}</td><td>{{ row.raw_score|default:"—" }}</td><td>{{ row.maximum|default:"—" }}</td><td>{{ row.session|default:"—" }}</td><td>{{ row.status|default:"—" }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.paginator.num_pages > 1 %}
+    <nav class="mt-4 flex flex-wrap items-center gap-2" aria-label="Halaman hasil impor">
+      {% if page.has_previous %}<a class="nav-link" href="?page={{ page.previous_page_number }}">Sebelumnya</a>{% endif %}
+      <span>Halaman {{ page.number }} dari {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a class="nav-link" href="?page={{ page.next_page_number }}">Berikutnya</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

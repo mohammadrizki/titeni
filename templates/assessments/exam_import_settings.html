@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% block title %}Pengaturan Impor Hasil Ujian · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as system_url %}
+  {% include "core/breadcrumbs.html" with current="Pengaturan Impor Hasil Ujian" parent_url=system_url parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Pengaturan Impor Hasil Ujian</h1>
+  {% if editing %}
+    <h2 class="section-title mt-4">Sunting {{ editing.name }}</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Simpan</button>
+      <a class="nav-link" href="{% url 'exam_imports:settings' %}">Batal</a>
+    </form>
+  {% else %}
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      {% include "core/add_row.html" with add_label="Tambah aplikasi impor CSV" %}
+    </form>
+  {% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Aplikasi</th><th scope="col">Protokol</th><th scope="col">Status</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for protocol in protocols %}
+          <tr>
+            <th scope="row">{{ protocol.name }}</th>
+            <td>{{ protocol.get_engine_display }}</td>
+            <td>
+              <form method="post" action="{% url 'exam_imports:edit_protocol' protocol.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="active" value="{% if protocol.active %}0{% else %}1{% endif %}">
+                <span>{{ protocol.active|yesno:"Aktif,Nonaktif" }}</span>
+                {% with action=protocol.active|yesno:"Nonaktifkan,Aktifkan" icon=protocol.active|yesno:"disable,enable" %}
+                  <button class="item-action" type="submit" title="{{ action }}" aria-label="{{ action }} {{ protocol.name }}">
+                    {% include "competencies/action_icon.html" with icon=icon only %}
+                  </button>
+                {% endwith %}
+              </form>
+            </td>
+            <td>
+              <a class="item-action" href="{% url 'exam_imports:edit_protocol' protocol.pk %}" title="Sunting" aria-label="Sunting {{ protocol.name }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

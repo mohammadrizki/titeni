@@ -15,6 +15,7 @@
       <dt class="font-semibold mt-2">Sumber dan jenis bukti</dt><dd>{{ record.source_link.capability }}</dd>
       <dt class="font-semibold mt-2">Konteks pengamatan</dt><dd>{{ record.context|default:"—" }}</dd>
       <dt class="font-semibold mt-2">Pencatat</dt><dd>{{ record.created_by.get_username }} · {{ record.created_at|date:"d M Y H:i" }}</dd>
+      {% if record.external_receipt %}<dt class="font-semibold mt-2">Pencatatan</dt><dd>Integrasi {{ record.external_receipt.adapter_version }} · {{ record.external_receipt.external_id }}</dd>{% endif %}
       {% if record.import_batch_id %}<dt class="font-semibold mt-2">Pencatatan</dt><dd>Impor CSV · Batch {{ record.import_batch_id }}</dd>{% endif %}
       <dt class="font-semibold mt-2">Versi</dt><dd>{{ record.revision_number }}</dd>
       {% if record.supersedes_id %}

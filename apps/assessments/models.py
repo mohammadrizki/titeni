@@ -231,3 +231,75 @@ class AssessmentAttempt(models.Model):
 
     def __str__(self) -> str:
         return f"{self.participation.enrollment.learner} · {self.number}"
+
+
+class ExamResultImport(models.Model):
+    event = models.ForeignKey(AssessmentEvent, on_delete=models.PROTECT)
+    adapter = models.SlugField(max_length=40)
+    source_label = models.CharField(max_length=120)
+    digest = models.CharField(max_length=64)
+    row_count = models.PositiveIntegerField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "adapter", "digest"], name="unique_exam_result_import"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.source_label} · {self.event}"
+
+
+class ImportedExamResult(models.Model):
+    batch = models.ForeignKey(ExamResultImport, on_delete=models.PROTECT, related_name="results")
+    row_number = models.PositiveIntegerField()
+    participant = models.CharField(max_length=254)
+    score = models.CharField(max_length=32, blank=True)
+    raw_score = models.CharField(max_length=32, blank=True)
+    maximum = models.CharField(max_length=32, blank=True)
+    session = models.CharField(max_length=120, blank=True)
+    status = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        ordering = ["row_number"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["batch", "row_number"], name="unique_exam_import_row_number"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.participant
+
+
+class ExamImportProtocol(models.Model):
+    class Engine(models.TextChoices):
+        MOODLE = "moodle", "Moodle XLSX"
+        EXAMTOOL = "examtool", "ExamTool CSV"
+        CSV = "csv-lain", "CSV dengan pemetaan kolom"
+
+    slug = models.SlugField(max_length=40, unique=True)
+    name = models.CharField("Nama aplikasi", max_length=120, unique=True)
+    engine = models.CharField("Protokol", max_length=16, choices=Engine.choices)
+    options = models.JSONField(default=dict, blank=True)
+    active = models.BooleanField("Aktif", default=False)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["pk"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(engine__in=["moodle", "examtool", "csv-lain"]),
+                name="valid_exam_import_engine",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.name

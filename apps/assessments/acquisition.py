@@ -309,6 +309,7 @@ def verify_evidence(
         records = attempt.evidence_records.select_related(
             "created_by",
             "import_batch",
+            "external_receipt",
             "source_link__capability__source",
             "source_link__capability__evidence_type",
             "supersedes",

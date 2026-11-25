@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+{% block title %}Impor Hasil Ujian · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'exam_imports:index' as imports_url %}
+  <h1 class="heading">Impor Hasil Ujian</h1>
+  {% if methods %}
+    {% if method %}
+      <dl class="mt-4">
+        <dt class="font-semibold">Metode ujian</dt><dd>{{ method }}</dd>
+        {% if component %}<dt class="font-semibold mt-2">Jenis ujian</dt><dd>{{ component.name }}</dd>{% endif %}
+        {% if event %}<dt class="font-semibold mt-2">Tanggal ujian</dt><dd>{{ event.occurred_on|date:"d M Y" }} · {{ event.name }}</dd>{% endif %}
+      </dl>
+    {% endif %}
+    {% if not method %}
+      <form class="editor mt-4" method="get">
+        <label for="exam-method">Metode ujian</label>
+        <select id="exam-method" name="method" required>
+          <option value="">Pilih metode ujian</option>
+          {% for option in methods %}<option value="{{ option }}">{{ option }}</option>{% endfor %}
+        </select>
+        <button class="button mt-2" type="submit">Lanjut</button>
+      </form>
+    {% elif not component %}
+      <form class="editor mt-4" method="get">
+        <input type="hidden" name="method" value="{{ method }}">
+        <label for="exam-component">Jenis ujian</label>
+        <select id="exam-component" name="component" required>
+          <option value="">Pilih jenis ujian</option>
+          {% for option in components %}<option value="{{ option.pk }}">{{ option.name }} · {{ option.version.blueprint.program }} · {{ option.code }} (Blueprint versi {{ option.version.number }})</option>{% endfor %}
+        </select>
+        <button class="button mt-2" type="submit">Lanjut</button>
+        <a class="nav-link" href="{{ imports_url }}">Ubah metode</a>
+      </form>
+    {% elif not event %}
+      <form class="editor mt-4" method="get">
+        <input type="hidden" name="method" value="{{ method }}">
+        <input type="hidden" name="component" value="{{ component.pk }}">
+        <label for="exam-date">Tanggal ujian</label>
+        <select id="exam-date" name="event" required>
+          <option value="">Pilih tanggal ujian</option>
+          {% for option in dates %}<option value="{{ option.pk }}">{{ option.occurred_on|date:"d M Y" }} · {{ option.name }}</option>{% endfor %}
+        </select>
+        <button class="button mt-2" type="submit">Lanjut</button>
+        <a class="nav-link" href="{{ imports_url }}{% querystring method=method component=None event=None %}">Ubah jenis</a>
+      </form>
+    {% else %}
+      <h2 class="section-title mt-4">Pilih aplikasi</h2>
+      <ul class="mt-2">
+        {% for protocol in protocols %}
+          <li><a class="nav-link" href="{% url 'exam_imports:adapter' protocol.slug %}{% querystring method=method component=component.pk event=event.pk %}">{{ protocol.name }}</a></li>
+        {% endfor %}
+      </ul>
+      <a class="nav-link mt-2" href="{{ imports_url }}{% querystring method=method component=component.pk event=None %}">Ubah tanggal</a>
+    {% endif %}
+  {% elif protocols %}
+    <p class="mt-4">Belum ada pelaksanaan ujian yang dapat Anda gunakan untuk impor.</p>
+  {% else %}
+    <p class="mt-4">Belum ada protokol impor aktif.</p>
+  {% endif %}
+  {% include "assessments/exam_import_history.html" %}
+</section>
+{% endblock %}
