@@ -1,0 +1,36 @@
+{% extends "evidence/base.html" %}
+{% block title %}{{ unit.name }} · {{ application_name }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'curriculum:index' %}">Kurikulum</a></p>
+<h1 class="heading">{{ unit.get_kind_display }} · {{ unit.name }}</h1>
+<p>{{ unit.version }}</p>
+<section class="panel">
+  <h2 class="section-title">Target pencapaian unit</h2>
+  <ul>
+    {% for target in targets %}
+      <li><strong>{{ target.competency }}</strong> — {{ target.description }}</li>
+    {% empty %}
+      <li>Belum ada target pencapaian.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% if coverage %}
+<section class="panel">
+  <h2 class="section-title">Cakupan mata kuliah dan stase terkait</h2>
+  <ul>
+    {% for target in coverage %}
+      <li>{{ target.unit.name }} · {{ target.competency }} — {{ target.description }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% if form %}
+<form class="panel" method="post">
+  {% csrf_token %}
+  <h2 class="section-title">Tambah atau perbarui target</h2>
+  <p>Menyimpan target pada kompetensi yang sudah terdaftar akan memperbarui deskripsinya.</p>
+  {{ form.as_p }}
+  <button class="button" type="submit">Simpan target</button>
+</form>
+{% endif %}
+{% endblock %}

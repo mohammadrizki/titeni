@@ -1,0 +1,32 @@
+{% extends "evidence/base.html" %}
+{% block title %}Kerangka kompetensi · {{ application_name }}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="heading">Kerangka kompetensi</h1>
+    <p class="mt-1 text-sm text-muted">{{ program.name }}</p>
+  </div>
+  <form method="post" action="{% url 'competencies:create' program.pk %}">
+    {% csrf_token %}
+    <button class="button" type="submit">{% if versions %}Buka atau buat draf revisi{% else %}Buat draf pertama{% endif %}</button>
+  </form>
+</div>
+<div class="panel">
+  {% if versions %}
+    <ul class="office-module-links">
+      {% for version in versions %}
+        <li>
+          <a href="{% url 'competencies:detail' program.pk version.pk %}">Versi {{ version.number }}</a>
+          {% if version.published_at %}
+            <span class="status bg-green-soft text-green-ink">Terbit {{ version.published_at|date:"j M Y" }}</span>
+          {% else %}
+            <span class="status bg-paper text-muted">Draf</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-sm text-muted">Prodi ini belum memiliki versi kerangka kompetensi.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "evidence/base.html" %}
+{% block title %}Butir kompetensi · {{ application_name }}{% endblock %}
+{% block content %}
+<a class="text-sm font-semibold text-accent" href="{% url 'competencies:detail' program.pk version.pk %}">← Versi {{ version.number }}</a>
+<div>
+  <h1 class="heading">{% if item %}Edit butir kompetensi{% else %}Tambah butir kompetensi{% endif %}</h1>
+  <p class="mt-1 text-sm text-muted">{{ program.name }}</p>
+</div>
+<form class="panel editor" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="button" type="submit">Simpan butir</button>
+</form>
+{% endblock %}

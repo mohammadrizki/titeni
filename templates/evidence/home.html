@@ -1,0 +1,76 @@
+{% extends "evidence/base.html" %}
+{% block title %}Program studi · {{ application_name }}{% endblock %}
+{% block content %}
+<h1 class="heading">Program studi</h1>
+{% if managed %}
+<section id="pengelolaan" class="space-y-4" aria-labelledby="managed-heading">
+  <h2 id="managed-heading" class="section-title">Pengelolaan prodi</h2>
+  <ul class="office-modules">
+    {% for program in managed %}
+      <li class="office-module">
+        <div>
+          <h3 class="section-title">{{ program.name }}</h3>
+          <p class="mt-1 text-sm text-muted">{{ program.institution }}</p>
+        </div>
+        <ul class="office-module-links">
+          {% if program.access_settings.head_settings != False %}
+            <li><a href="{% url 'evidence:settings' program.pk %}">Profil prodi</a></li>
+            <li><a href="{% url 'competencies:index' program.pk %}">Kerangka kompetensi</a></li>
+            <li><a href="{% url 'curriculum:setup' program.pk %}">Kurikulum</a></li>
+          {% endif %}
+          {% if program.access_settings.head_evidence != False %}
+            <li><a href="{% url 'evidence:requirements' program.pk %}">Bukti yang Diharapkan</a></li>
+          {% endif %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% if office_programs %}
+<section id="administrasi-prodi" class="space-y-4" aria-labelledby="office-heading">
+  <h2 id="office-heading" class="section-title">Admin Program Studi</h2>
+  <ul class="office-modules">
+    {% for program in office_programs %}
+      <li class="office-module">
+        <a href="{% url 'program-office' program.pk %}">{{ program.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% if enrolled %}
+<section id="program-belajar" class="space-y-4" aria-labelledby="enrolled-heading">
+  <h2 id="enrolled-heading" class="section-title">Program belajar</h2>
+  <ul class="office-modules">
+    {% for program in enrolled %}
+      <li class="office-module">
+        <div>
+          <h3 class="section-title">{{ program.name }}</h3>
+          <p class="mt-1 text-sm text-muted">{{ program.institution }}</p>
+        </div>
+        <ul class="office-module-links"><li><a href="{% url 'evidence:targets' program.pk %}">Target Artefak</a></li></ul>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% if role_workspaces %}
+<section id="ruang-kerja" class="space-y-4" aria-labelledby="workspace-heading">
+  <h2 id="workspace-heading" class="section-title">Ruang kerja</h2>
+  <ul class="office-modules">
+    {% for workspace in role_workspaces %}
+    <li class="office-module">
+      <a href="{% url 'role-workspace' workspace.program.pk workspace.role %}">{{ workspace.label }} · {{ workspace.program.name }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% if coordinating %}
+<p class="panel"><a href="{% url 'curriculum:index' %}">Kurikulum yang diampu</a></p>
+{% endif %}
+{% if not managed and not enrolled and not coordinating and not office_programs and not role_workspaces %}
+<p class="panel text-muted">Belum ada penugasan aktif.</p>
+{% endif %}
+{% endblock %}

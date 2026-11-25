@@ -1,0 +1,11 @@
+<a class="titeni-admin-nav-link" href="{% url 'admin:index' %}"{% if request.resolver_match.url_name == "index" %} aria-current="page"{% endif %}>Beranda admin</a>
+{% for app in available_apps %}
+  <div class="admin-nav-group">
+    <p class="titeni-admin-nav-label">{{ app.name }}</p>
+    {% for model in app.models %}
+      {% if model.admin_url %}
+        <a class="titeni-admin-nav-link" href="{{ model.admin_url }}"{% if model.admin_url in request.path %} aria-current="page"{% endif %}>{{ model.name }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endfor %}

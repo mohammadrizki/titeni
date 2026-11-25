@@ -1,0 +1,14 @@
+{% extends "evidence/base.html" %}
+{% block title %}Kurikulum · {{ application_name }}{% endblock %}
+{% block content %}
+<h1 class="heading">Kurikulum</h1>
+<ul class="office-modules">
+  {% for unit in units %}
+    <li class="office-module">
+      <a href="{% url 'curriculum:detail' unit.pk %}">{{ unit.get_kind_display }} · {{ unit }}</a>
+    </li>
+  {% empty %}
+    <li class="panel">Belum ada unit kurikulum yang dapat Anda akses.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

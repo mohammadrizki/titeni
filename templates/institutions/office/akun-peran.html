@@ -1,0 +1,42 @@
+{% extends "institutions/office.html" %}
+{% block office_content %}
+<section class="panel">
+  <h2 class="section-title">Pendaftaran mahasiswa</h2>
+  <div class="table-wrap">
+    <table class="data-table" aria-label="Pendaftaran mahasiswa menunggu persetujuan">
+      <thead><tr><th scope="col">Nama</th><th scope="col">Akun</th><th scope="col">Tanggal daftar</th><th scope="col">Aksi</th></tr></thead>
+      <tbody>
+        {% for registration in pending_registrations %}
+          <tr>
+            <td>{{ registration.user.get_full_name|default:registration.user.username }}</td>
+            <td>{{ registration.user.username }}</td>
+            <td>{{ registration.requested_at }}</td>
+            <td>
+              <form method="post" action="{% url 'approve-student-registration' office_program.pk registration.pk %}">
+                {% csrf_token %}
+                <button class="button" type="submit">Setujui</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Tidak ada pendaftaran yang menunggu persetujuan.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="panel">
+  <h2 class="section-title">Daftar Pengguna dan Peran</h2>
+  <form class="editor" method="get">
+    <label for="filter-peran">Peran</label>
+    <select id="filter-peran" name="peran">
+      <option value="">Semua peran</option>
+      {% for value, label in role_choices %}
+        <option value="{{ value }}"{% if selected_role == value %} selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="button button-secondary mt-3" type="submit">Filter</button>
+  </form>
+  {% include "institutions/office/member_table.html" with empty_message="Belum ada pengguna aktif untuk pilihan peran ini." %}
+</section>
+{% endblock %}

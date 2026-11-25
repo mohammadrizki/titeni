@@ -1,0 +1,77 @@
+{% extends "evidence/base.html" %}
+{% load static %}
+{% block title %}Bukti yang Diharapkan · {{ application_name }}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="heading">Bukti yang Diharapkan</h1>
+    <p class="mt-1 text-sm text-muted">{{ program.name }}</p>
+  </div>
+  <a class="button ml-auto" href="{% url 'evidence:create' program.pk %}#bukti-baru"
+     data-inline-add aria-controls="bukti-baru" aria-expanded="{% if show_add %}true{% else %}false{% endif %}">Tambah ketentuan</a>
+</div>
+<div class="panel">
+    <form id="form-bukti-baru" method="post" action="{% url 'evidence:create' program.pk %}#bukti-baru">
+      {% csrf_token %}
+    </form>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th scope="col">Nama Bukti</th><th scope="col">Jenis</th><th scope="col">Sumber</th><th scope="col">Syarat</th><th scope="col" class="text-right">Aksi</th></tr></thead>
+        <tbody>
+        {% for item in requirements %}
+          <tr>
+            <td class="min-w-44">
+              <strong class="text-accent">{{ item.title }}</strong>
+              <div class="mt-1">
+              {% if item.archived_at %}<span class="status bg-paper text-muted">Diarsipkan</span>
+              {% elif item.published_at %}<span class="status bg-green-soft text-green-ink">Terbit</span>
+              {% else %}<span class="status bg-amber-100 text-amber-900">Draf</span>{% endif %}
+              </div>
+            </td>
+            <td>{{ item.artifact_type }}</td>
+            <td>{{ item.source|default:"—" }}</td>
+            <td><p>Minimum {{ item.minimum_count }}</p><p class="mt-1 whitespace-pre-wrap text-muted">{{ item.criteria }}</p></td>
+            <td>
+              {% if not item.archived_at %}
+                <div class="flex flex-wrap gap-2">
+                  {% if not item.published_at %}
+                    <a class="button button-secondary" href="{% url 'evidence:edit' program.pk item.pk %}">Edit draf</a>
+                    <a class="button" href="{% url 'evidence:preview' program.pk item.pk %}">Pratinjau</a>
+                  {% else %}
+                    <form method="post" action="{% url 'evidence:archive' program.pk item.pk %}">
+                      {% csrf_token %}<button class="button button-secondary" type="submit">Arsipkan</button>
+                    </form>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Belum ada ketentuan bukti.</td></tr>
+        {% endfor %}
+          <tr id="bukti-baru"{% if not show_add %} hidden{% endif %}>
+            <td class="min-w-44">
+              {{ add_form.non_field_errors }}
+              {{ add_form.title.as_field_group }}
+              {{ add_form.learning_objective.as_field_group }}
+              {% include "evidence/requirement_options.html" with form=add_form %}
+            </td>
+            <td>{{ add_form.artifact_type.as_field_group }}</td>
+            <td>{{ add_form.source.as_field_group }}</td>
+            <td>
+              {{ add_form.minimum_count.as_field_group }}
+              {{ add_form.criteria.as_field_group }}
+            </td>
+            <td>
+              <div class="flex justify-end gap-1 whitespace-nowrap">
+                <button class="item-action item-action-save" type="submit" form="form-bukti-baru" title="Simpan dan pratinjau" aria-label="Simpan dan pratinjau"><span aria-hidden="true">✓</span></button>
+                <a class="item-action" href="{% url 'evidence:requirements' program.pk %}" title="Batal" aria-label="Batal"><span aria-hidden="true">×</span></a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</div>
+<script src="{% static 'titeni/inline-add-row.js' %}" defer></script>
+{% endblock %}

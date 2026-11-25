@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block title %}Fakultas · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as breadcrumb_parent %}
+  {% include "core/breadcrumbs.html" with current="Profil Fakultas" parent_url=breadcrumb_parent parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Profil Fakultas</h1>
+  <form method="post" class="editor mt-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Simpan profil</button>
+  </form>
+</section>
+{% endblock %}

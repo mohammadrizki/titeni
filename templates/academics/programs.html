@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block title %}Akademik · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% include "core/breadcrumbs.html" with current="Akademik" only %}
+  <h1 class="heading">Program studi</h1>
+  <ul class="mt-4">
+    {% for program in programs %}
+      <li class="mt-4">
+        <h2 class="font-semibold">{{ program.name }}</h2>
+        {% include "academics/program_tabs.html" with program=program only %}
+      </li>
+    {% empty %}
+      <li>Belum ada penugasan konfigurasi program studi.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

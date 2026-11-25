@@ -1,0 +1,106 @@
+{% extends "core/base.html" %}
+{% block title %}Draf kerangka kompetensi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as breadcrumb_parent %}
+  {% url 'academics:competencies:framework' program.pk as breadcrumb_section %}
+  {% include "core/breadcrumbs.html" with current="Draf kerangka kompetensi" parent_url=breadcrumb_parent parent_label="Akademik" section_url=breadcrumb_section section_label="Kerangka kompetensi" only %}
+  <h1 class="heading mt-3">Draf kerangka kompetensi</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">Versi {{ version.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="draft" only %}
+  <div class="academic-tab-panel">
+    <h2 class="mt-4 font-semibold">Butir kompetensi</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="item">
+      {% include "core/add_row.html" with form=item_form add_label="Tambah butir kompetensi" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode</th><th scope="col">Nama</th><th scope="col">Butir induk</th></tr></thead>
+        <tbody>
+          {% for item in items %}
+            <tr><td>{{ item.code }}</td><td>{{ item.name }}</td><td>{{ item.parent|default_if_none:"—" }}</td></tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada butir kompetensi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="mt-4 font-semibold">Indikator kompetensi</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="indicator">
+      {% include "core/add_row.html" with form=indicator_form add_label="Tambah indikator kompetensi" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir</th><th scope="col">Kode indikator</th><th scope="col">Deskripsi indikator</th></tr></thead>
+        <tbody>
+          {% for indicator in indicators %}
+            <tr><td>{{ indicator.item }}</td><td>{{ indicator.code }}</td><td>{{ indicator.description }}</td></tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada indikator kompetensi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="mt-4 font-semibold">Milestone perkembangan</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="milestone">
+      {% include "core/add_row.html" with form=milestone_form add_label="Tambah milestone perkembangan" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir</th><th scope="col">Tahap kurikulum</th><th scope="col">Ekspektasi perkembangan</th></tr></thead>
+        <tbody>
+          {% for milestone in milestones %}
+            <tr><td>{{ milestone.item }}</td><td>{{ milestone.stage.version }} · {{ milestone.stage }}</td><td>{{ milestone.expectation }}</td></tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada milestone.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="mt-4 font-semibold">Relasi perkembangan</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="relationship">
+      {% include "core/add_row.html" with form=relationship_form add_label="Tambah relasi perkembangan" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir asal</th><th scope="col">Butir tujuan</th><th scope="col">Relasi perkembangan</th></tr></thead>
+        <tbody>
+          {% for relationship in relationships %}
+            <tr><td>{{ relationship.source }}</td><td>{{ relationship.target }}</td><td>{{ relationship.description }}</td></tr>
+          {% empty %}
+            <tr><td colspan="3">Belum ada relasi perkembangan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="mt-4 font-semibold">Standar performa</h2>
+    <p class="mt-2" id="standard-version-help">Gunakan kembali kode standar pada butir yang sama untuk menambah versi draf.</p>
+    <form class="editor mt-4" method="post" aria-describedby="standard-version-help">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="standard">
+      {% include "core/add_row.html" with form=standard_form add_label="Tambah versi standar performa" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir</th><th scope="col">Kode standar</th><th scope="col">Versi draf</th><th scope="col">Deskripsi standar performa</th></tr></thead>
+        <tbody>
+          {% for standard_version in standard_versions %}
+            <tr><td>{{ standard_version.standard.item }}</td><td>{{ standard_version.standard.code }}</td><td>{{ standard_version.number }}</td><td>{{ standard_version.description }}</td></tr>
+          {% empty %}
+            <tr><td colspan="4">Belum ada standar performa.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,41 @@
+<nav class="space-y-1" aria-label="Menu aplikasi">
+  {% if office_program %}
+    <p class="nav-heading">{{ office_program.name }} · Admin Program Studi</p>
+    {% for slug, label in office_menu.items %}
+      <a class="nav-link" href="{% if slug == 'beranda' %}{% url 'program-office' office_program.pk %}{% else %}{% url 'program-office-section' office_program.pk slug %}{% endif %}"{% if slug == section %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <a class="nav-link" href="{% url 'evidence:home' %}">Semua program studi</a>
+  {% elif workspace_program %}
+    <p class="nav-heading">{{ workspace_program.name }} · {{ workspace_label }}</p>
+    {% for slug, label in workspace_menu.items %}
+      <a class="nav-link" href="{% if slug == 'beranda' %}{% url 'role-workspace' workspace_program.pk workspace_role %}{% else %}{% url 'role-workspace-section' workspace_program.pk workspace_role slug %}{% endif %}"{% if slug == section %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <a class="nav-link" href="{% url 'evidence:home' %}">Semua program studi</a>
+  {% else %}
+  <a class="nav-link" href="{% url 'evidence:home' %}"{% if request.resolver_match.app_name == "evidence" and request.resolver_match.url_name == "home" %} aria-current="page"{% endif %}>Beranda</a>
+  {% if program %}
+    <p class="nav-heading">{{ program.name }}</p>
+    {% if request.resolver_match.url_name == "targets" %}
+      <a class="nav-link" href="{% url 'evidence:targets' program.pk %}" aria-current="page">Target Artefak</a>
+    {% else %}
+      {% if program.access_settings.head_settings != False %}
+        <a class="nav-link" href="{% url 'evidence:settings' program.pk %}"{% if request.resolver_match.url_name == "settings" %} aria-current="page"{% endif %}>Profil prodi</a>
+        <a class="nav-link" href="{% url 'competencies:index' program.pk %}"{% if request.resolver_match.app_name == "competencies" %} aria-current="page"{% endif %}>Kerangka kompetensi</a>
+      {% endif %}
+      {% if program.access_settings.head_evidence != False %}
+        <a class="nav-link" href="{% url 'evidence:requirements' program.pk %}"{% if request.resolver_match.app_name == "evidence" and request.resolver_match.url_name != "settings" %} aria-current="page"{% endif %}>Bukti yang Diharapkan</a>
+      {% endif %}
+    {% endif %}
+  {% else %}
+    {% if managed or enrolled %}<p class="nav-heading">Program studi</p>{% endif %}
+    {% if managed %}<a class="nav-link" href="#pengelolaan">Pengelolaan prodi</a>{% endif %}
+    {% if role_workspaces %}<a class="nav-link" href="#ruang-kerja">Ruang kerja</a>{% endif %}
+    {% if office_programs %}<a class="nav-link" href="#administrasi-prodi">Admin Program Studi</a>{% endif %}
+    {% if enrolled %}<a class="nav-link" href="#program-belajar">Program belajar</a>{% endif %}
+  {% endif %}
+  {% if user.is_staff %}
+    <div class="mx-2 my-3 border-t border-line"></div>
+    <a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a>
+  {% endif %}
+  {% endif %}
+</nav>

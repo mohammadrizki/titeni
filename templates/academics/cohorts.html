@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% block title %}Kohort · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% include "core/breadcrumbs.html" with current="Kohort" parent_url=academic_url parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Kohort</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="cohorts" only %}
+  <div class="academic-tab-panel">
+    <form class="editor mt-4" method="post">{% csrf_token %}{% include "core/add_row.html" with add_label="Tambah kohort" %}</form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode</th><th scope="col">Nama kohort</th><th scope="col">Periode akademik</th><th scope="col">Aksi</th></tr></thead>
+        <tbody>
+          {% for cohort in cohorts %}
+            <tr>
+              <td>{{ cohort.code }}</td><td>{{ cohort.name }}</td><td>{{ cohort.period.name }}</td>
+              <td>{% if perms.academics.view_learnerenrollment %}<a class="nav-link" href="{% url 'academics:enrollments' program.pk cohort.pk %}">Daftar mahasiswa</a>{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">Belum ada kohort.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

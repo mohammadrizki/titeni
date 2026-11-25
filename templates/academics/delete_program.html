@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}Hapus program studi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as breadcrumb_parent %}
+  {% url 'academics:register_program' as breadcrumb_section %}
+  {% include "core/breadcrumbs.html" with current="Hapus program studi" parent_url=breadcrumb_parent parent_label="Administrasi Sistem" section_url=breadcrumb_section section_label="Program Studi" only %}
+  <h1 class="heading">Hapus program studi?</h1>
+  <p class="mt-3">{{ program.code }} · {{ program.name }}</p>
+  {% if protected %}
+    <p class="mt-4" role="alert">Program studi masih dirujuk oleh data akademik atau penugasan.</p>
+    <a class="nav-link" href="{% url 'academics:register_program' %}">Kembali</a>
+  {% else %}
+  <form class="mt-4 flex items-center gap-3" method="post">
+    {% csrf_token %}
+    <button class="button" type="submit">Hapus program studi</button>
+    <a class="nav-link" href="{% url 'academics:register_program' %}">Batal</a>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

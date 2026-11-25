@@ -1,0 +1,14 @@
+  <section class="panel table-wrap">
+    <table class="data-table" aria-label="{{ section_title }}">
+      <thead><tr><th scope="col">Nama</th><th scope="col">Akun</th><th scope="col">Peran</th></tr></thead>
+      <tbody>
+        {% for grant in member_records %}
+          {% with member=grant.affiliation.institution_affiliation.user %}
+            <tr><td>{{ member.get_full_name|default:member.username }}</td><td>{{ member.username }}</td><td>{{ grant.get_role_display }}</td></tr>
+          {% endwith %}
+        {% empty %}
+          <tr><td colspan="3" class="text-muted">{{ empty_message }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>

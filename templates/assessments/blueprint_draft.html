@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% block title %}Draf blueprint asesmen · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:assessments:blueprints' program.pk as blueprint_url %}
+  {% include "core/breadcrumbs.html" with current="Draf blueprint asesmen" parent_url=academic_url parent_label="Akademik" section_url=blueprint_url section_label="Blueprint asesmen" only %}
+  <h1 class="heading mt-3">Draf blueprint asesmen</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">Versi {{ version.number }} · <a class="text-accent underline" href="{% url 'academics:competencies:draft' program.pk version.framework_version_id %}">Draf kompetensi versi {{ version.framework_version.number }}</a></p>
+  {% include "academics/program_tabs.html" with program=program active="blueprint_draft" only %}
+  <div class="academic-tab-panel">
+    <h2 class="section-title">Komponen asesmen</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="item">
+      {% include "core/add_row.html" with form=item_form add_label="Tambah komponen asesmen" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode</th><th scope="col">Komponen asesmen</th><th scope="col">Metode asesmen</th><th scope="col">Tujuan asesmen</th><th scope="col">Tahap kurikulum</th><th scope="col">Waktu asesmen</th></tr></thead>
+        <tbody>
+          {% for item in items %}
+            <tr><td>{{ item.code }}</td><td>{{ item.name }}</td><td>{{ item.method }}</td><td>{{ item.purpose }}</td><td>{{ item.stage.version }} · {{ item.stage }}</td><td>{{ item.timing }}</td></tr>
+          {% empty %}
+            <tr><td colspan="6">Belum ada komponen asesmen.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="section-title mt-4">Pemetaan kompetensi</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="mapping">
+      {% include "core/add_row.html" with form=mapping_form add_label="Tambah pemetaan kompetensi" only %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Komponen asesmen</th><th scope="col">Butir kompetensi</th></tr></thead>
+        <tbody>
+          {% for mapping in mappings %}
+            <tr><td>{{ mapping.item }}</td><td>{{ mapping.competency }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Belum ada pemetaan kompetensi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

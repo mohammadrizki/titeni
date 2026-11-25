@@ -1,0 +1,80 @@
+{% extends "evidence/base.html" %}
+{% load static %}
+{% block title %}Pengaturan Kurikulum · {{ application_name }}{% endblock %}
+{% block content %}
+<h1 class="heading">Pengaturan Kurikulum · {{ program.name }}</h1>
+<p><a href="{% url 'curriculum:index' %}">Lihat unit dan target pencapaian</a></p>
+{% for action, title, form, headers, records in sections %}
+<section class="panel" aria-labelledby="judul-{{ action }}">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="section-title" id="judul-{{ action }}">{{ title }}</h2>
+    <a class="button ml-auto" href="?tambah={{ action }}#baru-{{ action }}"
+       data-inline-add aria-controls="baru-{{ action }}"
+       aria-expanded="{% if active_form == action %}true{% else %}false{% endif %}">Tambah</a>
+  </div>
+  <form method="post" id="form-{{ action }}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="{{ action }}">
+  </form>
+  <div class="table-wrap">
+    <table class="data-table" aria-labelledby="judul-{{ action }}">
+      <thead><tr>
+        {% for header in headers %}<th scope="col">{{ header }}</th>{% endfor %}
+        <th scope="col" class="text-right">Aksi</th>
+      </tr></thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          {% if action == "versi" %}
+            <td>{{ record.framework_version }}</td>
+            <td>{{ record.number }} · {% if record.published_at %}Terbit{% else %}Draf{% endif %}</td>
+            <td>—</td>
+          {% elif action == "unit" %}
+            <td>{{ record.version }}</td><td>{{ record.get_kind_display }}</td>
+            <td>{{ record.code }}</td><td>{{ record.name }}</td>
+            <td class="text-right"><a class="item-action" href="{% url 'curriculum:detail' record.pk %}" title="Pratinjau" aria-label="Pratinjau {{ record.name }}">{% include "competencies/action_icon.html" with icon="preview" only %}</a></td>
+          {% elif action == "cakupan" %}
+            <td>{{ record.coordination_unit }}</td><td>{{ record.teaching_unit }}</td><td>—</td>
+          {% else %}
+            <td>{{ record.role_label }}</td><td>{{ record.unit }}</td><td>{{ record.affiliation }}</td>
+            <td>{{ record.starts_at }}</td><td>{{ record.ends_at|default_if_none:"—" }}</td>
+            <td class="text-right">
+              {% if record.starts_at < now %}
+                {% if not record.ends_at or record.ends_at > now %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="akhiri">
+                    <button class="item-action item-action-danger" type="submit" name="assignment" value="{{ record.pk }}"
+                            title="Akhiri penugasan" aria-label="Akhiri penugasan {{ record.affiliation }}">
+                      <span aria-hidden="true">⏹</span>
+                    </button>
+                  </form>
+                {% endif %}
+              {% endif %}
+            </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="{{ headers|length|add:1 }}" class="text-center text-muted">Belum ada data.</td></tr>
+        {% endfor %}
+        {% if form.non_field_errors %}
+        <tr><td colspan="{{ headers|length|add:1 }}">{{ form.non_field_errors }}</td></tr>
+        {% endif %}
+        <tr id="baru-{{ action }}"{% if active_form != action %} hidden{% endif %}>
+          {% for field in form %}
+          <td>{{ field.errors }}<label class="sr-only" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</td>
+          {% endfor %}
+          <td>
+            <div class="flex justify-end gap-1 whitespace-nowrap">
+              <button class="item-action" type="submit" form="form-{{ action }}" title="Simpan" aria-label="Simpan"><span aria-hidden="true">✓</span></button>
+              <a class="item-action" href="{% url 'curriculum:setup' program.pk %}#judul-{{ action }}" title="Batal" aria-label="Batal"><span aria-hidden="true">×</span></a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+<script src="{% static 'titeni/inline-add-row.js' %}" defer></script>
+{% endblock %}

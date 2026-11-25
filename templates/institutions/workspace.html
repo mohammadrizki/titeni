@@ -1,0 +1,26 @@
+{% extends "evidence/base.html" %}
+{% block title %}{{ section_title }} · {{ workspace_label }} · {{ application_name }}{% endblock %}
+{% block content %}
+<div>
+  <h1 class="heading">{{ section_title }}</h1>
+  <p class="mt-1 text-sm text-muted">{{ workspace_program.name }} · {{ workspace_label }}</p>
+</div>
+{% if show_targets_link %}
+  <p class="panel"><a class="button" href="{% url 'evidence:targets' workspace_program.pk %}">Lihat Target Artefak</a></p>
+{% endif %}
+{% if units %}
+  <section class="panel">
+    <h2 class="section-title">Cakupan unit yang diampu</h2>
+    <ul class="space-y-3">
+      {% for unit in units %}
+        <li><a class="nav-link" href="{% url 'curriculum:detail' unit.pk %}">{{ unit.get_kind_display }} · {{ unit.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+{% if section != "beranda" %}
+  <p class="panel text-muted">{{ section_title }} belum dapat dikelola dari ruang kerja ini.</p>
+{% elif not show_targets_link and not units %}
+  <p class="panel text-muted">Belum ada tugas yang dapat ditampilkan.</p>
+{% endif %}
+{% endblock %}

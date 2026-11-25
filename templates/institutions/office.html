@@ -1,0 +1,9 @@
+{% extends "evidence/base.html" %}
+{% block title %}{{ section_title }} · Admin Program Studi · {{ application_name }}{% endblock %}
+{% block content %}
+<div>
+  <h1 class="heading">{{ section_title }}</h1>
+  <p class="mt-1 text-sm text-muted">{{ office_program.name }} · Admin Program Studi</p>
+</div>
+{% block office_content %}{% endblock %}
+{% endblock %}

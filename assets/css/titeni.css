@@ -1,0 +1,194 @@
+@import "tailwindcss" source(none);
+@import "./oxbow.css";
+@source "../../templates/evidence";
+@source "../../templates/competencies";
+@source "../../templates/registration";
+
+@theme inline {
+  --font-sans: var(--ox-font);
+  --color-paper: var(--ox-background);
+  --color-ink: var(--ox-foreground);
+  --color-muted: var(--ox-muted-foreground);
+  --color-line: var(--ox-border);
+  --color-surface: var(--ox-surface);
+  --color-accent: var(--ox-accent);
+  --color-accent-soft: var(--ox-accent-soft);
+  --color-green-soft: var(--ox-success-soft);
+  --color-green-ink: var(--ox-success);
+  --color-pine: #123d32;
+  --color-pine-hover: #205747;
+  --color-pine-soft: #e1f0e8;
+}
+
+@layer base {
+  :root { color-scheme: light; }
+  body { @apply min-h-svh bg-paper text-ink antialiased; }
+  a, button, summary, input, select, textarea {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-accent;
+  }
+  h1, h2, h3 { @apply text-balance tracking-tight; }
+}
+
+@layer components {
+  .public-wrap { @apply mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12; }
+  .site-topbar {
+    @apply sticky top-0 z-20 border-b border-pine bg-pine text-white;
+    background-image: repeating-radial-gradient(
+      ellipse 190px 95px at 100% -46px,
+      transparent 0 18px,
+      rgb(189 234 207 / 16%) 19px,
+      transparent 20px 31px
+    );
+  }
+  .site-header-content { @apply flex min-h-16 w-full items-center justify-between gap-3 px-4 py-2 sm:px-6; }
+  .site-topbar .brand { @apply text-white; }
+  .site-topbar .mark { @apply bg-pine-soft text-pine; }
+  .topbar-subtitle { @apply text-pine-soft; }
+  .site-topbar :is(a, button, summary):focus-visible { @apply outline-pine-soft; }
+  .site-topbar nav .nav-link { @apply text-pine-soft hover:bg-pine-hover hover:text-white; }
+  .site-topbar nav .button { @apply bg-white text-pine hover:bg-pine-soft; }
+  .topbar-control { @apply inline-grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-pine-soft hover:bg-pine-hover hover:text-white; }
+  .front-theme-mode { display: none; }
+  :root[data-theme="auto"] .front-theme-mode[data-mode="auto"],
+  :root[data-theme="light"] .front-theme-mode[data-mode="light"],
+  :root[data-theme="dark"] .front-theme-mode[data-mode="dark"] { display: inline-flex; }
+  .workspace { @apply w-full lg:grid lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[15.5rem_minmax(0,1fr)]; }
+  .sidebar { @apply sticky top-16 hidden max-h-[calc(100svh-4rem)] min-h-[calc(100svh-4rem)] self-start overflow-y-auto border-r border-line bg-surface p-4 lg:block; }
+  .sidebar-rail { @apply hidden border-r border-line bg-surface; }
+  .sidebar-toggle { @apply grid size-9 cursor-pointer place-items-center text-accent hover:bg-accent-soft; }
+  .workspace-main { @apply min-w-0 space-y-5 px-4 py-6 sm:px-8 lg:py-9; }
+  .mark {
+    @apply inline-grid size-9 shrink-0 place-items-center rounded-lg text-lg font-bold;
+    background: var(--ox-accent);
+    color: var(--ox-accent-foreground);
+  }
+  .brand { @apply inline-flex min-w-0 items-center gap-2.5 font-bold tracking-tight text-ink; }
+  .panel { @apply min-w-0 rounded-xl border border-line bg-surface p-4 shadow-xs sm:p-5; }
+  .heading { @apply text-2xl leading-tight font-semibold text-ink sm:text-3xl; }
+  .section-title { @apply text-base font-semibold text-ink; }
+  .button {
+    @apply inline-flex min-h-10 items-center justify-center rounded-lg border border-transparent px-3.5 py-1.5 text-center text-sm font-semibold;
+    background: var(--ox-accent);
+    color: var(--ox-accent-foreground);
+  }
+  .button:hover { background: var(--ox-accent-hover); }
+  .button-secondary { @apply border-line bg-surface text-ink; }
+  .button-secondary:hover { @apply bg-paper; }
+  .button-danger { @apply bg-red-700 text-white; }
+  .button-danger:hover { @apply bg-red-800; }
+  .nav-link { @apply block rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-paper hover:text-ink; }
+  .nav-link[aria-current="page"] { @apply bg-accent-soft font-semibold text-accent; }
+  .nav-heading { @apply px-3 pt-4 pb-1 text-xs font-medium wrap-anywhere text-muted; }
+  .profile-menu { @apply relative text-sm; }
+  .profile-menu summary { @apply flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1 font-semibold hover:bg-pine-hover; }
+  .profile-menu summary::-webkit-details-marker { display: none; }
+  .profile-menu summary::after { content: "▾"; color: currentColor; }
+  .profile-avatar { @apply grid size-8 shrink-0 place-items-center rounded-full bg-accent-soft text-accent; }
+  .profile-actions { @apply absolute end-0 z-30 mt-2 w-36 rounded-lg border border-line bg-surface p-1 shadow-lg; }
+  .editor { @apply max-w-2xl; }
+  .editor p { @apply mb-4; }
+  .editor label { @apply mb-1.5 block text-sm font-medium; }
+  .editor input:not([type="hidden"]), .editor select, .editor textarea {
+    @apply block w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base text-ink;
+  }
+  .editor textarea { @apply min-h-26 resize-y; }
+  .editor .helptext { @apply mt-1.5 block text-sm leading-relaxed text-muted; }
+  .editor .errorlist { @apply mb-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800; }
+  .status { @apply inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap; }
+  .table-wrap { @apply overflow-x-auto; }
+  .data-table { @apply w-full text-left text-sm; }
+  .data-table th { @apply border-b border-line px-2.5 py-2 text-xs font-semibold whitespace-nowrap text-muted; }
+  .data-table td { @apply border-b border-line/60 px-2.5 py-3 align-top; }
+  .data-table tbody tr:last-child td { @apply border-b-0; }
+  .inline-item-field { @apply block w-full rounded-lg border border-line bg-surface px-2 py-1.5 text-sm text-ink; }
+  .item-action { @apply inline-grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-accent hover:bg-accent-soft; }
+  .item-action-danger { @apply text-red-700 hover:bg-red-50; }
+  .item-action-save { @apply bg-accent-soft; }
+  .competency-order-handle { @apply cursor-grab touch-none active:cursor-grabbing; }
+  tr[data-reordering] { @apply bg-accent-soft; }
+  .competency-code-cell {
+    width: calc(10ch + 2.25rem + 2px);
+    overflow-wrap: anywhere;
+  }
+  .competency-code-cell .inline-item-field { width: calc(10ch + 1rem + 2px); }
+  #kompetensi-baru .errorlist { @apply mt-1 text-sm text-red-700; }
+  .public-stage {
+    background: radial-gradient(ellipse at 80% 8%, var(--ox-accent-soft), transparent 52%), var(--ox-background);
+  }
+  .login-card {
+    @apply mx-auto max-w-md rounded-xl border border-line p-5 shadow-sm sm:p-8;
+    background: linear-gradient(var(--ox-muted-surface), var(--ox-surface) 34%);
+  }
+}
+
+:root {
+  --ox-accent: #1b5947;
+  --ox-accent-hover: #123d32;
+  --ox-accent-soft: #e1f0e8;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ox-accent: #a7ddc8;
+  --ox-accent-hover: #c4eedb;
+  --ox-accent-foreground: #123d32;
+  --ox-accent-soft: #263f3a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    color-scheme: dark;
+    --ox-accent: #a7ddc8;
+    --ox-accent-hover: #c4eedb;
+    --ox-accent-foreground: #123d32;
+    --ox-accent-soft: #263f3a;
+  }
+}
+
+.workspace[data-sidebar-open] {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+}
+
+.workspace[data-sidebar-open] .mobile-menu-fallback,
+.workspace[data-sidebar-open="false"] .sidebar {
+  display: none;
+}
+
+.workspace[data-sidebar-open] .sidebar-rail,
+.workspace[data-sidebar-open="true"] .sidebar {
+  display: block;
+}
+
+@media (min-width: 64rem) {
+  .workspace[data-sidebar-open="true"] {
+    grid-template-columns: 2.25rem 15.5rem minmax(0, 1fr);
+  }
+
+  .workspace[data-sidebar-open] .sidebar-toggle {
+    position: sticky;
+    top: 4rem;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .workspace[data-sidebar-open] .sidebar-rail {
+    border-bottom: 1px solid var(--ox-border);
+  }
+
+  .workspace[data-sidebar-open="false"] .sidebar-rail {
+    grid-column: 1 / -1;
+    border-inline-end: 0;
+  }
+
+  .workspace[data-sidebar-open="true"] .sidebar {
+    position: static;
+    min-height: 0;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--ox-border);
+  }
+
+  .workspace[data-sidebar-open] .workspace-main {
+    grid-column: 1 / -1;
+  }
+}

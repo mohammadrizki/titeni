@@ -1,0 +1,36 @@
+<tr id="kompetensi-baru" class="bg-paper"{% if not show_add %} hidden{% endif %}>
+  <td></td>
+  <td class="competency-code-cell">
+    <label class="sr-only" for="{{ add_form.code.id_for_label }}">Kode</label>
+    {{ add_form.code }}
+    {{ add_form.code.errors }}
+  </td>
+  <td class="min-w-48">
+    <label class="sr-only" for="{{ add_form.name.id_for_label }}">Nama</label>
+    {{ add_form.name }}
+    {{ add_form.name.errors }}
+    <label class="mt-2 block text-xs font-semibold text-muted" for="{{ add_form.description.id_for_label }}">Deskripsi (opsional)</label>
+    {{ add_form.description }}
+    {{ add_form.description.errors }}
+  </td>
+  <td class="min-w-32">
+    <label class="sr-only" for="{{ add_form.kind.id_for_label }}">Jenis</label>
+    {{ add_form.kind }}
+    {{ add_form.kind.errors }}
+  </td>
+  <td class="min-w-32">
+    <label class="sr-only" for="{{ add_form.parent.id_for_label }}">Induk (opsional)</label>
+    {{ add_form.parent }}
+    {{ add_form.parent.errors }}
+  </td>
+  <td>
+    <form id="competency-add-form" method="post" action="{% url 'competencies:add' program.pk version.pk %}">
+      {% csrf_token %}
+      {{ add_form.non_field_errors }}
+      <div class="flex justify-end gap-1 whitespace-nowrap">
+        <a class="item-action" title="Batal" aria-label="Batal" data-cancel-item href="{% url 'competencies:detail' program.pk version.pk %}">{% include "competencies/action_icon.html" with icon="cancel" only %}</a>
+        <button class="item-action item-action-save" type="submit" title="Simpan" aria-label="Simpan">{% include "competencies/action_icon.html" with icon="save" only %}</button>
+      </div>
+    </form>
+  </td>
+</tr>

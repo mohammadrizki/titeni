@@ -1,0 +1,75 @@
+{% extends "evidence/base.html" %}
+{% load static %}
+{% block title %}Versi {{ version.number }} · {{ application_name }}{% endblock %}
+{% block content %}
+<a class="text-sm font-semibold text-accent" href="{% url 'competencies:index' program.pk %}">← Semua versi</a>
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="heading">Kerangka kompetensi versi {{ version.number }}</h1>
+    <p class="mt-1 text-sm text-muted">{{ program.name }} · {% if version.published_at %}Terbit {{ version.published_at|date:"j M Y" }}{% else %}Draf{% endif %}</p>
+  </div>
+  {% if not version.published_at and items %}
+    <form method="post" action="{% url 'competencies:publish' program.pk version.pk %}">
+      {% csrf_token %}
+      <button class="button button-secondary" type="submit">Terbitkan dan kunci versi</button>
+    </form>
+  {% endif %}
+</div>
+<section class="panel" aria-labelledby="competency-items-heading">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="section-title" id="competency-items-heading">Butir kompetensi</h2>
+    {% if not version.published_at %}
+      <a class="button ml-auto" href="{% url 'competencies:add' program.pk version.pk %}#kompetensi-baru" data-add-item aria-controls="kompetensi-baru" aria-expanded="{% if show_add %}true{% else %}false{% endif %}">Tambah butir baru</a>
+    {% endif %}
+  </div>
+  {% if add_form and items %}
+    <form id="competency-order-form" method="post" action="{% url 'competencies:reorder' program.pk version.pk %}" hidden>
+      {% csrf_token %}
+    </form>
+    <p class="sr-only" id="competency-order-help">Seret pegangan atau gunakan Panah Atas dan Bawah untuk mengurutkan.</p>
+    <p id="competency-order-feedback" class="text-sm text-muted" role="status"></p>
+  {% endif %}
+  <div class="table-wrap">
+    <table class="data-table" aria-labelledby="competency-items-heading">
+      <thead>
+        <tr>{% if add_form %}<th scope="col" class="w-10"><span class="sr-only">Urutan</span></th>{% endif %}<th scope="col" class="competency-code-cell">Kode</th><th scope="col">Nama</th><th scope="col">Jenis</th><th scope="col">Induk</th><th scope="col" class="text-right">Aksi</th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr{% if add_form %} data-competency-id="{{ item.pk|stringformat:'d' }}"{% endif %}>
+            {% if add_form %}
+              <td>
+                <button class="item-action competency-order-handle" type="button" data-order-handle title="Ubah urutan" aria-label="Ubah urutan {{ item.code }}" aria-describedby="competency-order-help">
+                  {% include "competencies/action_icon.html" with icon="reorder" only %}
+                </button>
+              </td>
+            {% endif %}
+            <td class="competency-code-cell">{{ item.code }}</td>
+            <td class="min-w-36 font-semibold">{{ item.name }}</td>
+            <td>{{ item.get_kind_display }}</td>
+            <td>{% if item.parent %}{{ item.parent }}{% else %}—{% endif %}</td>
+            <td>
+              <div class="flex justify-end gap-1 whitespace-nowrap">
+                <a class="item-action" title="Pratinjau" aria-label="Pratinjau {{ item.code }}" href="{% url 'competencies:preview' program.pk version.pk item.pk %}">{% include "competencies/action_icon.html" with icon="preview" only %}</a>
+                {% if not version.published_at %}
+                  <a class="item-action" title="Sunting" aria-label="Sunting {{ item.code }}" href="{% url 'competencies:edit' program.pk version.pk item.pk %}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+                  <a class="item-action item-action-danger" title="Hapus" aria-label="Hapus {{ item.code }}" href="{% url 'competencies:delete' program.pk version.pk item.pk %}">{% include "competencies/action_icon.html" with icon="delete" only %}</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="{% if add_form %}6{% else %}5{% endif %}" class="py-6 text-center text-muted">Belum ada butir kompetensi dalam versi ini.</td></tr>
+        {% endfor %}
+        {% if add_form %}
+          {% include "competencies/add_row.html" %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% if add_form %}
+  <script src="{% static 'titeni/competency-row.js' %}" defer></script>
+  {% if items %}<script src="{% static 'titeni/competency-order.js' %}" defer></script>{% endif %}
+{% endif %}
+{% endblock %}

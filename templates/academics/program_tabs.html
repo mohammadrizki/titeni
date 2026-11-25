@@ -1,0 +1,9 @@
+<nav class="academic-tabs mt-4{% if active %} academic-tabs-attached{% endif %}" data-academic-tabs aria-label="Bagian akademik {{ program.name }}">
+  <div class="academic-tabs-scroll" data-academic-tabs-scroll>
+    <a class="academic-tab" href="{% url 'academics:periods' program.pk %}"{% if active == 'periods' %} aria-current="page"{% endif %}>Periode akademik</a>
+    <a class="academic-tab" href="{% url 'academics:cohorts' program.pk %}"{% if active == 'cohorts' %} aria-current="page"{% elif active == 'enrollments' %} aria-current="location"{% endif %}>Kohort</a>
+    <a class="academic-tab" href="{% url 'academics:curricula' program.pk %}"{% if active == 'curricula' %} aria-current="page"{% elif active == 'curriculum_version' %} aria-current="location"{% endif %}>Kurikulum</a>
+    <a class="academic-tab" href="{% url 'academics:competencies:framework' program.pk %}"{% if active == 'framework' %} aria-current="page"{% elif active == 'draft' %} aria-current="location"{% endif %}>Kompetensi</a>
+    <a class="academic-tab" href="{% url 'academics:assessments:blueprints' program.pk %}"{% if active == 'blueprints' %} aria-current="page"{% elif active == 'blueprint_draft' %} aria-current="location"{% endif %}>Blueprint asesmen</a>
+  </div>
+</nav>

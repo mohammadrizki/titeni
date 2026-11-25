@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block title %}Masuk · Titeni{% endblock %}
+{% block content %}
+<section class="public-stage min-h-[calc(100svh-4rem)] px-4 py-12 sm:py-20">
+  <div class="login-card">
+    <h1 class="heading mb-6 text-center">Masuk ke Titeni</h1>
+    <form class="editor" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button class="button w-full" type="submit">Masuk</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

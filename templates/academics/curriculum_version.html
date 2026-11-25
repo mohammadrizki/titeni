@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% block title %}Draf kurikulum · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as breadcrumb_parent %}
+  {% url 'academics:curricula' program.pk as breadcrumb_section %}
+  {% include "core/breadcrumbs.html" with current="Draf kurikulum" parent_url=breadcrumb_parent parent_label="Akademik" section_url=breadcrumb_section section_label="Kurikulum" only %}
+  <h1 class="heading mt-3">Draf kurikulum</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ version.curriculum.name }} · Draf versi {{ version.number }}</p>
+  {% include "academics/program_tabs.html" with program=program active="curriculum_version" only %}
+  <div class="academic-tab-panel">
+    <h2 class="mt-4 font-semibold">Tahap kurikulum</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      {% include "core/add_row.html" with add_label="Tambah tahap kurikulum" %}
+    </form>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Kode tahap</th><th scope="col">Nama tahap</th></tr></thead>
+        <tbody>
+          {% for stage in stages %}
+            <tr><td>{{ stage.code }}</td><td>{{ stage.name }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Belum ada tahap kurikulum.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

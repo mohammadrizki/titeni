@@ -1,0 +1,13 @@
+{% extends "evidence/base.html" %}
+{% block title %}Draf bukti · {{ application_name }}{% endblock %}
+{% block content %}
+<div>
+  <h1 class="heading">Edit draf</h1>
+  <p class="mt-1 text-sm text-muted">{{ program.name }}</p>
+</div>
+<form class="panel editor" method="post">
+  {% csrf_token %}
+  {% include "evidence/requirement_fields.html" %}
+  <button class="button mt-4" type="submit">Simpan dan pratinjau</button>
+</form>
+{% endblock %}

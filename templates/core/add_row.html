@@ -1,0 +1,18 @@
+<details class="table-add-row"{% if form.errors %} open{% endif %}>
+  <summary class="button" aria-label="{{ add_label|default:'Tambah baris' }}" title="{{ add_label|default:'Tambah baris' }}">
+    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </summary>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr>{% for field in form %}<th scope="col">{{ field.label }}</th>{% endfor %}<th scope="col">Aksi</th></tr></thead>
+      <tbody><tr>
+        {% for field in form %}<td><label class="sr-only" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</td>{% endfor %}
+        <td><button class="button" type="submit">Simpan</button></td>
+      </tr></tbody>
+    </table>
+  </div>
+  {{ form.non_field_errors }}
+</details>

@@ -1,0 +1,19 @@
+{% extends "admin/base_site.html" %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Beranda</a> › <a href="{{ changelist_url }}">Peran pengguna</a> › {{ title }}</div>
+{% endblock %}
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <fieldset class="module aligned">
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="form-row">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+      </div>
+    {% endfor %}
+  </fieldset>
+  <div class="submit-row"><input class="default" type="submit" value="Berikan peran"></div>
+</form>
+{% endblock %}

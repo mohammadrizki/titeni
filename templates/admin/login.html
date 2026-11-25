@@ -1,0 +1,9 @@
+{% extends "admin/login.html" %}
+
+{% block content %}
+<section class="oxbow-admin-login" aria-labelledby="oxbow-admin-login-title">
+  <h1 id="oxbow-admin-login-title">Masuk ke Admin Titeni</h1>
+  {{ block.super }}
+  <a class="oxbow-admin-return" href="{% url 'evidence:home' %}">← Kembali ke Titeni</a>
+</section>
+{% endblock %}

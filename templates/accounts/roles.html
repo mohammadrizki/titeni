@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Peran &amp; Hak Akses · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Peran &amp; Hak Akses</h1>
+  <p class="mt-2">Matriks ini menyimpan konfigurasi peran. Akses pengguna diberikan melalui penugasan yang berlaku.</p>
+  {% if editing %}<a class="nav-link" href="{% url 'accounts:roles' %}">Batal sunting</a>{% endif %}
+  <form class="editor mt-4" method="post">
+    {% csrf_token %}
+    {% if not editing %}
+      <div class="flex justify-end">
+        <button class="button" type="button" data-inline-add data-inline-add-enhance aria-controls="role-form-row"
+                aria-expanded="true" aria-label="Tambah peran" title="Tambah peran" hidden>
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table role-matrix" aria-label="Matriks peran dan hak akses">
+        <thead><tr>
+          {% for field in form %}<th scope="col">{{ field.label }}</th>{% endfor %}
+          <th scope="col">Aksi</th>
+        </tr></thead>
+        <tbody>
+          <tr id="role-form-row"{% if form.errors %} data-inline-add-open{% endif %}>
+            {% for field in form %}
+              <td{% if field.name == 'name' %} class="role-name-cell"{% endif %}>
+                {% if field.use_fieldset %}
+                  <fieldset>
+                    <legend class="role-field-label">{{ field.label }}</legend>
+                    {{ field }}{{ field.errors }}
+                  </fieldset>
+                {% else %}
+                  <label class="role-field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}{{ field.errors }}
+                {% endif %}
+              </td>
+            {% endfor %}
+            <td>
+              {{ form.non_field_errors }}
+              {% include "accounts/role_actions.html" with role=editing editing=True only %}
+            </td>
+          </tr>
+          {% for role in roles %}
+            <tr>
+              <th scope="row">{{ role.name }}</th>
+              <td>
+                {% regroup role.permissions.all by content_type.app_label as permission_groups %}
+                {% for group in permission_groups %}
+                  <details class="permission-details">
+                    <summary>{% if group.grouper == "academics" %}Academic{% elif group.grouper == "accounts" %}Accounts{% else %}{{ group.grouper|title }}{% endif %}</summary>
+                    <ul class="permission-options">{% for permission in group.list %}<li>{{ permission.name }}</li>{% endfor %}</ul>
+                  </details>
+                {% empty %}
+                  Belum ada hak akses.
+                {% endfor %}
+              </td>
+              <td>{{ role.get_scope_display }}</td>
+              <td>{% include "accounts/role_actions.html" with role=role only %}</td>
+            </tr>
+          {% empty %}
+            {% if not editing %}<tr><td colspan="4">Belum ada peran.</td></tr>{% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+  <script src="{% static 'titeni/inline-add-row.js' %}" defer></script>
+  <script src="{% static 'titeni/permission-groups.js' %}" defer></script>
+</section>
+{% endblock %}

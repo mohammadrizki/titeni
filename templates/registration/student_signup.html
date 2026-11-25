@@ -1,0 +1,14 @@
+{% extends "evidence/base.html" %}
+{% block title %}Daftar sebagai mahasiswa · {{ application_name }}{% endblock %}
+{% block content %}
+<section class="public-wrap py-8">
+  <form class="panel editor" method="post">
+    <h1 class="heading">Daftar sebagai mahasiswa</h1>
+    <p>Akun dapat digunakan setelah disetujui oleh Admin Program Studi.</p>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Kirim pendaftaran</button>
+    <a class="button button-secondary" href="{% url 'login' %}">Masuk</a>
+  </form>
+</section>
+{% endblock %}

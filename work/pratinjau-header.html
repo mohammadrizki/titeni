@@ -1,0 +1,63 @@
+<style>
+  #titeni-header-preview {
+    display: grid;
+    gap: 16px;
+  }
+  #titeni-header-preview figure { margin: 0; }
+  #titeni-header-preview figcaption { margin-bottom: 6px; }
+  #titeni-header-preview .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+    padding-inline: 16px;
+    background-color: #123d32;
+    color: #fff;
+  }
+  #titeni-header-preview .proposed {
+    background-image: repeating-radial-gradient(
+      ellipse 190px 95px at 100% -46px,
+      transparent 0 18px,
+      rgb(189 234 207 / 16%) 19px,
+      transparent 20px 31px
+    );
+  }
+  #titeni-header-preview .group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #titeni-header-preview .mark,
+  #titeni-header-preview .avatar {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+  }
+  #titeni-header-preview .mark {
+    border-radius: 8px;
+    background: #d9efe4;
+    color: #123d32;
+    font-weight: 500;
+  }
+  #titeni-header-preview .avatar {
+    border-radius: 50%;
+    background: rgb(255 255 255 / 14%);
+  }
+</style>
+<div id="titeni-header-preview">
+  <figure>
+    <figcaption>Saat ini</figcaption>
+    <div class="masthead">
+      <span class="group"><span class="mark" aria-hidden="true">T</span>Titeni</span>
+      <span class="group"><span class="avatar"><i data-lucide="user" aria-hidden="true"></i></span><i data-lucide="monitor" aria-hidden="true"></i></span>
+    </div>
+  </figure>
+  <figure>
+    <figcaption>Usulan · garis halus</figcaption>
+    <div class="masthead proposed">
+      <span class="group"><span class="mark" aria-hidden="true">T</span>Titeni</span>
+      <span class="group"><span class="avatar"><i data-lucide="user" aria-hidden="true"></i></span><i data-lucide="monitor" aria-hidden="true"></i></span>
+    </div>
+  </figure>
+</div>

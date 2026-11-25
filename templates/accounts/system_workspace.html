@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% block title %}Administrasi Sistem · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% include "core/breadcrumbs.html" with current="Administrasi Sistem" only %}
+  <h1 class="heading">Administrasi Sistem</h1>
+  {% if perms.accounts.view_user %}
+    <p class="mt-4"><a class="button" href="{% url 'accounts:directory' %}">Pengguna</a></p>
+  {% endif %}
+  {% if perms.academics.change_institution %}
+    <p class="mt-4"><a class="button" href="{% url 'academics:faculty' %}">Profil Fakultas</a></p>
+  {% endif %}
+  {% if perms.academics.add_studyprogram %}
+    <p class="mt-4"><a class="button" href="{% url 'academics:register_program' %}">Program Studi</a></p>
+  {% endif %}
+  {% if perms.accounts.add_programconfigurationgrant %}
+    <p class="mt-4"><a class="button" href="{% url 'accounts:program_grants' %}">Penugasan</a></p>
+  {% endif %}
+  {% if user.is_superuser %}
+    <p class="mt-4"><a class="button" href="{% url 'accounts:roles' %}">Peran &amp; Hak Akses</a></p>
+  {% endif %}
+</section>
+{% endblock %}

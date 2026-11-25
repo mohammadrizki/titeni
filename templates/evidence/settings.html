@@ -1,0 +1,23 @@
+{% extends "evidence/base.html" %}
+{% block title %}Profil prodi · {{ application_name }}{% endblock %}
+{% block content %}
+<h1 class="heading">Profil prodi</h1>
+<dl class="panel grid gap-4 sm:grid-cols-2">
+  <div>
+    <dt class="text-sm text-muted">Nama program studi</dt>
+    <dd class="mt-1 font-semibold">{{ program.name }}</dd>
+  </div>
+  <div>
+    <dt class="text-sm text-muted">Jenjang pendidikan</dt>
+    <dd class="mt-1 font-semibold">{{ program.get_education_stage_display|default:"Belum ditetapkan" }}</dd>
+  </div>
+  <div>
+    <dt class="text-sm text-muted">Kode prodi</dt>
+    <dd class="mt-1 font-semibold">{{ program.code }}</dd>
+  </div>
+  <div>
+    <dt class="text-sm text-muted">Fakultas</dt>
+    <dd class="mt-1 font-semibold">{{ program.institution }}</dd>
+  </div>
+</dl>
+{% endblock %}

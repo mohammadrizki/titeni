@@ -1,0 +1,20 @@
+<dl class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(7rem,auto)]">
+  <div class="rounded-lg bg-paper px-3 py-2">
+    <dt class="text-xs text-muted">Jenis artefak</dt>
+    <dd class="mt-1 font-semibold wrap-anywhere">{{ item.artifact_type }}</dd>
+  </div>
+  <div class="rounded-lg border-l-4 border-accent bg-paper px-3 py-2">
+    <dt class="text-xs text-muted">Jumlah minimum</dt>
+    <dd class="mt-1 text-xl font-bold tabular-nums text-accent">{{ item.minimum_count }}</dd>
+  </div>
+  {% if item.source %}
+  <div class="sm:col-span-2">
+    <dt class="text-sm font-semibold">Sumber</dt>
+    <dd class="mt-1 text-sm wrap-anywhere">{{ item.source }}</dd>
+  </div>
+  {% endif %}
+  <div class="sm:col-span-2">
+    <dt class="text-sm font-semibold">Kriteria kecukupan</dt>
+    <dd class="mt-1 text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap text-muted">{{ item.criteria }}</dd>
+  </div>
+</dl>

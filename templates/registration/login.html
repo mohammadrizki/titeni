@@ -1,0 +1,18 @@
+{% extends "evidence/base.html" %}
+{% block title %}Masuk · {{ application_name }}{% endblock %}
+{% block content %}
+<section class="public-stage min-h-[calc(100svh-4rem)] px-4 py-12 sm:py-20">
+  <div class="login-card">
+    <div class="mb-6 text-center">
+      <h1 class="heading">Masuk ke {{ application_name }}</h1>
+    </div>
+    <form class="editor" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button class="button w-full" type="submit">Masuk</button>
+      <p class="mt-4 text-center"><a class="underline" href="{% url 'student-signup' %}">Daftar sebagai mahasiswa</a></p>
+    </form>
+  </div>
+</section>
+{% endblock %}

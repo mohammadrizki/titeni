@@ -1,0 +1,18 @@
+{% if item.learning_stage or item.learning_objective %}
+  <div class="mb-3 text-sm">
+    {% if item.learning_stage %}<p class="font-semibold text-accent">{{ item.learning_stage }}</p>{% endif %}
+    {% if item.learning_objective %}<p class="mt-1 whitespace-pre-wrap wrap-anywhere text-muted">{{ item.learning_objective }}</p>{% endif %}
+  </div>
+{% endif %}
+{% with competencies=item.competencies.all %}
+  {% if competencies %}
+    <div class="mb-3 text-sm">
+      <p class="font-semibold">Butir kompetensi prodi</p>
+      <ul>
+        {% for competency in competencies %}
+          <li>{{ competency }} · v{{ competency.version.number }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}

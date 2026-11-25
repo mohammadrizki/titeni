@@ -1,0 +1,87 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Pengguna · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as breadcrumb_parent %}
+  {% include "core/breadcrumbs.html" with current="Pengguna" parent_url=breadcrumb_parent parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Pengguna</h1>
+  <form class="editor mt-4" method="post">
+    {% csrf_token %}
+    {% if form and not editing %}
+      <div class="flex justify-end">
+        <button class="button" type="button" data-inline-add data-inline-add-enhance aria-controls="account-form-row"
+                aria-expanded="true" aria-label="Tambah pengguna" title="Tambah pengguna" hidden>
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr>
+          <th scope="col">Nama pengguna</th>
+          <th scope="col">Email</th>
+          <th scope="col">Peran</th>
+          <th scope="col">Status</th>
+          {% if user.is_superuser %}<th scope="col">Aksi</th>{% endif %}
+        </tr></thead>
+        <tbody>
+          {% if form %}
+            <tr id="account-form-row"{% if form.errors %} data-inline-add-open{% endif %}>
+              <td>
+                {{ form.username.label_tag }}{{ form.username }}{{ form.username.errors }}
+                {% if form.password1 %}
+                  <div>{{ form.password1.label_tag }}{{ form.password1 }}{{ form.password1.errors }}</div>
+                  <div>{{ form.password2.label_tag }}{{ form.password2 }}{{ form.password2.errors }}</div>
+                {% endif %}
+                {{ form.non_field_errors }}
+              </td>
+              <td>{{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}</td>
+              <td>{% if editing %}{% include "accounts/account_roles.html" with account=editing only %}{% else %}—{% endif %}</td>
+              <td>{{ form.is_active }} {{ form.is_active.label_tag }}{{ form.is_active.errors }}</td>
+              <td>
+                <button class="item-action item-action-save" type="submit" title="Simpan" aria-label="Simpan pengguna">{% include "competencies/action_icon.html" with icon="save" only %}</button>
+                {% if editing %}<a class="item-action" href="{% url 'accounts:directory' %}" title="Batal" aria-label="Batal">{% include "competencies/action_icon.html" with icon="cancel" only %}</a>{% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% for account in page %}
+            <tr>
+              <td>{{ account.username }}</td>
+              <td>{{ account.email|default:"—" }}</td>
+              <td>{% include "accounts/account_roles.html" with account=account only %}</td>
+              <td>{{ account.is_active|yesno:"Aktif,Nonaktif" }}</td>
+              {% if user.is_superuser %}
+                <td>
+                  <div class="flex gap-1">
+                    <a class="item-action" href="?sunting={{ account.pk }}" title="Sunting" aria-label="Sunting {{ account.username }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+                    <a class="item-action" href="{% url 'accounts:reset_account_password' account.pk %}" title="Reset kata sandi" aria-label="Reset kata sandi {{ account.username }}">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 10a5 5 0 1 0-4 4l-5 5v2h3v-2h2v-2h2l3-3"/><circle cx="17" cy="7" r="1"/></svg>
+                    </a>
+                    <a class="item-action" href="{% url 'accounts:assign_roles' account.pk %}" title="Tambah peran" aria-label="Tambah peran untuk {{ account.username }}">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    </a>
+                    {% if not account.is_superuser %}
+                      <a class="item-action item-action-danger" href="{% url 'accounts:delete_account' account.pk %}" title="Hapus" aria-label="Hapus {{ account.username }}">{% include "competencies/action_icon.html" with icon="delete" only %}</a>
+                    {% endif %}
+                  </div>
+                </td>
+              {% endif %}
+            </tr>
+          {% empty %}
+            {% if not editing %}<tr><td colspan="{% if user.is_superuser %}5{% else %}4{% endif %}">Belum ada akun.</td></tr>{% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+  {% if page.has_other_pages and not editing %}
+    <nav class="mt-4 flex items-center gap-3" aria-label="Halaman daftar akun">
+      {% if page.has_previous %}<a class="nav-link" href="?page={{ page.previous_page_number }}">Sebelumnya</a>{% endif %}
+      <span>Halaman {{ page.number }} dari {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a class="nav-link" href="?page={{ page.next_page_number }}">Selanjutnya</a>{% endif %}
+    </nav>
+  {% endif %}
+  {% if user.is_superuser %}<script src="{% static 'titeni/inline-add-row.js' %}" defer></script>{% endif %}
+</section>
+{% endblock %}

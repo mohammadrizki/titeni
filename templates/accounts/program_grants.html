@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% block title %}Penugasan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as breadcrumb_parent %}
+  {% include "core/breadcrumbs.html" with current="Penugasan" parent_url=breadcrumb_parent parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Penugasan</h1>
+  <form class="editor mt-4" method="post">
+    {% csrf_token %}
+    {% include "core/add_row.html" with add_label="Tambah penugasan prodi" %}
+  </form>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Akun</th><th scope="col">Program studi</th><th scope="col">Mulai</th><th scope="col">Selesai</th><th scope="col">Aksi</th></tr></thead>
+      <tbody>
+        {% for grant in page %}
+          <tr>
+            <td>{{ grant.account.username }}</td><td>{{ grant.program.name }}</td>
+            <td>{{ grant.starts_on|date:"d M Y" }}</td><td>{{ grant.ends_on|date:"d M Y" }}</td>
+            <td>
+              {% if grant.revoked_at %}
+                Dicabut
+              {% elif perms.accounts.change_programconfigurationgrant %}
+                <form method="post" action="{% url 'accounts:revoke_program_grant' grant.pk %}">
+                  {% csrf_token %}
+                  <button class="nav-link" type="submit">Cabut penugasan</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Belum ada penugasan.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="mt-4 flex items-center gap-3" aria-label="Halaman penugasan">
+      {% if page.has_previous %}<a class="nav-link" href="?page={{ page.previous_page_number }}">Sebelumnya</a>{% endif %}
+      <span>Halaman {{ page.number }} dari {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a class="nav-link" href="?page={{ page.next_page_number }}">Selanjutnya</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

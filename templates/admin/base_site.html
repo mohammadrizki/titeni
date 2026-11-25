@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} · {% endif %}{{ title }} · Titeni Admin{% endblock %}
+
+{% block responsive %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'titeni/admin.css' %}?v=oxbow-3">
+{% endblock %}
+
+{% block branding %}
+  <div id="site-name">
+    <a class="titeni-admin-brand" href="{% url 'admin:index' %}">
+      <span class="titeni-admin-mark" aria-hidden="true">T</span>
+      <span>Titeni <small>Admin</small>{% if faculty_name %}<span class="titeni-admin-faculty">{{ faculty_name }}</span>{% endif %}</span>
+    </a>
+  </div>
+  {% if user.is_anonymous %}
+    {% include "admin/color_theme_toggle.html" %}
+  {% endif %}
+{% endblock %}
+
+{% block nav-global %}
+  {% if has_permission %}
+    <details class="titeni-admin-mobile">
+      <summary>Menu admin</summary>
+      <nav aria-label="Menu admin">
+        {% include "admin/titeni_nav_links.html" %}
+      </nav>
+    </details>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,391 @@
+@import "./oxbow.css";
+
+/* Use the same Oxbow palette with Django's existing light, dark, and auto modes. */
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --primary: var(--ox-accent);
+  --secondary: var(--ox-accent);
+  --accent: var(--ox-accent);
+  --primary-fg: var(--ox-accent-foreground);
+  --body-bg: var(--ox-background);
+  --body-fg: var(--ox-foreground);
+  --body-quiet-color: var(--ox-muted-foreground);
+  --body-medium-color: var(--ox-muted-foreground);
+  --body-loud-color: var(--ox-foreground);
+  --header-bg: var(--ox-surface);
+  --header-color: var(--ox-foreground);
+  --header-link-color: var(--ox-foreground);
+  --header-branding-color: var(--ox-foreground);
+  --breadcrumbs-bg: var(--ox-surface);
+  --breadcrumbs-fg: var(--ox-muted-foreground);
+  --breadcrumbs-link-fg: var(--ox-accent);
+  --link-fg: var(--ox-accent);
+  --link-hover-color: var(--ox-accent-hover);
+  --link-selected-fg: var(--link-fg);
+  --hairline-color: var(--ox-border);
+  --border-color: var(--ox-border);
+  --darkened-bg: var(--ox-muted-surface);
+  --selected-bg: var(--ox-accent-soft);
+  --selected-row: var(--ox-accent-soft);
+  --button-fg: var(--ox-accent-foreground);
+  --button-bg: var(--ox-accent);
+  --button-hover-bg: var(--ox-accent-hover);
+  --default-button-bg: var(--ox-accent);
+  --default-button-hover-bg: var(--ox-accent-hover);
+  --object-tools-bg: var(--ox-accent);
+  --object-tools-hover-bg: var(--ox-accent-hover);
+  --font-family-primary: var(--ox-font);
+}
+
+#header {
+  position: relative;
+  z-index: 25;
+  box-sizing: border-box;
+  min-height: 4rem;
+  gap: .6rem 1rem;
+  border-bottom: 1px solid var(--ox-border);
+}
+
+#branding {
+  flex-wrap: wrap;
+  gap: .5rem;
+  min-width: 0;
+}
+
+#site-name {
+  display: flex;
+  margin: 0;
+}
+
+.titeni-admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+.titeni-admin-brand small,
+.titeni-admin-faculty {
+  color: var(--ox-muted-foreground);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.titeni-admin-faculty {
+  display: block;
+  margin-top: .12rem;
+  overflow-wrap: anywhere;
+}
+
+.titeni-admin-mark {
+  display: inline-grid;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: .5rem;
+  background: var(--ox-accent);
+  color: var(--ox-accent-foreground);
+  line-height: 1;
+}
+
+div.breadcrumbs {
+  border-bottom: 1px solid var(--ox-border);
+}
+
+#content h1 {
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+#nav-sidebar,
+.toggle-nav-sidebar {
+  background: var(--ox-surface);
+}
+
+#nav-filter,
+fieldset.module,
+.submit-row,
+#content input[type="text"],
+#content input[type="password"],
+#content input[type="email"],
+#content textarea,
+#content select {
+  border-radius: .5rem;
+}
+
+#content-main,
+#changelist {
+  min-width: 0;
+}
+
+#changelist .results {
+  overflow-x: auto;
+  border: 1px solid var(--ox-border);
+  border-radius: .75rem;
+  background: var(--ox-surface);
+}
+
+#nav-sidebar .current-app .section:link,
+#nav-sidebar .current-app .section:visited {
+  color: var(--ox-accent);
+}
+
+#content :is(a, button, input, select, textarea):focus-visible,
+#header :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--ox-accent);
+  outline-offset: 3px;
+}
+
+.titeni-admin-page-head {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+#content .titeni-admin-page-head h1 {
+  margin: 0;
+  color: var(--ox-foreground);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.titeni-admin-page-head a:link,
+.titeni-admin-page-head a:visited {
+  padding: .5rem .75rem;
+  border: 1px solid var(--ox-border);
+  border-radius: .5rem;
+  background: var(--ox-surface);
+  font-weight: 650;
+}
+
+.titeni-dashboard-nav {
+  position: sticky;
+  top: 0;
+  box-sizing: border-box;
+  flex: 0 0 248px;
+  align-self: flex-start;
+  min-height: calc(100vh - 4rem);
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 1rem;
+  border-inline-end: 1px solid var(--ox-border);
+  background: var(--ox-surface);
+}
+
+.titeni-dashboard-nav + .content {
+  min-width: 0;
+}
+
+.titeni-admin-mobile {
+  display: none;
+}
+
+.admin-nav-group + .admin-nav-group {
+  margin-top: .7rem;
+}
+
+.titeni-admin-nav-label {
+  margin: .85rem .55rem .25rem;
+  color: var(--ox-muted-foreground);
+  font-size: .76rem;
+  font-weight: 600;
+}
+
+.titeni-admin-nav-link:link,
+.titeni-admin-nav-link:visited,
+#header .titeni-admin-nav-link:link,
+#header .titeni-admin-nav-link:visited {
+  display: block;
+  padding: .48rem .6rem;
+  border-radius: .5rem;
+  color: var(--ox-foreground);
+}
+
+.titeni-admin-nav-link:hover,
+.titeni-admin-nav-link[aria-current="page"] {
+  background: var(--ox-accent-soft);
+}
+
+.dashboard #content.colMS {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, .42fr);
+  align-items: start;
+  gap: 1rem;
+  width: auto;
+  margin: 0;
+  padding: clamp(1rem, 3vw, 1.8rem);
+}
+
+.dashboard #content-main,
+.dashboard #content-related {
+  box-sizing: border-box;
+  float: none;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.dashboard #content-related {
+  overflow: hidden;
+  border: 1px solid var(--ox-border);
+  border-radius: .75rem;
+  background: var(--ox-surface);
+}
+
+.dashboard #content > br.clear {
+  display: none;
+}
+
+.office-module h2 a {
+  color: var(--ox-foreground);
+}
+
+.admin-module-add:link,
+.admin-module-add:visited {
+  padding: .25rem .45rem;
+  border-radius: .4rem;
+  background: var(--ox-accent-soft);
+  color: var(--ox-accent);
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+body.login {
+  background: radial-gradient(ellipse at 80% 8%, var(--ox-accent-soft), transparent 52%), var(--ox-background);
+}
+
+.login #container {
+  width: min(28rem, calc(100% - 2rem));
+  min-width: 0;
+  margin: clamp(1.5rem, 10vh, 6rem) auto;
+  border-radius: .85rem;
+  background: linear-gradient(var(--ox-muted-surface), var(--ox-surface) 34%);
+  box-shadow: 0 8px 28px #1d203012;
+}
+
+.login #header {
+  justify-content: flex-start;
+  padding: 1rem 1.35rem;
+  background: transparent;
+}
+
+.login #content {
+  padding: clamp(1rem, 5vw, 2rem);
+}
+
+.login .form-row input {
+  border-color: var(--ox-border);
+  background: var(--ox-surface);
+  color: var(--ox-foreground);
+}
+
+.login .submit-row input {
+  width: 100%;
+  min-height: 2.5rem;
+  border-radius: .5rem;
+  font-weight: 650;
+}
+
+@media (max-width: 1000px) {
+  .dashboard #content.colMS {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  #header {
+    flex-wrap: wrap;
+  }
+
+  .titeni-dashboard-nav {
+    display: none;
+  }
+
+  .titeni-admin-mobile {
+    position: relative;
+    display: block;
+  }
+
+  .titeni-admin-mobile summary {
+    padding: .45rem .6rem;
+    border: 1px solid var(--ox-border);
+    border-radius: .5rem;
+    cursor: pointer;
+  }
+
+  .titeni-admin-mobile nav {
+    position: absolute;
+    z-index: 30;
+    inset-inline-end: 0;
+    box-sizing: border-box;
+    width: min(16rem, 85vw);
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: .65rem;
+    border: 1px solid var(--ox-border);
+    border-radius: .55rem;
+    background: var(--ox-surface);
+    box-shadow: 0 8px 24px #1d203033;
+  }
+}
+
+.oxbow-admin-login {
+  display: flow-root;
+}
+
+#content .oxbow-admin-login h1 {
+  margin: 0 0 1.25rem;
+  color: var(--ox-foreground);
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
+}
+
+.oxbow-admin-return:link,
+.oxbow-admin-return:visited {
+  display: inline-block;
+  margin-top: 1.25rem;
+  color: var(--ox-accent);
+  font-weight: 600;
+}
+
+.login #login-form .form-row {
+  padding-block: .35rem;
+}
+
+.login #login-form .form-row label {
+  font-weight: 600;
+}
+
+#nav-sidebar #nav-filter {
+  width: calc(100% - 1.5rem);
+  margin: .75rem;
+  padding: .5rem .65rem;
+}
+
+#nav-sidebar .module {
+  margin: 0 .65rem .75rem;
+  border: 1px solid var(--ox-border);
+  border-radius: .65rem;
+  background: var(--ox-surface);
+}
+
+#nav-sidebar .module caption {
+  padding: .55rem .6rem;
+  border-bottom: 1px solid var(--ox-border);
+  background: var(--ox-muted-surface);
+  color: var(--ox-muted-foreground);
+  font-size: .75rem;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+#nav-sidebar .module :is(th, td) {
+  padding: .48rem .6rem;
+}

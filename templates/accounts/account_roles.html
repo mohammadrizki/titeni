@@ -1,0 +1,13 @@
+{% with groups=account.groups.all assignments=account.role_assignments.all %}
+  {% if account.is_superuser or groups or assignments %}
+    <ul>
+      {% if account.is_superuser %}<li>Superuser</li>{% endif %}
+      {% for group in groups %}<li>{{ group.name }}</li>{% endfor %}
+      {% for assignment in assignments %}
+        <li>{{ assignment.role.name }}{% if assignment.program %} · {{ assignment.program.name }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    —
+  {% endif %}
+{% endwith %}

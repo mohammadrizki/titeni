@@ -1,0 +1,116 @@
+{
+  "schema": "elogbook-ppds1-ika-unram/0.1",
+  "exported_at": "2026-11-19T12:00:00+08:00",
+  "periode": "Ganjil 2026/2027",
+  "program": {
+    "kode": "PPDS1-IKA",
+    "institusi": "FKIK Universitas Mataram",
+    "wahana": "RSUD Provinsi NTB"
+  },
+  "residen": {
+    "nim": "PPDS1-2025-1-01",
+    "nama": "dr. Ayu Lestari",
+    "angkatan": "Angkatan I (Agustus 2025)",
+    "semester": 3,
+    "kelompok": 1,
+    "dpa_nip": "198407202012121001"
+  },
+  "logbook": [
+    {
+      "id": "e248",
+      "tanggal": "2026-11-17",
+      "jenis": "pasien",
+      "rotasi": "Blok C: Tumbuh Kembang dan Pediatri Sosial",
+      "divisi": "tkps",
+      "unit": "Poliklinik anak",
+      "diagnosis_icd10": "G80.9",
+      "tindakan": null,
+      "tingkat_kolegium": 3,
+      "status": "menunggu",
+      "verifikator_nip": "198709092015042001",
+      "persetujuan": "qr",
+      "pasien": {
+        "token": "enc:NDEyODg1fFouTi4…",
+        "usia": "11 tahun",
+        "jk": "L"
+      }
+    },
+    {
+      "id": "e246",
+      "tanggal": "2026-11-14",
+      "jenis": "tindakan",
+      "rotasi": "Blok C: Tumbuh Kembang dan Pediatri Sosial",
+      "divisi": "tkps",
+      "unit": "Bangsal anak",
+      "diagnosis_icd10": "Z00.1",
+      "tindakan": "Skrining perkembangan (KPSP/Denver II)",
+      "tingkat_kolegium": 2,
+      "status": "terverifikasi",
+      "verifikator_nip": "198709092015042001",
+      "persetujuan": "menunggu",
+      "pasien": {
+        "token": "enc:ODE0OTY5fFcuTS4…",
+        "usia": "8 bulan",
+        "jk": "L"
+      }
+    }
+  ],
+  "asesmen": [
+    {
+      "id": "w251",
+      "jenis": "CBD",
+      "tanggal": "2026-11-09",
+      "nilai": 70,
+      "epa": "epa5",
+      "entrustment": 3,
+      "penilai_nip": "198709092015042001"
+    },
+    {
+      "id": "w250",
+      "jenis": "DOPS",
+      "tanggal": "2026-11-08",
+      "nilai": 86,
+      "epa": "epa5",
+      "entrustment": 2,
+      "penilai_nip": "198709092015042001"
+    }
+  ],
+  "capaian": [
+    {
+      "keterampilan": "Resusitasi neonatus",
+      "target_tingkat": 4,
+      "target_jumlah": 10,
+      "tercapai": 2
+    },
+    {
+      "keterampilan": "Pemasangan akses vena perifer",
+      "target_tingkat": 4,
+      "target_jumlah": 25,
+      "tercapai": 1
+    },
+    {
+      "keterampilan": "Pungsi lumbal",
+      "target_tingkat": 3,
+      "target_jumlah": 5,
+      "tercapai": 7
+    },
+    {
+      "keterampilan": "Pemberian imunisasi",
+      "target_tingkat": 3,
+      "target_jumlah": 20,
+      "tercapai": 0
+    },
+    {
+      "keterampilan": "Skrining perkembangan (KPSP/Denver II)",
+      "target_tingkat": 4,
+      "target_jumlah": 15,
+      "tercapai": 0
+    },
+    {
+      "keterampilan": "Antropometri dan plot kurva pertumbuhan",
+      "target_tingkat": 4,
+      "target_jumlah": 30,
+      "tercapai": 0
+    }
+  ]
+}

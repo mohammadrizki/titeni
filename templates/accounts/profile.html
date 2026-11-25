@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block title %}Profil saya · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% include "core/breadcrumbs.html" with current="Profil saya" only %}
+  <h1 class="heading">Profil saya</h1>
+  <form class="editor mt-4" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Simpan profil</button>
+    <a class="nav-link" href="{% url 'profile:change_password' %}">Ubah kata sandi</a>
+  </form>
+</section>
+{% endblock %}

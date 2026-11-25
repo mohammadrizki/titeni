@@ -1,0 +1,15 @@
+{% extends "evidence/base.html" %}
+{% block title %}Pratinjau butir · {{ application_name }}{% endblock %}
+{% block content %}
+<a class="text-sm font-semibold text-accent" href="{% url 'competencies:detail' program.pk version.pk %}">← Kembali ke tabel butir</a>
+<div>
+  <h1 class="heading">{{ item.name }}</h1>
+  <p class="mt-1 text-sm text-muted">{{ program.name }} · Versi {{ version.number }}</p>
+</div>
+<dl class="panel grid gap-4 sm:grid-cols-2">
+  <div><dt class="text-sm text-muted">Kode</dt><dd class="font-semibold">{{ item.code }}</dd></div>
+  <div><dt class="text-sm text-muted">Jenis</dt><dd>{{ item.get_kind_display }}</dd></div>
+  <div><dt class="text-sm text-muted">Induk</dt><dd>{{ item.parent|default:"—" }}</dd></div>
+  <div class="sm:col-span-2"><dt class="text-sm text-muted">Deskripsi</dt><dd class="whitespace-pre-wrap wrap-anywhere">{{ item.description|default:"—" }}</dd></div>
+</dl>
+{% endblock %}

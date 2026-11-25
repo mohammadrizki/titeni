@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% block title %}Pendaftaran mahasiswa · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto px-4 py-12">
+  {% url 'academics:programs' as academic_url %}
+  {% url 'academics:cohorts' program.pk as cohort_url %}
+  {% include "core/breadcrumbs.html" with current="Pendaftaran mahasiswa" parent_url=academic_url parent_label="Akademik" section_url=cohort_url section_label="Kohort" only %}
+  <h1 class="heading mt-3">Pendaftaran mahasiswa</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  <p class="mt-2">{{ cohort.name }} · {{ cohort.period.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="enrollments" only %}
+  <div class="academic-tab-panel">
+    {% if form %}<form class="editor mt-4" method="post">{% csrf_token %}{% include "core/add_row.html" with add_label="Tambah pendaftaran mahasiswa" %}</form>{% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Nama pengguna</th><th scope="col">Tanggal pendaftaran</th></tr></thead>
+        <tbody>
+          {% for enrollment in enrollments %}
+            <tr><td>{{ enrollment.learner.account.username }}</td><td>{{ enrollment.enrolled_on|date:"d M Y" }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Belum ada mahasiswa terdaftar.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

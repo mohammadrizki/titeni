@@ -1,0 +1,85 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Program Studi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as breadcrumb_parent %}
+  {% include "core/breadcrumbs.html" with current="Program Studi" parent_url=breadcrumb_parent parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Program Studi</h1>
+  {% if institution %}
+    <h2 class="mt-4 font-semibold" id="program-faculty">{{ institution.name }}</h2>
+    <form class="editor mt-4" method="post">
+      {% csrf_token %}
+      {% if not editing %}<div class="flex justify-end">
+        <button class="button" type="button" data-inline-add data-inline-add-enhance
+                aria-controls="new-program-row" aria-expanded="true"
+                aria-label="Tambah program studi" title="Tambah program studi" hidden>
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </button>
+      </div>{% endif %}
+      <div class="table-wrap mt-4">
+        <table class="data-table" aria-labelledby="program-faculty">
+          <thead>
+            <tr>
+              {% for field in form %}<th scope="col">{{ field.label }}</th>{% endfor %}
+              <th scope="col">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="new-program-row"{% if form.errors %} data-inline-add-open{% endif %}>
+              {% for field in form %}
+                <td>
+                  <label class="sr-only" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  {{ field }}{{ field.errors }}
+                </td>
+              {% endfor %}
+              <td>
+                {{ form.non_field_errors }}
+                {% if editing %}
+                  <a class="item-action" href="?sunting={{ editing.pk }}" title="Sunting" aria-label="Sunting {{ editing.code }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+                  {% if perms.academics.delete_studyprogram %}
+                    <a class="item-action item-action-danger" href="{% url 'academics:delete_program' editing.pk %}" title="Hapus" aria-label="Hapus {{ editing.code }}">{% include "competencies/action_icon.html" with icon="delete" only %}</a>
+                  {% endif %}
+                {% endif %}
+                <button class="item-action item-action-save" type="submit" aria-label="Simpan program studi" title="Simpan">
+                  {% include "competencies/action_icon.html" with icon="save" only %}
+                </button>
+              </td>
+            </tr>
+            {% for program in programs %}
+              <tr>
+                <td>{{ program.code }}</td>
+                <td>{{ program.name }}</td>
+                <td>{{ program.get_education_stage_display }}</td>
+                <td>
+                  <div class="flex gap-1">
+                    {% if perms.academics.change_studyprogram %}
+                      <a class="item-action" href="?sunting={{ program.pk }}" title="Sunting" aria-label="Sunting {{ program.code }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+                    {% endif %}
+                    {% if perms.academics.delete_studyprogram %}
+                      <a class="item-action item-action-danger" href="{% url 'academics:delete_program' program.pk %}" title="Hapus" aria-label="Hapus {{ program.code }}">{% include "competencies/action_icon.html" with icon="delete" only %}</a>
+                    {% endif %}
+                    {% if perms.academics.change_studyprogram %}
+                      <span title="Simpan">
+                        <button class="item-action item-action-save opacity-50" type="button" disabled aria-label="Simpan {{ program.code }}">{% include "competencies/action_icon.html" with icon="save" only %}</button>
+                      </span>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              {% if not editing %}<tr><td colspan="4">Belum ada program studi.</td></tr>{% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <script src="{% static 'titeni/inline-add-row.js' %}" defer></script>
+  {% else %}
+    <p class="mt-4">Profil fakultas perlu disiapkan sebelum pendaftaran program studi.</p>
+  {% endif %}
+</section>
+{% endblock %}

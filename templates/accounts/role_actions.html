@@ -1,0 +1,19 @@
+<div class="flex items-start gap-1 whitespace-nowrap">
+  {% if role %}
+    {% if editing %}
+      <span class="item-action opacity-50" title="Sunting" aria-hidden="true">{% include "competencies/action_icon.html" with icon="edit" only %}</span>
+    {% else %}
+      <a class="item-action" href="?sunting={{ role.pk }}" title="Sunting" aria-label="Sunting {{ role.name }}">{% include "competencies/action_icon.html" with icon="edit" only %}</a>
+    {% endif %}
+  {% endif %}
+  {% if editing %}
+    <button class="item-action item-action-save" type="submit" title="Simpan" aria-label="Simpan peran">{% include "competencies/action_icon.html" with icon="save" only %}</button>
+  {% else %}
+    <span title="Simpan">
+      <button class="item-action item-action-save opacity-50" type="button" disabled aria-label="Simpan {{ role.name }}">{% include "competencies/action_icon.html" with icon="save" only %}</button>
+    </span>
+  {% endif %}
+  {% if role %}
+    <a class="item-action item-action-danger" href="{% url 'accounts:delete_role' role.pk %}" title="Hapus" aria-label="Hapus {{ role.name }}">{% include "competencies/action_icon.html" with icon="delete" only %}</a>
+  {% endif %}
+</div>

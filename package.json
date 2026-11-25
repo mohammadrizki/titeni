@@ -1,0 +1,15 @@
+{
+  "name": "titeni",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "css:build": "tailwindcss -i ./assets/css/titeni.css -o ./static/titeni/evidence.css --minify && npm run css:build:admin",
+    "css:watch": "tailwindcss -i ./assets/css/titeni.css -o ./static/titeni/evidence.css --watch",
+    "css:build:admin": "tailwindcss -i ./assets/css/admin.css -o ./static/titeni/admin.css --minify",
+    "css:watch:admin": "tailwindcss -i ./assets/css/admin.css -o ./static/titeni/admin.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.5",
+    "tailwindcss": "4.3.5"
+  }
+}

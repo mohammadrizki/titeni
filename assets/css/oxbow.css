@@ -1,0 +1,99 @@
+/* Shared palette for the Oxbow-style Django templates. */
+:root {
+  --ox-background: #f6f7fb;
+  --ox-surface: #fff;
+  --ox-muted-surface: #f0f1f8;
+  --ox-border: #dfe2ed;
+  --ox-foreground: #1b2032;
+  --ox-muted-foreground: #545d75;
+  --ox-accent: #4535ae;
+  --ox-accent-hover: #382b8e;
+  --ox-accent-foreground: #fff;
+  --ox-accent-soft: #eeebff;
+  --ox-success: #176040;
+  --ox-success-soft: #e6f5ed;
+  --ox-font: "Inter", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  --ox-background: #12141c;
+  --ox-surface: #1b1e29;
+  --ox-muted-surface: #232736;
+  --ox-border: #393e52;
+  --ox-foreground: #f1f2fa;
+  --ox-muted-foreground: #b9c0d6;
+  --ox-accent: #bcb0ff;
+  --ox-accent-hover: #d2c9ff;
+  --ox-accent-foreground: #241a55;
+  --ox-accent-soft: #302653;
+  --ox-success: #a7e4c3;
+  --ox-success-soft: #213b32;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --ox-background: #12141c;
+    --ox-surface: #1b1e29;
+    --ox-muted-surface: #232736;
+    --ox-border: #393e52;
+    --ox-foreground: #f1f2fa;
+    --ox-muted-foreground: #b9c0d6;
+    --ox-accent: #bcb0ff;
+    --ox-accent-hover: #d2c9ff;
+    --ox-accent-foreground: #241a55;
+    --ox-accent-soft: #302653;
+    --ox-success: #a7e4c3;
+    --ox-success-soft: #213b32;
+  }
+}
+
+.office-modules {
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: .85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.office-module {
+  min-width: 0;
+  padding: 1.05rem;
+  border: 1px solid var(--ox-border);
+  border-radius: .75rem;
+  background: var(--ox-surface);
+}
+
+.office-module h2 {
+  margin: 0 0 .65rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.office-module-links {
+  margin: .65rem 0 0;
+  padding: 0;
+}
+
+.office-module-links li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .35rem .75rem;
+  padding: .55rem 0;
+  border-top: 1px solid var(--ox-border);
+  list-style: none;
+}
+
+.office-module-links a {
+  color: var(--ox-accent);
+  font-size: .875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.office-module-links a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,42 @@
+{% extends "admin/index.html" %}
+
+{% block nav-sidebar %}
+  <nav class="titeni-dashboard-nav" aria-label="Menu admin">
+    {% include "admin/titeni_nav_links.html" %}
+  </nav>
+{% endblock %}
+
+{% block content_title %}
+  <div class="titeni-admin-page-head">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'evidence:home' %}">Buka aplikasi Titeni <span aria-hidden="true">↗</span></a>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <section id="content-main" aria-label="Modul administrasi">
+    <div class="office-modules">
+      {% for app in app_list %}
+        <article class="office-module">
+          <h2><a href="{{ app.app_url }}">{{ app.name }}</a></h2>
+          <ul class="office-module-links">
+            {% for model in app.models %}
+              <li>
+                {% if model.admin_url %}
+                  <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                {% else %}
+                  <span>{{ model.name }}</span>
+                {% endif %}
+                {% if model.add_url %}
+                  <a class="admin-module-add" href="{{ model.add_url }}" aria-label="Tambah {{ model.name }}">Tambah</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% empty %}
+        <p>Belum ada modul administrasi yang bisa diakses.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

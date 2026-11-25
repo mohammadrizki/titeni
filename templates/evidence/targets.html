@@ -1,0 +1,19 @@
+{% extends "evidence/base.html" %}
+{% block title %}Target Artefak · {{ application_name }}{% endblock %}
+{% block content %}
+<div>
+  <h1 class="heading">Target Artefak</h1>
+  <p class="mt-1 text-sm text-muted">{{ program.name }} · Selama program belajar</p>
+</div>
+<ul class="space-y-4">
+  {% for item in targets %}
+    <li class="panel">
+      <h2 class="section-title mb-3 wrap-anywhere">{{ item.title }}</h2>
+      {% include "evidence/learning_context.html" %}
+      {% include "evidence/criteria.html" %}
+    </li>
+  {% empty %}
+    <li class="panel py-8 text-center text-sm text-muted">Belum ada target artefak yang diterbitkan untuk prodi ini.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

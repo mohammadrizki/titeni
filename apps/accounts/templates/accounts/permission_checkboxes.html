@@ -1,0 +1,15 @@
+<div class="permission-groups"{% if widget.attrs.id %} id="{{ widget.attrs.id }}"{% endif %}>
+  {% for group, options, index in widget.optgroups %}
+    <div class="permission-group" data-permission-group>
+      <input type="checkbox" data-permission-group-toggle aria-label="Pilih semua izin {{ group }}" hidden>
+      <details class="permission-details">
+        <summary>{{ group }}</summary>
+        <div class="permission-options">
+          {% for option in options %}
+            <div>{% include option.template_name with widget=option %}</div>
+          {% endfor %}
+        </div>
+      </details>
+    </div>
+  {% endfor %}
+</div>

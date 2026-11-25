@@ -1,0 +1,15 @@
+<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {% if icon == "preview" %}
+    <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>
+  {% elif icon == "edit" %}
+    <path d="m15 5 4 4M4 20l4.5-1 12-12a2.8 2.8 0 0 0-4-4l-12 12L4 20Z"/>
+  {% elif icon == "delete" %}
+    <path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/>
+  {% elif icon == "reorder" %}
+    <path d="M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01" stroke-width="3"/>
+  {% elif icon == "cancel" %}
+    <path d="m6 6 12 12M18 6 6 18"/>
+  {% elif icon == "save" %}
+    <path d="m5 12 4.5 4.5L19 7"/>
+  {% endif %}
+</svg>

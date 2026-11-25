@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block title %}Kerangka kompetensi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as breadcrumb_parent %}
+  {% include "core/breadcrumbs.html" with current="Kerangka kompetensi" parent_url=breadcrumb_parent parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Kerangka kompetensi</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="framework" only %}
+  <div class="academic-tab-panel">
+    <form class="mt-4" method="post">
+      {% csrf_token %}
+      <button class="button" type="submit">Buat draf versi baru</button>
+    </form>
+    <ul class="mt-4">
+      {% for version in versions %}
+        <li><a class="nav-link" href="{% url 'academics:competencies:draft' program.pk version.pk %}">Draf versi {{ version.number }}</a></li>
+      {% empty %}
+        <li>Belum ada draf.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}
