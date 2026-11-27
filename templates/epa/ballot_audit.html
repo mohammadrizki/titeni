@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block title %}Riwayat pemungutan suara Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:epa_committee' mandate.pk as parent %}
+  {% include "core/breadcrumbs.html" with current="Riwayat pemungutan suara" parent_url=parent parent_label=mandate.name only %}
+  <h1 class="heading mt-3">Riwayat pemungutan suara</h1>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Kasus</th><th>Usulan</th><th>Dibuka</th><th>Ditutup</th><th>Hasil</th></tr></thead>
+      <tbody>
+        {% for ballot in page %}
+          <tr><th scope="row">{{ ballot.enrollment }} · {{ ballot.publication }}</th>
+            <td>Draf {{ ballot.draft.number }} · {{ ballot.level }}</td>
+            <td>{{ ballot.created_at }} · {{ ballot.created_by }}</td>
+            <td>{% if ballot.closed_at %}{{ ballot.closed_at }} · {{ ballot.closed_by }}{% else %}Masih terbuka{% endif %}</td>
+            <td>{% if ballot.closed_at %}{{ ballot.get_outcome_display }} · {{ ballot.result.approvals }} setuju dari {{ ballot.result.eligible }} · Kuorum minimum {{ ballot.result.quorum }}{% endif %}
+              {% if ballot.closed_at and ballot.votes.all %}
+                <details><summary>Suara tercatat</summary>
+                  <ul>{% for vote in ballot.votes.all %}<li>{{ vote.created_by }} · {{ vote.get_choice_display }}</li>{% endfor %}</ul>
+                </details>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}<tr><td colspan="5">Belum ada pemungutan suara.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "core/page_navigation.html" with page=page only %}
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block title %}Berbagi tujuan belajar · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Berbagi tujuan belajar</h1>
+  <p><a href="{% url 'learning_plan' goal.plan.enrollment_id %}">Kembali ke rencana</a></p>
+  <form method="post" class="mt-4">{% csrf_token %}{{ form.as_p }}
+    <button class="button" name="action" value="share">Bagikan versi</button>
+  </form>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Pembimbing</th><th>Versi</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for share in shares %}
+      <tr>
+        <th scope="row">{{ share.assignment.advisor }}</th><td>{{ share.number }}</td>
+        <td>{% if share.revoked_at or share.assignment.revoked_at %}Akses berakhir{% else %}Dibagikan{% endif %}</td>
+        <td><a href="{% url 'learning_goal_review' share.pk %}">Lihat tinjauan</a>
+          {% if not share.revoked_at and not share.assignment.revoked_at %}
+            <form method="post">{% csrf_token %}<input type="hidden" name="share" value="{{ share.pk }}">
+              <button class="button" name="action" value="revoke">Cabut akses</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}<tr><td colspan="4">Tujuan belum dibagikan.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

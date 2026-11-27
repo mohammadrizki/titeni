@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block title %}Ketua Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  {% url 'accounts:epa_committee' mandate.pk as parent %}
+  {% include "core/breadcrumbs.html" with current="Ketua Komite EPA" parent_url=parent parent_label=mandate.name only %}
+  <h1 class="heading mt-3">Ketua Komite EPA</h1>
+  {% if mandate.chair %}
+    <p>{{ mandate.chair.member.account }} · Ditunjuk oleh {{ mandate.chair.created_by }} · {{ mandate.chair.created_at }}</p>
+  {% else %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Tunjuk ketua</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

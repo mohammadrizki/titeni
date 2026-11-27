@@ -6,6 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
+from apps.accounts.access import require_program_permission
 from apps.accounts.models import User
 from apps.evidence.artifact_map import scoped_blueprints
 from apps.evidence.forms import EvidenceRequirementForm
@@ -22,6 +23,10 @@ def evidence_requirements(request: HttpRequest, program_id: int, version_id: int
         version = get_object_or_404(
             blueprints.select_for_update(of=("self",)) if writing else blueprints, pk=version_id
         )
+        if writing:
+            require_program_permission(
+                actor, program_id, "evidence.add_evidencerequirementtemplate"
+            )
         form = EvidenceRequirementForm(request.POST if writing else None, version=version)
         if writing and form.is_valid():
             requirement = form.save(commit=False)

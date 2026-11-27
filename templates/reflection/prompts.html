@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block title %}Pemantik refleksi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:curricula' program.pk as curriculum_url %}
+  {% include "core/breadcrumbs.html" with current="Pemantik refleksi" parent_url=curriculum_url parent_label="Kurikulum" only %}
+  <h1 class="heading mt-3">Pemantik refleksi</h1>
+  <p>{{ program.name }}</p>
+  {% if can_write %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {% if editing %}
+        {{ form.as_p }}
+        <button class="button" type="submit">Simpan perubahan</button>
+        <a href="{% url 'academics:reflection_prompts' program.pk %}">Batal</a>
+      {% else %}
+        {% include "core/add_row.html" with form=form only %}
+      {% endif %}
+    </form>
+  {% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Urutan</th><th scope="col">Pemantik</th><th scope="col">Status</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for prompt in prompts %}
+          <tr>
+            <td>{{ prompt.position }}</td><th scope="row">{{ prompt.text }}</th>
+            <td>{% if prompt.is_active %}Aktif{% else %}Nonaktif{% endif %}</td>
+            <td>{% if can_edit %}<a href="{% url 'academics:edit_reflection_prompt' program.pk prompt.pk %}">Sunting</a>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Prodi ini masih memakai pemantik bawaan.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Kehadiran dan konflik kepentingan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'epa_participation_cases' mandate.pk as parent %}
+  {% include "core/breadcrumbs.html" with current="Kehadiran dan konflik kepentingan" parent_url=parent parent_label=mandate.name only %}
+  <h1 class="heading mt-3">Kehadiran dan konflik kepentingan</h1>
+  <p>{{ case.enrollment }} · {{ case.publication.version }}</p>
+  <p>Kuorum {{ quorum }} dari {{ mandate.quorum }} · {% if quorum >= mandate.quorum %}Terpenuhi{% else %}Belum terpenuhi{% endif %}</p>
+  {% if previous %}<p>Konfirmasi terakhir {{ previous.created_at }}. {% if previous.present %}Hadir{% else %}Tidak hadir{% endif %} · {% if previous.conflict %}Memiliki konflik{% else %}Tidak memiliki konflik{% endif %}.</p>{% endif %}
+  {% if can_discuss %}
+    <p class="mt-4"><a href="{% url 'epa_committee_discussion' mandate.pk case.publication_id case.enrollment_id %}">Buka pembahasan dan pemungutan suara</a></p>
+  {% endif %}
+  <form class="mt-4" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Simpan konfirmasi</button>
+  </form>
+</section>
+{% endblock %}

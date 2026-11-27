@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% block title %}Pemberlakuan EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:epa:activity_version' program.pk activity.pk version.pk as parent %}
+  {% include "core/breadcrumbs.html" with current="Pemberlakuan dan penugasan asesor" parent_url=parent parent_label=version.title only %}
+  <h1 class="heading mt-3">{{ version.title }} · Versi {{ version.number }}</h1>
+  <p>{{ program.name }} · {{ version.scale }}</p>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if current %}
+    <p>Berlaku sejak {{ publication.created_at|date:"d M Y H:i" }}</p>
+  {% elif publication %}
+    <p>Digantikan oleh versi yang lebih baru.</p>
+  {% else %}
+    <p>Draf</p>
+  {% endif %}
+  {% if can_publish %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <p>Memberlakukan versi ini mengunci pemetaan kompetensi dan tingkat pada versi skala yang dipilih.</p>
+      <button class="button" name="action" value="publish">Berlakukan versi EPA</button>
+    </form>
+  {% endif %}
+  {% if publication %}
+    <h2 class="section-title mt-4">Penugasan asesor</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th scope="col">Mahasiswa</th><th scope="col">Asesor</th><th scope="col">Observasi</th></tr></thead>
+        <tbody>
+          {% for assignment in assignments %}
+            <tr><th scope="row">{{ assignment.enrollment }}</th><td>{{ assignment.assessor }}</td><td>{{ assignment.observation_count }}</td></tr>
+          {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if assignment_form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}<input type="hidden" name="action" value="assign">
+        {% include "core/add_row.html" with form=assignment_form only %}
+      </form>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

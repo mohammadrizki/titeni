@@ -127,6 +127,10 @@ def download_artifact(
         request, program_id, event_id, attempt_id, record_id
     )
     artifact = get_object_or_404(record.artifacts.all(), pk=artifact_id)
+    return private_pdf_response(artifact)
+
+
+def private_pdf_response(artifact: EvidenceArtifact) -> FileResponse:
     try:
         stream = artifact.file.open("rb")
     except FileNotFoundError as error:

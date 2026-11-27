@@ -134,6 +134,8 @@ def test_scoped_periods_and_revocable_grants(client: Client) -> None:
         "ends_on": "2026-06-30",
     }
     assert client.get(other).status_code == client.post(other, data).status_code == 404
+    assert client.post(periods, data).status_code == 403
+    manager.user_permissions.add(Permission.objects.get(codename="add_academicperiod"))
     assert client.post(periods, {**data, "ends_on": "2025-06-30"}).status_code == 200
     assert client.post(periods, {**data, "program": second.pk}).status_code == 302
     period = AcademicPeriod.objects.get()
@@ -181,6 +183,15 @@ def test_curriculum_drafts_are_versioned_and_program_scoped(client: Client) -> N
     list_url = reverse("academics:curricula", args=[program.pk])
     data = {"code": "2026", "name": "Kurikulum 2026"}
     assert client.post(reverse("academics:curricula", args=[other.pk]), data).status_code == 404
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            codename__in=[
+                "add_curriculum",
+                "add_curriculumversion",
+                "add_curriculumstage",
+            ]
+        )
+    )
     result = client.post(list_url, data, follow=True)
     assert "Draf versi 1" in result.content.decode()
     curriculum = Curriculum.objects.get(program=program)

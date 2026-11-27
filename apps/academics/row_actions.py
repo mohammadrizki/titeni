@@ -19,7 +19,11 @@ from apps.academics.models import (
     LearnerEnrollment,
     StudyProgram,
 )
-from apps.accounts.access import configurable_programs, program_role_permissions
+from apps.accounts.access import (
+    configurable_programs,
+    has_program_permission,
+    program_role_permissions,
+)
 from apps.accounts.models import User
 from apps.assessments.models import (
     AssessmentBlueprintVersion,
@@ -226,7 +230,9 @@ def row_action(
 
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
-    if kind == "mahasiswa" and not actor.has_perm(permission(spec, "view")):
+    if kind == "mahasiswa" and not has_program_permission(
+        actor, program_id, permission(spec, "view")
+    ):
         raise PermissionDenied
     if action != "lihat":
         required = permission(spec, "change" if action == "sunting" else "delete")

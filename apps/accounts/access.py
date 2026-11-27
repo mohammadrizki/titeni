@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Permission
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
@@ -25,3 +26,12 @@ def program_role_permissions(actor: User, program_id: int) -> set[str]:
         accessrole__assignments__program_id=program_id,
     ).values_list("content_type__app_label", "codename")
     return {f"{app}.{codename}" for app, codename in permissions}
+
+
+def has_program_permission(actor: User, program_id: int, permission: str) -> bool:
+    return actor.has_perm(permission) or permission in program_role_permissions(actor, program_id)
+
+
+def require_program_permission(actor: User, program_id: int, permission: str) -> None:
+    if not has_program_permission(actor, program_id, permission):
+        raise PermissionDenied

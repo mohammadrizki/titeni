@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% block title %}Draf peninjauan progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'progression_review_queue' as parent %}
+  {% include "core/breadcrumbs.html" with current="Draf peninjauan progresi" parent_url=parent parent_label="Peninjauan Progresi" only %}
+  <h1 class="heading mt-3">Draf peninjauan progresi</h1>
+  <p>{{ assignment.enrollment }} · {{ assignment.enrollment.cohort.period.program }}</p>
+  <h2 class="section-title mt-4">Evaluasi produksi dan asesmen ulang</h2>
+  {% for evaluation in evaluations %}
+    <details class="mt-4">
+      <summary>#{{ evaluation.pk }} · {{ evaluation.rule.standard.standard.item }} · {{ evaluation.created_at }}{% if evaluation.snapshot.reassessment %} · Hasil asesmen ulang{% endif %}</summary>
+      <p>Versi aturan {{ evaluation.rule.number }}</p>
+      {% include "adaptive/findings.html" with findings=evaluation.snapshot only %}
+    </details>
+  {% empty %}<p>Belum ada evaluasi produksi.</p>{% endfor %}
+  {% if decisions %}
+    <h2 class="section-title mt-4">Keputusan EPA</h2>
+    {% for decision in decisions %}
+      <details class="mt-4">
+        <summary>#{{ decision.pk }} · {{ decision.ballot.publication.version }} · {{ decision.ballot.level }}{% if decision.replacement %} · Digantikan{% endif %}</summary>
+        <p>{{ decision.created_at }} · {{ decision.ballot.level.version }}</p>
+        {{ decision.ballot.rationale|linebreaks }}
+      </details>
+    {% endfor %}
+  {% endif %}
+  <h2 class="section-title mt-4">Rekomendasi</h2>
+  {% if evaluations or decisions or form.is_bound %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Simpan draf</button>
+    </form>
+  {% else %}
+    <p>Rekomendasi dapat dicatat setelah bukti pendukung tersedia.</p>
+  {% endif %}
+  {% if drafts %}
+    <h2 class="section-title mt-4">Riwayat draf</h2>
+    {% for item in drafts %}
+      <details class="mt-4">
+        <summary>Draf {{ item.number }} · {{ item.created_at }} · {{ item.recommendation }}</summary>
+        {{ item.rationale|linebreaks }}
+        <ul>{% for source in item.evidence.all %}
+          <li>{% if source.evaluation_id %}Evaluasi #{{ source.evaluation_id }}{% else %}Keputusan EPA #{{ source.decision_id }}{% endif %}</li>
+        {% endfor %}</ul>
+      </details>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

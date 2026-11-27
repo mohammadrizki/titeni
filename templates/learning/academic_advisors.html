@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% block title %}Pembimbing akademik · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Pembimbing akademik</h1>
+  <p>{{ enrollment.learner }}</p>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="assign">
+    {% include "core/add_row.html" with form=form only %}
+  </form>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Pembimbing</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for assignment in assignments %}
+        <tr><th scope="row">{{ assignment.advisor }}</th><td>{% if assignment.revoked_at %}Dicabut {{ assignment.revoked_at }}{% else %}Aktif{% endif %}</td>
+        <td>{% if not assignment.revoked_at %}<form method="post">
+          {% csrf_token %}<input type="hidden" name="assignment" value="{{ assignment.pk }}">
+          <button class="button" name="action" value="revoke">Cabut penugasan</button>
+        </form>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

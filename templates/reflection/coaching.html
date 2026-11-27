@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+{% block title %}Dialog coaching · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Dialog coaching</h1>
+  <p class="mt-2">{{ share.revision }} · Pembimbing {{ share.assignment.advisor }}</p>
+  <ol class="mt-4">
+    {% for message in messages_in_thread %}
+      <li class="mt-3">
+        <p><strong>{{ message.author }}</strong> · {{ message.created_at }}</p>
+        <p class="whitespace-pre-wrap">{{ message.body }}</p>
+      </li>
+    {% empty %}
+      <li>Belum ada pesan.</li>
+    {% endfor %}
+  </ol>
+  {% if can_post %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}{{ form.as_p }}
+      <button class="button" type="submit" name="action" value="message">Kirim pesan</button>
+    </form>
+  {% else %}
+    <p class="mt-4">Dialog hanya dapat dibaca.</p>
+  {% endif %}
+  <h2 class="section-title mt-6">Rekomendasi dan tindak lanjut</h2>
+  {% if can_recommend %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}{{ recommendation_form.as_p }}
+      <button class="button" name="action" value="recommend">Simpan rekomendasi</button>
+    </form>
+  {% endif %}
+  {% if follow_up_form.errors %}<div role="alert">{{ follow_up_form.errors }}</div>{% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Rekomendasi</th><th scope="col">Tenggat</th><th scope="col">Tindak lanjut</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for recommendation in recommendations %}
+          <tr>
+            <th scope="row"><p class="whitespace-pre-wrap">{{ recommendation.body }}</p><p>{{ recommendation.author }} · {{ recommendation.created_at }}</p></th>
+            <td>{{ recommendation.due_on|default:"—" }}</td>
+            <td>
+              {% if recommendation.completed_at %}<p>Selesai {{ recommendation.completed_at }}</p><p class="whitespace-pre-wrap">{{ recommendation.completion_note }}</p>
+              {% else %}Menunggu tindak lanjut{% endif %}
+            </td>
+            <td>
+              {% if is_owner %}<a href="{% url 'learning_plan' share.assignment.enrollment_id %}?coaching_source={{ recommendation.pk }}">Buat tujuan belajar</a>{% endif %}
+              {% if can_complete and not recommendation.completed_at %}
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="recommendation" value="{{ recommendation.pk }}">
+                  <label for="follow-up-{{ recommendation.pk }}">Catatan tindak lanjut</label>
+                  <textarea id="follow-up-{{ recommendation.pk }}" name="note" maxlength="4000" rows="3" required></textarea>
+                  <button class="button" name="action" value="complete">Tandai selesai</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}<tr><td colspan="4">Belum ada rekomendasi.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block title %}Keputusan EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Keputusan EPA</h1>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>EPA</th><th>Tingkat supervisi</th><th>Terbit</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for decision in decisions %}
+      <tr><th scope="row">{{ decision.ballot.publication.version }}</th><td>{{ decision.ballot.level }}</td><td>{{ decision.created_at }}</td>
+        <td>{% if decision.replacement %}Digantikan{% elif decision.replaces %}Keputusan pengganti{% else %}Berlaku{% endif %}</td>
+        <td><a href="{% url 'epa_student_decision' decision.pk %}">Buka keputusan</a></td></tr>
+    {% empty %}<tr><td colspan="5">Belum ada keputusan.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

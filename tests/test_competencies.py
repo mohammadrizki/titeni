@@ -42,6 +42,18 @@ def test_competency_drafts_scope_hierarchy_and_milestones(client: Client) -> Non
     )
     index = reverse("academics:competencies:framework", args=[program.pk])
     assert client.get(index).status_code == 302
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            codename__in=[
+                "add_competencyframeworkversion",
+                "add_competencyitem",
+                "add_competencyindicator",
+                "add_competencymilestone",
+                "add_competencyrelationship",
+                "add_performancestandardversion",
+            ]
+        )
+    )
     client.force_login(manager)
     listing = client.get(reverse("academics:programs")).content.decode()
     tab_urls = [

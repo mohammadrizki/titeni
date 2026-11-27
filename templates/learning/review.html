@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block title %}Tinjauan tujuan belajar · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">{{ share }}</h1>
+  <p>{{ share.goal.plan.enrollment.learner }}</p>
+  <dl class="mt-4">
+    <dt>Kompetensi</dt><dd>{{ share.snapshot.competency }}</dd>
+    <dt>Alasan</dt><dd>{{ share.snapshot.rationale }}</dd>
+    <dt>Kegiatan</dt><dd>{{ share.snapshot.activity }}</dd>
+    <dt>Hasil yang diharapkan</dt><dd>{{ share.snapshot.expected_outcome }}</dd>
+    <dt>Bukti kemajuan</dt><dd>{{ share.snapshot.improvement_evidence }}</dd>
+    <dt>Kriteria penyelesaian</dt><dd>{{ share.snapshot.completion_criteria }}</dd>
+    <dt>Tenggat</dt><dd>{{ share.snapshot.due_on }}</dd>
+    <dt>Tinjauan</dt><dd>{{ share.snapshot.review_on }}</dd>
+  </dl>
+  <h2 class="section-title mt-4">Catatan tinjauan</h2>
+  <ul>{% for review in reviews %}<li>{{ review.author }} · {{ review.created_at }}<p class="whitespace-pre-wrap">{{ review.note }}</p></li>
+  {% empty %}<li>Belum ada catatan.</li>{% endfor %}</ul>
+  {% if can_review %}
+    <form method="post" class="mt-4">{% csrf_token %}{{ form.as_p }}<button class="button">Simpan catatan</button></form>
+  {% endif %}
+</section>
+{% endblock %}

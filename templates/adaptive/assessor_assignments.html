@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+{% block title %}Penugasan asesor · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Penugasan asesor</h1>
+  {% if scheduled %}
+    <h2 class="section-title mt-4">Percobaan tambahan terjadwal</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Pelaksanaan</th><th scope="col">Tanggal</th><th scope="col">Mahasiswa</th></tr></thead>
+        <tbody>
+          {% for assignment in scheduled %}
+            <tr><th scope="row">{{ assignment.reservation.event }}</th><td>{{ assignment.reservation.event.occurred_on }}</td><td>{{ assignment.reservation.baseline.enrollment.learner }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+  {% if form.is_bound or form.assignment.field.queryset %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Simpan temuan</button>
+    </form>
+  {% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Revisi bukti</th><th scope="col">Standar</th><th scope="col">Temuan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for assignment in assignments %}
+          <tr>
+            <th scope="row">{{ assignment.record.reference }} · Versi {{ assignment.record.revision_number }}</th>
+            <td>{{ assignment.standard }} · {{ assignment.standard.description }}</td>
+            <td>{% if assignment.finding %}Temuan tercatat{% else %}Menunggu temuan{% endif %}</td>
+            <td>
+              {% for artifact in assignment.record.artifacts.all %}
+                <a href="{% url 'assessor_artifact' assignment.pk artifact.pk %}">{{ artifact.original_name }}</a>
+              {% empty %}—{% endfor %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Tidak ada penugasan aktif.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if own_findings %}
+    <h2 class="section-title mt-4">Temuan yang saya catat</h2>
+    {% if revision_form.errors %}<div role="alert">{{ revision_form.errors }}</div>{% endif %}
+    {% for finding in own_findings %}
+      {% include "adaptive/finding_revisions.html" with finding=finding outcomes=finding_outcomes form=revision_form only %}
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

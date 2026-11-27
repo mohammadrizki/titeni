@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block title %}Draf peninjauan EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'epa_review_queue' as parent %}
+  {% include "core/breadcrumbs.html" with current="Draf peninjauan EPA" parent_url=parent parent_label="Peninjauan EPA" only %}
+  <h1 class="heading mt-3">Draf peninjauan EPA</h1>
+  <p>{{ assignment.enrollment }} · {{ assignment.publication.version }} · {{ assignment.publication.version.scale }}</p>
+  <h2 class="section-title mt-4">Riwayat observasi</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th scope="col">Observasi</th><th scope="col">Asesor</th><th scope="col">Konteks dan kompleksitas</th><th scope="col">Tingkat teramati</th><th scope="col">Umpan balik</th></tr></thead>
+      <tbody>
+        {% for observation in observations %}
+          <tr><th scope="row">#{{ observation.pk }} · {{ observation.occurred_on }} · Versi {{ observation.assignment.publication.version.number }}</th>
+            <td>{{ observation.assignment.assessor }}</td>
+            <td>{{ observation.context }} · {{ observation.case_complexity }}</td>
+            <td>{{ observation.level }} · {{ observation.level.version }}</td>
+            <td>{{ observation.feedback|linebreaks }}</td></tr>
+        {% empty %}<tr><td colspan="5">Belum ada observasi untuk peninjauan ini.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if observations or form.is_bound %}
+    <h2 class="section-title mt-4">Rekomendasi</h2>
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Simpan draf</button>
+    </form>
+  {% endif %}
+  {% if drafts %}
+    <h2 class="section-title mt-4">Riwayat draf</h2>
+    {% for draft in drafts %}
+      <details class="mt-4">
+        <summary>Draf {{ draft.number }} · {{ draft.created_at }} · {{ draft.level }}</summary>
+        {{ draft.rationale|linebreaks }}
+        <p>Observasi pendukung {% for observation in draft.evidence.all %}#{{ observation.pk }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+      </details>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

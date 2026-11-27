@@ -7,6 +7,9 @@
   {% include "core/breadcrumbs.html" with current="Kurikulum" parent_url=breadcrumb_parent parent_label="Akademik" only %}
   <h1 class="heading mt-3">Kurikulum</h1>
   <p class="mt-2">{{ program.name }}</p>
+  {% if can_view_reflection_prompts %}
+    <p class="mt-4"><a href="{% url 'academics:reflection_prompts' program.pk %}">Pemantik refleksi</a></p>
+  {% endif %}
   {% include "academics/program_tabs.html" with program=program active="curricula" only %}
   <div class="academic-tab-panel">
     <form class="editor mt-4" method="post">

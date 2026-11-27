@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block title %}Draf intervensi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Draf intervensi pembelajaran</h1>
+  {% if assignment %}
+    <p>{{ assignment.enrollment.learner }}</p>
+    {% if has_indications or form.errors %}
+      <form method="post" class="mt-4">{% csrf_token %}
+        {% include "core/add_row.html" with form=form only %}
+      </form>
+    {% else %}<p>Tidak ada indikasi intervensi aktif.</p>{% endif %}
+    <div class="table-wrap mt-4"><table class="data-table">
+      <thead><tr><th scope="col">Kompetensi</th><th scope="col">Kegiatan</th><th scope="col">Alasan</th><th scope="col">Hasil yang diharapkan</th></tr></thead>
+      <tbody>{% for draft in drafts %}<tr>
+        <th scope="row">{{ draft.evaluation.rule.standard.standard.item }}</th><td>{{ draft.activity }}</td><td>{{ draft.rationale }}</td><td>{{ draft.expected_outcome }}</td>
+      </tr>{% empty %}<tr><td colspan="4">Belum ada draf.</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% if reports %}
+      <h2 class="section-title mt-4">Laporan pelaksanaan</h2>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Kompetensi</th><th>Kegiatan</th><th>Dilaporkan</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody>{% for report in reports %}<tr>
+          <th scope="row">{{ report.approval.draft.evaluation.rule.standard.standard.item }}</th>
+          <td>{{ report.approval.draft.activity }}</td>
+          <td>{{ report.reported_at }}</td>
+          <td>{% if report.reassessment %}Terverifikasi · {{ report.reassessment.verified_at }}{% else %}Menunggu verifikasi{% endif %}</td>
+          <td>{% if can_verify and not report.reassessment %}
+            <form method="post" action="{% url 'verify_intervention_completion' assignment.pk report.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="button">Verifikasi pelaksanaan</button>
+            </form>
+          {% endif %}</td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+    {% endif %}
+  {% else %}
+    <ul class="mt-4">{% for item in assignments %}
+      <li><a href="{% url 'intervention_drafts' item.pk %}">{{ item.enrollment.learner }} · {{ item.enrollment.cohort }}</a></li>
+    {% empty %}<li>Belum ada penugasan pembimbing aktif.</li>{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% if mandate.revoked_at %}Dicabut
+{% elif not mandate.issued_at %}Draf
+{% elif today < mandate.starts_on %}Terjadwal
+{% elif today > mandate.ends_on %}Berakhir
+{% else %}Berlaku
+{% endif %}

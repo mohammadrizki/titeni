@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import configurable_programs, require_program_permission
 from apps.accounts.models import User
 from apps.assessments.forms import (
     BlueprintEvidenceSourceForm,
@@ -30,6 +30,8 @@ from apps.evidence.models import EvidenceSourceCapability
 def blueprints(request: HttpRequest, program_id: int) -> HttpResponse:
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
+    if request.method == "POST":
+        require_program_permission(actor, program_id, "assessments.add_assessmentblueprintversion")
     form = BlueprintVersionForm(request.POST if request.method == "POST" else None, program=program)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
@@ -97,6 +99,9 @@ def blueprint_draft(request: HttpRequest, program_id: int, version_id: int) -> H
                     form = source_form
                 case _:
                     return HttpResponse(status=400)
+            require_program_permission(
+                actor, program_id, f"assessments.add_{form._meta.model._meta.model_name}"
+            )
             if form.is_valid():
                 record = form.save(commit=False)
                 if isinstance(record, BlueprintItemEvidenceSource):

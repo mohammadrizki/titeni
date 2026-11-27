@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% block title %}Antrean eskalasi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:evidence:adaptive_policies' program.pk as policies_url %}
+  {% include "core/breadcrumbs.html" with current="Antrean eskalasi" parent_url=policies_url parent_label="Kebijakan percobaan tambahan" only %}
+  <h1 class="heading mt-3">Antrean eskalasi</h1>
+  <p>{{ program.name }}</p>
+  <p class="mt-4">{{ totals.open }} terbuka · {{ totals.due_today }} jatuh tempo hari ini · {{ totals.overdue }} lewat tenggat</p>
+  <nav class="mt-4" aria-label="Saring eskalasi">
+    <a href="?status=open" {% if state == "open" %}aria-current="page"{% endif %}>Terbuka</a> ·
+    <a href="?status=overdue" {% if state == "overdue" %}aria-current="page"{% endif %}>Lewat tenggat</a> ·
+    <a href="?status=closed" {% if state == "closed" %}aria-current="page"{% endif %}>Ditutup</a>
+  </nav>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Mahasiswa</th><th scope="col">Butir</th><th scope="col">Tenggat</th><th scope="col">Tinjauan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for case in page %}
+          <tr>
+            <th scope="row">{{ case.baseline.enrollment.learner }}</th><td>{{ case.target }}</td>
+            <td>{{ case.due_on }}{% if not case.closed_at %}{% if case.due_on < today %} · Lewat tenggat{% elif case.due_on == today %} · Jatuh tempo hari ini{% endif %}{% endif %}</td>
+            <td>{% if case.closed_at %}Ditutup{% elif case.reviewed_at %}Ditinjau{% else %}Menunggu tinjauan{% endif %}</td>
+            <td><a href="{% url 'academics:evidence:adaptive_policy_preview' program.pk case.baseline.enrollment_id case.opened_by_evaluation_id %}?policy={{ case.policy_id }}#eskalasi-{{ case.pk }}">Buka kasus</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Tidak ada eskalasi dalam pilihan ini.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="mt-4" aria-label="Halaman antrean">
+      {% if page.has_previous %}<a href="?status={{ state }}&amp;page={{ page.previous_page_number }}">Sebelumnya</a>{% endif %}
+      <span>Halaman {{ page.number }} dari {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?status={{ state }}&amp;page={{ page.next_page_number }}">Berikutnya</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

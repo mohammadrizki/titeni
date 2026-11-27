@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.academics.forms import AcademicPeriodForm, InstitutionForm, StudyProgramForm
 from apps.academics.models import AcademicPeriod, Institution, StudyProgram
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import configurable_programs, require_program_permission
 from apps.accounts.models import User
 
 
@@ -127,6 +127,8 @@ def programs(request: HttpRequest) -> HttpResponse:
 def periods(request: HttpRequest, program_id: int) -> HttpResponse:
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
+    if request.method == "POST":
+        require_program_permission(actor, program_id, "academics.add_academicperiod")
     form = AcademicPeriodForm(request.POST if request.method == "POST" else None)
     if request.method == "POST" and form.is_valid():
         period = form.save(commit=False)

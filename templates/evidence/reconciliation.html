@@ -10,6 +10,9 @@
   <p class="mt-2">{{ baseline.enrollment.learner }} · Peta artefak versi {{ baseline.publication.version.number }}</p>
   {% include "academics/program_tabs.html" with program=program active="enrollments" only %}
   <div class="academic-tab-panel">
+    {% if can_evaluate %}
+      <a class="button" href="{% url 'academics:evidence:evaluations' program.pk baseline.enrollment_id %}">Evaluasi bukti</a>
+    {% endif %}
     {% if error %}<p role="alert">{{ error }}</p>{% endif %}
     <h2 class="section-title">Pencatatan terhadap baseline</h2>
     <div class="table-wrap mt-4">

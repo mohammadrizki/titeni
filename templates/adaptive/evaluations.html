@@ -1,0 +1,135 @@
+{% extends "core/base.html" %}
+{% block title %}Evaluasi bukti · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:evidence:reconcile' program.pk baseline.enrollment_id as reconciliation_url %}
+  {% include "core/breadcrumbs.html" with current="Evaluasi bukti" parent_url=reconciliation_url parent_label="Rekonsiliasi bukti" only %}
+  <h1 class="heading mt-3">Evaluasi bukti</h1>
+  <p class="mt-2">{{ program.name }} · {{ baseline.enrollment.learner }}</p>
+  <p><a href="{% url 'academics:evidence:longitudinal_review' program.pk baseline.enrollment_id %}">Tinjauan kompetensi longitudinal</a></p>
+  {% if can_add_rule or can_publish %}
+    <details class="mt-4" {% if rule_form.errors %}open{% endif %}>
+      <summary>Tambah baris</summary>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ rule_form.as_p }}
+        {% if can_add_rule %}<button class="button" type="submit" name="action" value="new-rule">Simpan versi demonstrasi</button>{% endif %}
+        {% if can_publish %}<button class="button" type="submit" name="action" value="new-production-rule">Simpan draf produksi</button>{% endif %}
+      </form>
+    </details>
+  {% endif %}
+  {% if can_view_policy %}
+    <p class="mt-4"><a href="{% url 'academics:evidence:adaptive_policies' program.pk %}">Kebijakan percobaan tambahan</a></p>
+  {% endif %}
+  {% if can_simulate %}
+    <p class="mt-4"><a href="{% url 'academics:evidence:planning_demonstration' program.pk %}">Uji rencana percobaan tambahan</a></p>
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ simulation_form.non_field_errors }}
+      {{ simulation_form.preview_token.errors }}
+      {{ simulation_form.rule.as_field_group }}
+      <button class="button" type="submit" name="action" value="preview">Pratinjau</button>
+      {% if preview_token %}
+        <input type="hidden" name="preview_token" value="{{ preview_token }}">
+        <button class="button" type="submit" name="action" value="record">Catat evaluasi</button>
+      {% endif %}
+    </form>
+  {% endif %}
+  {% if result %}
+    <h2 class="section-title mt-4">{{ result.target }}</h2>
+    <p>{{ result.standard }}</p>
+    {% include "adaptive/findings.html" with findings=result only %}
+  {% endif %}
+  {% if can_simulate %}
+    <details class="mt-4" {% if performance_form.is_bound %}open{% endif %}>
+      <summary>Uji temuan performa dengan data sintetis</summary>
+      <p class="mt-2">Masukkan jumlah percobaan contoh. Hasil uji tidak disimpan pada rekam mahasiswa.</p>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ performance_form.as_p }}
+        <button class="button" type="submit" name="action" value="performance-demo">Uji temuan</button>
+      </form>
+      {% if performance_result %}
+        <p class="mt-2">Kesenjangan performa: {{ performance_result.status.label|lower }}.</p>
+        {% if performance_result.reason == "conflicting_findings" %}
+          <p>Temuan sintetis berbeda dan perlu ditinjau.</p>
+        {% elif performance_result.reason == "evidence_not_sufficient" %}
+          <p>Kecukupan bukti belum ditetapkan.</p>
+        {% elif performance_result.reason == "too_few_performance_findings" %}
+          <p>Temuan sintetis belum memenuhi ambang yang dipilih.</p>
+        {% endif %}
+      {% endif %}
+    </details>
+  {% endif %}
+  {% if can_assign %}
+    <details class="mt-4" {% if assignment_form.is_bound %}open{% endif %}>
+      <summary>Tugaskan asesor</summary>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ assignment_form.as_p }}
+        <button class="button" type="submit" name="action" value="assign-finding">Simpan penugasan</button>
+      </form>
+    </details>
+  {% endif %}
+  {% if can_submit %}
+    <details class="mt-4" {% if finding_form.is_bound %}open{% endif %}>
+      <summary>Catat temuan asesor</summary>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ finding_form.as_p }}
+        <button class="button" type="submit" name="action" value="submit-finding">Simpan temuan</button>
+      </form>
+    </details>
+  {% endif %}
+  {% if own_findings %}
+    <h2 class="section-title mt-4">Temuan yang saya catat</h2>
+    {% if revision_form.errors %}<div role="alert">{{ revision_form.errors }}</div>{% endif %}
+    {% for finding in own_findings %}
+      {% include "adaptive/finding_revisions.html" with finding=finding outcomes=finding_outcomes form=revision_form only %}
+    {% endfor %}
+  {% endif %}
+  {% if retirement_form.errors %}
+    <div role="alert">{{ retirement_form.errors }}</div>
+  {% endif %}
+  {% if can_publish or production_rules %}
+    <h2 class="section-title mt-4">Aturan produksi</h2>
+    {% if can_publish %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ publication_form.as_p }}
+        <button class="button" type="submit" name="action" value="publish">Terbitkan aturan</button>
+      </form>
+    {% endif %}
+    {% include "adaptive/rule_versions.html" with versions=production_rules can_retire=can_publish action="retire-production" production=True only %}
+  {% endif %}
+  <h2 class="section-title mt-4">Versi aturan demonstrasi</h2>
+  {% include "adaptive/rule_versions.html" with versions=rules can_retire=can_retire action="retire" only %}
+  {% if can_approve_intervention %}<p><a href="{% url 'intervention_approvals' program.pk baseline.pk %}">Persetujuan intervensi</a></p>{% endif %}
+  <h2 class="section-title mt-4">Riwayat evaluasi</h2>
+  {% for evaluation in history %}
+    <details class="mt-4">
+      <summary>
+        {{ evaluation.created_at }} · {{ evaluation.snapshot.target }} ·
+        {% if evaluation.snapshot.demonstration %}Demonstrasi{% else %}Produksi{% endif %} · Aturan {{ evaluation.rule.number }} · {{ evaluation.get_sufficiency_display }}
+      </summary>
+      <p>{{ evaluation.snapshot.standard }} · {{ evaluation.created_by }} · {{ evaluation.get_trigger_display }}</p>
+      {% if evaluation.pk in intervention_evaluations %}
+        <p class="mt-2">Indikasi intervensi pembelajaran dan asesmen ulang</p>
+      {% endif %}
+      {% include "adaptive/findings.html" with findings=evaluation.snapshot only %}
+      {% if can_view_policy and not evaluation.rule.demonstration %}
+        <p class="mt-4"><a href="{% url 'academics:evidence:adaptive_policy_preview' program.pk baseline.enrollment_id evaluation.pk %}">Pratinjau rencana percobaan tambahan</a></p>
+      {% endif %}
+    </details>
+  {% empty %}
+    <p>Belum ada simulasi tercatat.</p>
+  {% endfor %}
+  {% if history.has_other_pages %}
+    <nav class="mt-4" aria-label="Halaman riwayat evaluasi">
+      {% if history.has_previous %}<a href="?page={{ history.previous_page_number }}">Sebelumnya</a>{% endif %}
+      <span>Halaman {{ history.number }} dari {{ history.paginator.num_pages }}</span>
+      {% if history.has_next %}<a href="?page={{ history.next_page_number }}">Berikutnya</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

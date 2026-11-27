@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block title %}Penunjukan Komite Banding EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:epa_appeals' as parent %}
+  {% include "core/breadcrumbs.html" with current="Penunjukan komite" parent_url=parent parent_label="Banding EPA" only %}
+  <h1 class="heading mt-3">Komite Banding EPA</h1>
+  <p>{{ appeal.decision.ballot }}</p>
+  {% if appeal.mandate_id %}
+    <p>{{ appeal.mandate }} · {{ appeal.assigned_by }} · {{ appeal.assigned_at }}</p>
+    {% if appeal.resolved_at %}<p>{{ appeal.get_outcome_display }} · {{ appeal.resolved_at }}</p>{% endif %}
+  {% elif form.mandate.field.queryset %}
+    <form method="post" class="mt-4">{% csrf_token %}{{ form.as_p }}<button class="button" type="submit">Tunjuk komite banding</button></form>
+  {% else %}
+    <p>Belum ada komite independen dengan mandat aktif yang mencakup kasus ini.</p>
+    {{ form.errors }}
+  {% endif %}
+</section>
+{% endblock %}

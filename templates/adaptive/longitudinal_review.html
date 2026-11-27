@@ -1,0 +1,120 @@
+{% extends "core/base.html" %}
+{% block title %}Tinjauan kompetensi longitudinal · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:evidence:evaluations' program.pk baseline.enrollment_id as evaluation_url %}
+  {% if can_open_evaluation %}
+    {% include "core/breadcrumbs.html" with current="Tinjauan kompetensi longitudinal" parent_url=evaluation_url parent_label="Evaluasi bukti" only %}
+  {% elif synthesis_form %}
+    {% url 'academic_review_queue' as queue_url %}
+    {% include "core/breadcrumbs.html" with current="Tinjauan kompetensi longitudinal" parent_url=queue_url parent_label="Penugasan pembimbing akademik" only %}
+  {% endif %}
+  <h1 class="heading mt-3">Tinjauan kompetensi longitudinal</h1>
+  <p>{{ program }} · {{ baseline.enrollment.learner }} · {{ baseline.enrollment.cohort }}</p>
+  {% if can_read_syntheses %}
+    <h2 class="section-title mt-4">Sintesis pembimbing akademik</h2>
+    {% for synthesis in syntheses %}
+      <article class="mt-4">
+        <p><strong>{{ synthesis.assignment.advisor }}</strong> · {{ synthesis.created_at }}</p>
+        {{ synthesis.body|linebreaks }}
+      </article>
+    {% empty %}<p>Belum ada sintesis.</p>{% endfor %}
+    {% if synthesis_form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <p>Kaprodi dan pembimbing akademik yang ditugaskan dapat membaca catatan ini meskipun pembagian materi sumber dicabut.</p>
+        {{ synthesis_form.as_p }}
+        <button class="button" type="submit">Simpan sintesis</button>
+      </form>
+    {% endif %}
+  {% endif %}
+  {% if can_review_evidence %}
+    <details class="mt-4">
+      <summary>Ekspektasi bukti baseline</summary>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Persyaratan</th><th>Konteks</th><th>Minimum</th></tr></thead>
+        <tbody>{% for requirement in requirements %}<tr>
+          <th scope="row">{{ requirement.number }}. {{ requirement.label }}</th>
+          <td>{{ requirement.entry.context|default:"—" }}</td><td>{{ requirement.minimum }}</td>
+        </tr>{% empty %}<tr><td colspan="3">Belum ada persyaratan.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </details>
+    {% if milestones %}
+      <details class="mt-4">
+        <summary>Ekspektasi perkembangan pada peta terbit</summary>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Kompetensi</th><th>Ekspektasi</th></tr></thead>
+          <tbody>{% for target in milestones %}<tr>
+            <th scope="row">{{ target.label }}</th>
+            <td><ul>{% for milestone in target.milestones %}<li>{{ milestone }}</li>{% endfor %}</ul></td>
+          </tr>{% endfor %}</tbody>
+        </table></div>
+      </details>
+    {% endif %}
+    {% if can_open_evaluation %}
+      <p class="mt-4"><a href="{% url 'academics:evidence:reconcile' program.pk baseline.enrollment_id %}">Lihat rekonsiliasi bukti</a></p>
+    {% endif %}
+    <h2 class="section-title mt-4">Riwayat evaluasi produksi</h2>
+    {% for evaluation in history %}
+      <details class="mt-4">
+        <summary>{{ evaluation.created_at }} · {{ evaluation.snapshot.target|default:evaluation.rule.standard.standard.item }} · {{ evaluation.get_sufficiency_display }}</summary>
+        <p>Aturan versi {{ evaluation.rule.number }} · {{ evaluation.get_trigger_display }} · {{ evaluation.created_by }}</p>
+        {% include "adaptive/findings.html" with findings=evaluation.snapshot only %}
+      </details>
+    {% empty %}<p>Belum ada evaluasi produksi tercatat.</p>{% endfor %}
+    {% if history.has_other_pages %}
+      <nav class="mt-4" aria-label="Halaman riwayat evaluasi">
+        {% if history.has_previous %}<a href="?page={{ history.previous_page_number }}">Sebelumnya</a>{% endif %}
+        <span>Halaman {{ history.number }} dari {{ history.paginator.num_pages }}</span>
+        {% if history.has_next %}<a href="?page={{ history.next_page_number }}">Berikutnya</a>{% endif %}
+      </nav>
+    {% endif %}
+    {% if reservations %}
+      <h2 class="section-title mt-4">Percobaan tambahan</h2>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Kompetensi</th><th>Sesi</th><th>Tanggal</th><th>Status reservasi</th></tr></thead>
+        <tbody>{% for reservation in reservations %}<tr>
+          <th scope="row">{{ reservation.evaluation.rule.standard.standard.item }}</th>
+          <td>{{ reservation.event }}</td><td>{{ reservation.event.occurred_on }}</td>
+          <td>{% if reservation.released_at %}Dilepas{% elif reservation.attempt_id %}Percobaan ditautkan{% else %}Dipesan{% endif %}</td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+    {% endif %}
+    {% if interventions %}
+      <h2 class="section-title mt-4">Intervensi dan asesmen ulang</h2>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Kompetensi</th><th>Kegiatan</th><th>Persetujuan</th><th>Pelaksanaan</th></tr></thead>
+        <tbody>{% for approval in interventions %}<tr>
+          <th scope="row">{{ approval.draft.evaluation.rule.standard.standard.item }}</th>
+          <td>{{ approval.draft.activity }}</td><td>{{ approval.approved_at }}</td>
+          <td>{% if approval.interventioncompletionreport.reassessment %}
+            Diverifikasi {{ approval.interventioncompletionreport.reassessment.verified_at }} · kebutuhan asesmen ulang tercatat
+          {% elif approval.interventioncompletionreport %}Menunggu verifikasi{% else %}Menunggu laporan{% endif %}</td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+    {% endif %}
+  {% endif %}
+  {% if shared_reflections or shared_goals %}
+    <h2 class="section-title mt-4">Materi yang dibagikan kepada Anda</h2>
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Materi</th><th>Versi</th><th>Dibagikan</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for share in shared_reflections %}
+          <tr>
+            <th scope="row">{{ share.revision.reflection }}</th>
+            <td>{{ share.revision.number }}</td><td>{{ share.shared_at }}</td>
+            <td><a href="{% url 'shared_reflection' share.pk %}">Buka refleksi</a> · <a href="{% url 'reflection_coaching' share.pk %}">Buka coaching</a></td>
+          </tr>
+        {% endfor %}
+        {% for share in shared_goals %}
+          <tr>
+            <th scope="row">{{ share.snapshot.activity }}</th>
+            <td>{{ share.number }}</td><td>{{ share.shared_at }}</td>
+            <td><a href="{% url 'learning_goal_review' share.pk %}">Buka tujuan belajar</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

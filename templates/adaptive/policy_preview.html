@@ -1,0 +1,197 @@
+{% extends "core/base.html" %}
+{% block title %}Pratinjau rencana percobaan tambahan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:evidence:evaluations' program.pk evaluation.baseline.enrollment_id as evaluations_url %}
+  {% include "core/breadcrumbs.html" with current="Pratinjau rencana" parent_url=evaluations_url parent_label="Evaluasi bukti" only %}
+  <h1 class="heading mt-3">Pratinjau rencana percobaan tambahan</h1>
+  <p class="mt-2">{{ evaluation.snapshot.target }} · Evaluasi {{ evaluation.created_at }}</p>
+  <p>Pratinjau memakai snapshot evaluasi dan slot yang dikonfirmasi saat ini. Gunakan tombol reservasi untuk mencatat kebutuhan pada slot yang masih tersedia.</p>
+  {% if versions %}
+    <form method="get" class="mt-4">
+      <label for="preview-policy">Versi kebijakan</label>
+      <select name="policy" id="preview-policy">
+        {% for version in versions %}
+          <option value="{{ version.pk }}" {% if policy.pk == version.pk %}selected{% endif %}>{{ version }} · {% if version.publication %}Terbit{% else %}Draf{% endif %}</option>
+        {% endfor %}
+      </select>
+      <button class="button" type="submit">Hitung pratinjau</button>
+    </form>
+  {% else %}
+    <p>Belum ada kebijakan yang dapat digunakan untuk evaluasi ini.</p>
+  {% endif %}
+  {% if not active_rule %}<p class="mt-4">Aturan evaluasi ini sudah dihentikan. Riwayat reservasi tetap tersedia.</p>{% endif %}
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if proposal %}
+    <h2 class="section-title mt-4">
+      {% if proposal.route == "review" %}Perlu tinjauan prodi
+      {% elif proposal.route == "intervene" %}Intervensi pembelajaran dan asesmen ulang
+      {% elif proposal.route == "attainment_review" %}Tinjauan capaian
+      {% else %}Slot mencakup celah yang teridentifikasi{% endif %}
+    </h2>
+    {% if rows %}
+      <div class="table-wrap mt-4">
+        <table class="data-table">
+          <thead><tr><th scope="col">Pelaksanaan</th><th scope="col">Tanggal</th><th scope="col">Konteks</th><th scope="col">Celah yang dituju</th>{% if can_reserve %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+          <tbody>
+            {% for slot, targets in rows %}
+              <tr>
+                <th scope="row">{{ slot.event }}</th><td>{{ slot.event.occurred_on }}</td>
+                <td>{{ slot.option.sampling.context }}</td><td>{{ targets|join:", " }}</td>
+                {% if can_reserve %}
+                  <td>
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="policy" value="{{ policy.pk }}">
+                      <input type="hidden" name="slot" value="{{ slot.pk }}">
+                      <button class="button" type="submit">Reservasi</button>
+                    </form>
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+    {% if proposal.remaining %}
+      <h3 class="section-title mt-4">Celah yang masih terbuka</h3>
+      <ul>
+        {% for gap, amount in proposal.remaining.items %}<li>{{ gap }} · {{ amount }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+  {% if reservation_rows %}
+    <h2 class="section-title mt-4">Riwayat reservasi versi ini</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead>
+          <tr><th scope="col">Pelaksanaan</th><th scope="col">Celah</th><th scope="col">Status</th>
+            {% if can_release or can_link or can_schedule %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for reservation, attempt_options in reservation_rows %}
+            <tr>
+              <th scope="row">{{ reservation.event }} · {{ reservation.event.occurred_on }}</th>
+              <td>{{ reservation.gap_targets|join:", " }}</td>
+              <td>
+                {% if reservation.released_at %}
+                  {% if reservation.release_evaluation_id %}
+                    Dilepas otomatis {{ reservation.released_at }} berdasarkan evaluasi {{ reservation.release_evaluation_id }}.
+                  {% else %}
+                    Dilepas {{ reservation.released_at }} oleh {{ reservation.released_by }}.
+                  {% endif %}
+                  {{ reservation.release_reason }}
+                {% elif reservation.attempt %}
+                  Percobaan {{ reservation.attempt.number }} ditautkan {{ reservation.linked_at }} oleh {{ reservation.linked_by }}.
+                  {% if can_view_fulfillment %}
+                    {% with checks=reservation.fulfillment_checks.all %}
+                      {% if checks %}
+                        <details class="mt-2">
+                          <summary>{{ checks.0 }}</summary>
+                          <ol>
+                            {% for check in checks %}
+                              <li>{{ check.checked_at }} · {{ check }} · {{ check.checked_by }}
+                                {% if check.supporting_record %}
+                                  · {{ check.supporting_record.reference }} · Versi {{ check.supporting_record.revision_number }}
+                                {% endif %}
+                              </li>
+                            {% endfor %}
+                          </ol>
+                        </details>
+                      {% else %}<p>Belum diperiksa</p>{% endif %}
+                    {% endwith %}
+                  {% endif %}
+                {% elif reservation.participating %}Partisipasi tercatat
+                {% elif reservation.automatic %}
+                  Direservasi otomatis {{ reservation.created_at }} berdasarkan evaluasi {{ reservation.evaluation_id }}.
+                {% else %}Direservasi {{ reservation.created_at }} oleh {{ reservation.created_by }}{% endif %}
+                {% if reservation.scheduling_assignments.all %}
+                  <details class="mt-2">
+                    <summary>Asesor {{ reservation.scheduling_assignments.all.0.assessor }}</summary>
+                    <ol>
+                      {% for assignment in reservation.scheduling_assignments.all %}
+                        <li>{{ assignment.assessor }} · {{ assignment.assigned_at }} · {{ assignment.assigned_by }} · {{ assignment.reason }}</li>
+                      {% endfor %}
+                    </ol>
+                  </details>
+                {% endif %}
+              </td>
+              {% if can_release or can_link or can_schedule %}
+                <td>
+                  {% if can_schedule and eligible_assessors and not reservation.released_at and not reservation.participating and reservation.event.occurred_on >= today %}
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="policy" value="{{ policy.pk }}">
+                      <input type="hidden" name="reservation" value="{{ reservation.pk }}">
+                      <input type="hidden" name="previous" value="{{ reservation.scheduling_assignments.all.0.pk|default:'' }}">
+                      <label for="assessor-{{ reservation.pk }}">Asesor pelaksanaan</label>
+                      <select id="assessor-{{ reservation.pk }}" name="assessor" required>
+                        <option value="">Pilih asesor</option>
+                        {% for candidate in eligible_assessors %}
+                          <option value="{{ candidate.pk }}">{{ candidate }}</option>
+                        {% endfor %}
+                      </select>
+                      <label for="assign-reason-{{ reservation.pk }}">Alasan penugasan</label>
+                      <input id="assign-reason-{{ reservation.pk }}" name="reason" maxlength="500" required>
+                      <button class="button" type="submit" name="action" value="schedule-assessor">Tugaskan</button>
+                    </form>
+                  {% endif %}
+                  {% if can_link and attempt_options and not reservation.released_at and not reservation.attempt %}
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="policy" value="{{ policy.pk }}">
+                      <input type="hidden" name="reservation" value="{{ reservation.pk }}">
+                      <label for="link-attempt-{{ reservation.pk }}">Percobaan tercatat</label>
+                      <select id="link-attempt-{{ reservation.pk }}" name="attempt" required>
+                        {% for attempt in attempt_options %}
+                          <option value="{{ attempt.pk }}">Percobaan {{ attempt.number }}</option>
+                        {% endfor %}
+                      </select>
+                      <button class="button" type="submit" name="action" value="link-attempt">Tautkan</button>
+                    </form>
+                  {% endif %}
+                  {% if can_release and not reservation.released_at and not reservation.participating and not reservation.attempt %}
+                    <form method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="policy" value="{{ policy.pk }}">
+                      <input type="hidden" name="reservation" value="{{ reservation.pk }}">
+                      <label for="release-reason-{{ reservation.pk }}">Alasan pelepasan</label>
+                      <input id="release-reason-{{ reservation.pk }}" type="text" name="reason" maxlength="500" required>
+                      <button class="button" type="submit" name="action" value="release">Lepaskan</button>
+                    </form>
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+  {% if escalations %}
+    <h2 class="section-title mt-4">Eskalasi</h2>
+    {% for case in escalations %}
+      <div class="mt-3" id="eskalasi-{{ case.pk }}">
+        <p>{% if case.closed_at %}Ditutup {{ case.closed_at }}{% else %}Terbuka · Tenggat {{ case.due_on }}{% endif %}</p>
+        {% if case.remaining %}
+          <ul>{% for gap, amount in case.remaining.items %}<li>{{ gap }} · {{ amount }}</li>{% endfor %}</ul>
+        {% elif not case.closed_at %}<p>Celah memerlukan tinjauan prodi.</p>{% endif %}
+        {% if case.reviewed_at %}
+          <p>{{ case.reviewed_by }} · {{ case.reviewed_at }} · {{ case.review_note }}</p>
+        {% elif can_review_escalation and not case.closed_at %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="policy" value="{{ policy.pk }}">
+            <input type="hidden" name="escalation" value="{{ case.pk }}">
+            <label for="escalation-{{ case.pk }}">Catatan tindak lanjut</label>
+            <input id="escalation-{{ case.pk }}" name="note" maxlength="500" required>
+            <button class="button" name="action" value="review-escalation">Catat tinjauan</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

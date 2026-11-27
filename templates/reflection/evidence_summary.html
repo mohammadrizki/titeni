@@ -1,0 +1,26 @@
+<div class="mt-4">
+  <h2 class="section-title">Ringkasan bukti otomatis</h2>
+  <p>Versi refleksi {{ summary.revision }} · {{ summary.eligible_count }} bukti yang masih layak dari {{ summary.attempt_count }} percobaan</p>
+  {% if summary.rows %}
+    <div class="table-wrap mt-2">
+      <table class="data-table">
+        <thead>
+          <tr><th scope="col">Bukti</th><th scope="col">Pelaksanaan</th><th scope="col">Sumber dan jenis</th><th scope="col">Konteks</th><th scope="col">Status</th></tr>
+        </thead>
+        <tbody>
+          {% for row in summary.rows %}
+            <tr>
+              <th scope="row">{{ row.reference }} · Versi {{ row.revision }}</th>
+              <td>{{ row.component }} · {{ row.occurred_on }}</td>
+              <td>{{ row.source }} · {{ row.evidence_type }}</td>
+              <td>{{ row.context|default:"—" }}</td>
+              <td>{% if row.eligible %}Terverifikasi{% else %}Historis · Tidak lagi layak{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>Versi ini belum memiliki bukti terkait.</p>
+  {% endif %}
+</div>

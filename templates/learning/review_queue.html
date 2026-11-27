@@ -1,0 +1,11 @@
+{% extends "core/base.html" %}
+{% block title %}Tujuan belajar yang dibagikan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Tujuan belajar yang dibagikan</h1>
+  <p><a href="{% url 'intervention_index' %}">Draf intervensi pembelajaran</a></p>
+  <ul class="mt-4">{% for share in shares %}
+    <li><a href="{% url 'learning_goal_review' share.pk %}">{{ share.goal.plan.enrollment.learner }} · {{ share }}</a></li>
+  {% empty %}<li>Belum ada tujuan yang dibagikan.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

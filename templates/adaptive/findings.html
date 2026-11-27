@@ -1,0 +1,99 @@
+<p>Kecukupan bukti
+  {% if findings.sufficiency == "sufficient" %}cukup
+  {% elif findings.sufficiency == "insufficient" %}belum cukup
+  {% else %}perlu ditinjau{% endif %}
+</p>
+<p>Kesenjangan performa
+  {% if findings.performance == "open" %}terbuka{% elif findings.performance == "closed" %}tertutup{% else %}belum ditentukan{% endif %}.
+  {{ findings.performance_reason }}
+</p>
+{% if findings.assessor_findings %}
+  <details class="mt-4">
+    <summary>Temuan asesor ({{ findings.assessor_findings|length }})</summary>
+    <ul>
+      {% for finding in findings.assessor_findings %}
+        <li>Bukti {{ finding.record }}{% if finding.revision_number %} · Temuan versi {{ finding.revision_number }}{% endif %} · {% if finding.outcome == "below" %}Di bawah standar{% else %}Memenuhi standar{% endif %} · {{ finding.assessor_name }} · {{ finding.rationale }}{% if finding.revision_reason %} · Alasan koreksi {{ finding.revision_reason }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </details>
+{% endif %}
+{% if not findings.target_requirements %}<p>Baseline belum memiliki persyaratan untuk butir ini.</p>{% endif %}
+{% if findings.pending_placement %}<p>Ada bukti yang menunggu penempatan.</p>{% endif %}
+<div class="table-wrap mt-4">
+  <table class="data-table">
+    <thead><tr><th scope="col">Kriteria</th><th scope="col">Teramati</th><th scope="col">Minimum</th></tr></thead>
+    <tbody>
+      {% for criterion in findings.criteria %}
+        <tr><th scope="row">{{ criterion.label }}</th><td>{{ criterion.count }}</td><td>{{ criterion.minimum }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if findings.as_of %}
+  <p class="mt-4">Tanggal evaluasi {{ findings.as_of }}{% if findings.maximum_age_days %} · Usia maksimum {{ findings.maximum_age_days }} hari{% endif %}</p>
+{% endif %}
+{% if findings.coverage %}
+  <h3 class="section-title mt-4">Cakupan persyaratan baseline</h3>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Persyaratan</th><th scope="col">Konteks</th>
+          <th scope="col">Bukti yang dipakai</th><th scope="col">Minimum rancangan</th>
+          <th scope="col">Calon penempatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in findings.coverage %}
+          <tr>
+            <th scope="row">{{ row.number }}. {{ row.label }}</th>
+            <td>{{ row.context|default:"—" }}</td>
+            <td>{{ row.count }}</td><td>{{ row.minimum }}</td><td>{{ row.pending }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if findings.pending_placements %}
+    <p>Satu bukti dapat menjadi calon bagi beberapa persyaratan.</p>
+  {% endif %}
+{% endif %}
+{% if findings.evidence %}
+  <h3 class="section-title mt-4">Bukti yang dipakai</h3>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Referensi</th><th scope="col">Sumber</th><th scope="col">Tanggal pelaksanaan</th><th scope="col">Persyaratan baseline</th></tr></thead>
+      <tbody>
+        {% for row in findings.evidence %}
+          <tr>
+            <th scope="row">{% if row.reference %}{{ row.reference }} · Versi {{ row.revision }}{% else %}Bukti {{ row.record }}{% endif %}</th>
+            <td>{{ row.source_label|default:"—" }}</td>
+            <td>{{ row.occurred_on|default:"—" }}</td>
+            <td>{{ row.requirement }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% if findings.excluded_by_age %}
+  <details class="mt-4">
+    <summary>Bukti di luar rentang tanggal ({{ findings.excluded_by_age|length }})</summary>
+    <ul>
+      {% for row in findings.excluded_by_age %}
+        <li>Bukti {{ row.record }} · {{ row.occurred_on }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+{% endif %}
+{% if findings.reassessment %}
+  <p class="mt-4">Asesmen ulang memakai bukti dari kegiatan setelah {{ findings.reassessment_cutoff }}.</p>
+  {% if findings.historical_evidence %}
+    <details class="mt-4">
+      <summary>Bukti historis ({{ findings.historical_evidence|length }})</summary>
+      <ul>{% for row in findings.historical_evidence %}
+        <li>Bukti {{ row.record }} · {{ row.occurred_on }}</li>
+      {% endfor %}</ul>
+    </details>
+  {% endif %}
+{% endif %}

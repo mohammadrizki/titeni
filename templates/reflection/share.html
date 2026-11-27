@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block title %}Berbagi refleksi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Berbagi versi {{ revision.number }}</h1>
+  <p class="mt-2">Pembimbing yang Anda pilih hanya dapat membaca versi ini.</p>
+  <p><a href="{% url 'reflection_draft' revision.reflection.enrollment_id revision.reflection_id %}">Kembali ke draf</a></p>
+  <div class="mt-4 whitespace-pre-wrap">{{ revision.body }}</div>
+  <form method="post" class="mt-4">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="button" name="action" value="share">Bagikan versi ini</button>
+  </form>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Penerima</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for share in shares %}
+        <tr><th scope="row">{{ share.assignment.advisor }}</th>
+          <td>{% if share.revoked_at %}Dicabut {{ share.revoked_at }}{% elif share.assignment.revoked_at %}Penugasan berakhir{% else %}Dibagikan {{ share.shared_at }}{% endif %}</td>
+          <td><a href="{% url 'reflection_coaching' share.pk %}">Dialog coaching</a>{% if not share.revoked_at %}<form method="post">
+            {% csrf_token %}<input type="hidden" name="share" value="{{ share.pk }}">
+            <button class="button" name="action" value="revoke">Cabut akses</button>
+          </form>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="3">Versi ini belum dibagikan.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

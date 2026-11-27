@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Kasus Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'epa_participation_mandates' as parent %}
+  {% include "core/breadcrumbs.html" with current=mandate.name parent_url=parent parent_label="Partisipasi Komite EPA" only %}
+  <h1 class="heading mt-3">{{ mandate.name }}</h1>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Mahasiswa</th><th>Versi EPA</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for case in page %}
+          <tr><th scope="row">{{ case.enrollment }}</th><td>{{ case.publication.version }}</td><td><a href="{% url 'epa_participate' mandate.pk case.publication_id case.enrollment_id %}">Catat partisipasi</a></td></tr>
+        {% empty %}<tr><td colspan="3">Belum ada kasus dengan draf peninjauan.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "core/page_navigation.html" with page=page only %}
+</section>
+{% endblock %}

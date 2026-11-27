@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% block title %}Mandat Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:system' as parent %}
+  {% include "core/breadcrumbs.html" with current="Mandat Komite EPA" parent_url=parent parent_label="Administrasi Sistem" only %}
+  <h1 class="heading mt-3">Mandat Komite EPA</h1>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Komite</th><th>Prodi</th><th>Masa berlaku</th><th>Kuorum</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for mandate in mandates %}
+          <tr><th scope="row">{{ mandate.name }}</th><td>{{ mandate.program }}</td><td>{{ mandate.starts_on|date:"d M Y" }} – {{ mandate.ends_on|date:"d M Y" }}</td><td>{{ mandate.quorum }}</td><td>{% include "core/committee_status.html" %}</td><td><a href="{% url 'accounts:epa_committee' mandate.pk %}">Buka mandat</a></td></tr>
+        {% empty %}<tr><td colspan="6">Belum ada mandat.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if form %}
+    <form class="mt-4" method="post">
+      {% csrf_token %}
+      {% include "core/add_row.html" with form=form only %}
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

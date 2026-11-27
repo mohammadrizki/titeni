@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+{% block title %}Kebijakan percobaan tambahan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:evidence:adaptive_policies' program.pk as policy_url %}
+  {% include "core/breadcrumbs.html" with current="Versi kebijakan" parent_url=policy_url parent_label="Kebijakan percobaan tambahan" only %}
+  <h1 class="heading mt-3">{{ policy }}</h1>
+  <p class="mt-2">{{ program.name }} · {% if published %}Terbit {{ published.created_at }} oleh {{ published.created_by }}{% else %}Draf{% endif %}</p>
+  <p>Batas kumulatif {{ policy.maximum_attempts }} · Tenggat tinjauan {{ policy.review_within_days }} hari</p>
+  {% if publication_error %}<p role="alert">{{ publication_error }}</p>{% endif %}
+  {% if can_publish %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <label>
+        <input type="checkbox" name="automatic_reservations">
+        Aktifkan reservasi otomatis dari slot terkonfirmasi
+      </label>
+      <button class="button" type="submit" name="action" value="publish">Terbitkan kebijakan</button>
+    </form>
+  {% endif %}
+  <h2 class="section-title mt-4">Opsi percobaan</h2>
+  {% if can_add %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {% include "core/add_row.html" with form=form only %}
+    </form>
+  {% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Komponen dan konteks</th><th scope="col">Sumber dan jenis bukti</th><th scope="col">Celah yang dituju</th><th scope="col">Prioritas</th><th scope="col">Batas kumulatif opsi</th></tr></thead>
+      <tbody>
+        {% for option in options %}
+          <tr>
+            <th scope="row">{{ option.sampling }}</th>
+            <td>{{ option.source_link.capability }}</td>
+            <td>
+              {% if option.adds_attempt %}<div>Percobaan</div>{% endif %}
+              {% if option.adds_context %}<div>Konteks</div>{% endif %}
+              {% if option.adds_source %}<div>Sumber</div>{% endif %}
+              {% if option.adds_verifier %}<div>Verifikator</div>{% endif %}
+            </td>
+            <td>{{ option.priority }}</td><td>{{ option.maximum_per_option }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Belum ada opsi percobaan.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if published %}
+    {% if published.automatic_reservations %}<p class="mt-4">Reservasi otomatis aktif.</p>{% endif %}
+    <h2 class="section-title mt-4">Slot pelaksanaan terkonfirmasi</h2>
+    {% if can_confirm %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="confirm-slot">
+        {% include "core/add_row.html" with form=slot_form only %}
+      </form>
+    {% endif %}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Opsi</th><th scope="col">Pelaksanaan</th><th scope="col">Tanggal</th><th scope="col">Kapasitas</th><th scope="col">Dikonfirmasi oleh</th></tr></thead>
+        <tbody>
+          {% for slot in slots %}
+            <tr><th scope="row">{{ slot.option }}</th><td>{{ slot.event }}</td><td>{{ slot.event.occurred_on }}</td><td>{{ slot.capacity }}</td><td>{{ slot.created_by }}</td></tr>
+          {% empty %}
+            <tr><td colspan="5">Belum ada slot terkonfirmasi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

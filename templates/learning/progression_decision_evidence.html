@@ -1,0 +1,10 @@
+<h2 class="section-title mt-4">Bukti pendukung dan versi standar</h2>
+<ul>
+  {% for source in evidence %}
+    {% if source.evaluation_id %}
+      <li>{% if full %}<details><summary>{% endif %}Evaluasi #{{ source.evaluation_id }} · {{ source.evaluation.rule.standard }} · {{ source.evaluation.get_sufficiency_display }}{% if source.evaluation.snapshot.reassessment %} · Asesmen ulang{% endif %}{% if full %}</summary>{% include "adaptive/findings.html" with findings=source.evaluation.snapshot only %}</details>{% endif %}</li>
+    {% else %}
+      <li>{% if full %}<details><summary>{% endif %}Keputusan EPA #{{ source.decision_id }} · {{ source.decision.ballot.publication.version }} · {{ source.decision.ballot.level }} · {{ source.decision.ballot.level.version }}{% if full %}</summary>{{ source.decision.ballot.rationale|linebreaks }}</details>{% endif %}</li>
+    {% endif %}
+  {% empty %}<li>Belum ada bukti tercatat.</li>{% endfor %}
+</ul>

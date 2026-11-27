@@ -1,0 +1,79 @@
+{% extends "core/base.html" %}
+{% block title %}Pembahasan Progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'progression_committee_cases' mandate.pk as parent %}
+  {% include "core/breadcrumbs.html" with current="Pembahasan Progresi" parent_url=parent parent_label=mandate.name only %}
+  <h1 class="heading mt-3">Pembahasan Progresi</h1>
+  <p>{{ enrollment }} · {{ mandate.name }}</p>
+  <p>Kuorum {{ quorum }} dari {{ mandate.quorum }}</p>
+  <form method="post" class="mt-4">
+    {% csrf_token %}{{ attendance.as_p }}
+    <button class="button" name="action" value="attendance">Simpan konfirmasi</button>
+  </form>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% for pending_appeal in appeals %}
+    <details class="mt-4">
+      <summary>{{ pending_appeal }}</summary>
+      <p>{{ pending_appeal.decision.ballot.get_proposed_outcome_display }}</p>
+      {{ pending_appeal.decision.rationale|linebreaks }}
+      <p>Alasan banding</p>
+      {{ pending_appeal.reason|linebreaks }}
+    </details>
+  {% endfor %}
+  {% if ballot %}
+    {% if ballot.appeal %}<p>Putaran banding untuk keputusan #{{ ballot.appeal.decision_id }}</p>{% endif %}
+    <h2 class="section-title mt-4">{{ ballot.get_proposed_outcome_display }}</h2>
+    {% if ballot.standard %}<p>Standar {{ ballot.standard }}</p>{% endif %}
+    {% if ballot.conditions %}{{ ballot.conditions|linebreaks }}{% endif %}
+    <p>Draf {{ ballot.draft.number }} · {{ ballot.draft.assignment.reviewer }}</p>
+    <p>{{ ballot.draft.recommendation }}</p>
+    {{ ballot.draft.rationale|linebreaks }}
+    {% include "learning/progression_decision_evidence.html" with evidence=evidence full=True only %}
+    <h2 class="section-title mt-4">Catatan pembahasan</h2>
+    {% for note in comments %}
+      <p><strong>{{ note.member.account }}</strong> · {{ note.created_at }}</p>
+      {{ note.body|linebreaks }}
+    {% empty %}<p>Belum ada catatan.</p>{% endfor %}
+    {% if ballot.closed_at %}
+      <p>{{ ballot.get_result_display }} · {{ ballot.tally.approvals }} setuju dari {{ ballot.tally.eligible }} anggota yang memenuhi syarat.</p>
+      {% if ballot.appeal_result %}
+        <p>{{ ballot.appeal_result.get_outcome_display }}</p>
+        {{ ballot.appeal_result.resolution|linebreaks }}
+      {% elif ballot.decision %}
+        <p>Keputusan terbit {{ ballot.decision.published_at }}.</p>
+        {{ ballot.decision.rationale|linebreaks }}
+      {% elif ballot.result == "advanced" and is_chair %}
+        <form method="post" class="mt-4">
+          {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">{{ publication.as_p }}
+          <button class="button" name="action" value="publish">{% if ballot.appeal %}Catat hasil banding{% else %}Terbitkan keputusan{% endif %}</button>
+        </form>
+      {% endif %}
+    {% else %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">{{ comment.as_p }}
+        <button class="button" name="action" value="comment">Simpan catatan</button>
+      </form>
+      {% if own_vote %}<p>Suara Anda · {{ own_vote.get_choice_display }}</p>{% else %}
+        <form method="post" class="mt-4">
+          {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">{{ vote.as_p }}
+          <button class="button" name="action" value="vote">Catat suara</button>
+        </form>
+      {% endif %}
+      {% if is_chair %}
+        <form method="post" class="mt-4">
+          {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">
+          <button class="button" name="action" value="close">Tutup putaran</button>
+        </form>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+  {% if proposal %}
+    <h2 class="section-title mt-4">Usulan untuk putaran baru</h2>
+    <form method="post" class="mt-4">
+      {% csrf_token %}{{ proposal.as_p }}
+      <button class="button" name="action" value="open">Buka pembahasan</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

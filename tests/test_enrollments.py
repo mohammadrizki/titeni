@@ -45,6 +45,13 @@ def test_cohorts_and_enrollments_require_program_scope_and_explicit_permissions(
     ProgramConfigurationGrant.objects.create(
         account=manager, program=program, starts_on=timezone.localdate(), granted_by=manager
     )
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            codename__in=[
+                "add_cohort",
+            ]
+        )
+    )
     client.force_login(manager)
     assert client.get(reverse("academics:programs")).status_code == 200
     list_url = reverse("academics:cohorts", args=[program.pk])

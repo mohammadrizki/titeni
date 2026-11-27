@@ -8,7 +8,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST, require_safe
 
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import configurable_programs, require_program_permission
 from apps.accounts.models import User
 from apps.assessments.models import (
     AssessmentBlueprintVersion,
@@ -203,6 +203,7 @@ def save_artifact_map(request: HttpRequest, program_id: int, version_id: int) ->
         version = get_object_or_404(
             scoped_blueprints(actor, program_id).select_for_update(of=("self",)), pk=version_id
         )
+        require_program_permission(actor, program_id, "evidence.add_artifactmapversion")
         record, _ = ArtifactMap.objects.get_or_create(program_id=program_id)
         record = ArtifactMap.objects.select_for_update().get(pk=record.pk)
         latest = record.versions.defer("snapshot").first()

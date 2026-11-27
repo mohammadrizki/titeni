@@ -1,0 +1,95 @@
+{% extends "core/base.html" %}
+{% block title %}Pembahasan Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'epa_participate' mandate.pk publication_id enrollment_id as parent %}
+  {% include "core/breadcrumbs.html" with current="Pembahasan dan pemungutan suara" parent_url=parent parent_label="Partisipasi" only %}
+  <h1 class="heading mt-3">Pembahasan Komite EPA</h1>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if appeal %}
+    <h2 class="section-title mt-4">Keputusan awal</h2>
+    <p>{{ appeal.decision.ballot.level }}</p>
+    {{ appeal.decision.ballot.rationale|linebreaks }}
+    <h2 class="section-title mt-4">Alasan banding mahasiswa</h2>
+    {{ appeal.reason|linebreaks }}
+    {% if appeal.resolved_at %}<p>{{ appeal.get_outcome_display }}</p>{{ appeal.resolution|linebreaks }}{% endif %}
+  {% endif %}
+  {% if ballot %}
+    <p>{{ ballot.enrollment }} · {{ ballot.publication }}</p>
+    <h2 class="section-title mt-4">Usulan tingkat supervisi</h2>
+    <p>{{ ballot.level }} · {{ ballot.level.version }}</p>
+    {{ ballot.rationale|linebreaks }}
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th>Observasi pendukung</th><th>Konteks</th><th>Kompleksitas</th><th>Tingkat</th><th>Umpan balik</th></tr></thead>
+        <tbody>
+          {% for observation in evidence %}
+            <tr><th scope="row">{{ observation.occurred_on }}</th><td>{{ observation.context }}</td><td>{{ observation.case_complexity }}</td><td>{{ observation.level }}</td><td>{{ observation.feedback|linebreaks }}</td></tr>
+          {% empty %}<tr><td colspan="5">Belum ada observasi pendukung.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <h2 class="section-title mt-4">Catatan pembahasan</h2>
+    {% for comment in comments %}
+      <p><strong>{{ comment.created_by }}</strong> · {{ comment.created_at }}</p>
+      {{ comment.body|linebreaks }}
+    {% empty %}<p>Belum ada catatan.</p>{% endfor %}
+    {% if ballot.closed_at %}
+      <h2 class="section-title mt-4">Hasil pemungutan suara</h2>
+      <p>{{ ballot.get_outcome_display }} · {{ ballot.result.approvals }} suara setuju dari {{ ballot.result.eligible }} anggota yang memenuhi syarat dan hadir.</p>
+      {% if ballot.outcome == "advanced" and is_chair %}
+        {% if appeal and not appeal.resolved_at and ballot.created_at >= appeal.assigned_at %}
+          <form method="post" action="{% url 'epa_resolve_appeal' ballot.pk %}" class="mt-4">
+            {% csrf_token %}
+            <label for="appeal-resolution">Alasan hasil banding</label>
+            <textarea id="appeal-resolution" name="reason" maxlength="4000" required></textarea>
+            <button class="button" type="submit">Catat hasil banding</button>
+          </form>
+        {% elif not decision %}
+          <form method="post" action="{% url 'epa_publish_decision' ballot.pk %}" class="mt-4">
+            {% csrf_token %}
+            <button class="button" type="submit">Terbitkan keputusan EPA</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    {% else %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">
+        {{ comment_form.as_p }}
+        <button class="button" name="action" value="comment">Simpan catatan</button>
+      </form>
+      <h2 class="section-title mt-4">Suara Anda</h2>
+      {% if own_vote %}
+        <p>{{ own_vote.get_choice_display }}</p>
+      {% else %}
+        <form method="post" class="mt-4">
+          {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">
+          {{ vote_form.as_p }}
+          <button class="button" name="action" value="vote">Catat suara</button>
+        </form>
+      {% endif %}
+      {% if is_chair %}
+        <form method="post" class="mt-4">
+          {% csrf_token %}<input type="hidden" name="ballot" value="{{ ballot.pk }}">
+          <button class="button" name="action" value="close">Tutup pemungutan suara</button>
+        </form>
+      {% endif %}
+    {% endif %}
+  {% else %}
+    <p>Ketua belum membuka pembahasan.</p>
+  {% endif %}
+  {% if proposal %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {{ proposal.as_p }}
+      <button class="button" name="action" value="open">Buka pembahasan</button>
+    </form>
+  {% endif %}
+  {% if ballots|length > 1 %}
+    <h2 class="section-title mt-4">Riwayat hasil</h2>
+    {% for past in ballots %}
+      {% if past.closed_at %}<p>{{ past.closed_at }} · {{ past.level }} · {{ past.get_outcome_display }}</p>{% endif %}
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

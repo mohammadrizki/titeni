@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import configurable_programs, require_program_permission
 from apps.accounts.models import User
 from apps.competencies.forms import (
     IndicatorForm,
@@ -31,6 +31,7 @@ def framework(request: HttpRequest, program_id: int) -> HttpResponse:
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
     if request.method == "POST":
+        require_program_permission(actor, program_id, "competencies.add_competencyframeworkversion")
         with transaction.atomic():
             record, _ = CompetencyFramework.objects.get_or_create(program=program)
             record = CompetencyFramework.objects.select_for_update().get(pk=record.pk)
@@ -90,6 +91,12 @@ def draft(request: HttpRequest, program_id: int, version_id: int) -> HttpRespons
                     form = standard_form
                 case _:
                     return HttpResponse(status=400)
+            model = (
+                PerformanceStandardVersion if isinstance(form, StandardForm) else form._meta.model
+            )
+            require_program_permission(
+                actor, program_id, f"competencies.add_{model._meta.model_name}"
+            )
             if form.is_valid():
                 if isinstance(form, StandardForm):
                     form.create_version(actor)

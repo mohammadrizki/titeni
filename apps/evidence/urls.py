@@ -1,5 +1,13 @@
 from django.urls import path
 
+from apps.adaptive.planning_views import planning_demonstration
+from apps.adaptive.policy_views import (
+    escalation_queue,
+    policies,
+    policy_detail,
+    preview_policy_for_evaluation,
+)
+from apps.adaptive.views import evaluations, longitudinal_review
 from apps.evidence.artifact_map import (
     artifact_map,
     artifact_maps,
@@ -15,6 +23,25 @@ from apps.evidence.views import registry
 app_name = "evidence"
 urlpatterns = [
     path("", registry, name="registry"),
+    path("kebijakan-adaptif/", policies, name="adaptive_policies"),
+    path("eskalasi/", escalation_queue, name="adaptive_escalation_queue"),
+    path(
+        "rencana-individual/<int:enrollment_id>/evaluasi/<int:evaluation_id>/pratinjau-rencana/",
+        preview_policy_for_evaluation,
+        name="adaptive_policy_preview",
+    ),
+    path("kebijakan-adaptif/<int:policy_id>/", policy_detail, name="adaptive_policy"),
+    path("uji-percobaan-tambahan/", planning_demonstration, name="planning_demonstration"),
+    path(
+        "rencana-individual/<int:enrollment_id>/evaluasi/",
+        evaluations,
+        name="evaluations",
+    ),
+    path(
+        "rencana-individual/<int:enrollment_id>/tinjauan-kompetensi/",
+        longitudinal_review,
+        name="longitudinal_review",
+    ),
     path(
         "rencana-individual/<int:enrollment_id>/rekonsiliasi/",
         reconcile,

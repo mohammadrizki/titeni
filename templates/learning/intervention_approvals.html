@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block title %}Persetujuan intervensi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Persetujuan intervensi</h1>
+  <p>{{ baseline.enrollment.learner }}</p>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Kegiatan</th><th>Alasan</th><th>Hasil yang diharapkan</th><th>Status</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for draft in drafts %}
+      <tr><th scope="row">{{ draft.activity }}</th><td>{{ draft.rationale }}</td><td>{{ draft.expected_outcome }}</td>
+        <td>{% if draft.interventionapproval %}Wajib · {{ draft.interventionapproval.approved_by }} · {{ draft.interventionapproval.approved_at }}{% elif draft.evaluation_id in eligible %}Draf{% else %}Indikasi berakhir{% endif %}</td>
+        <td>{% if draft.evaluation_id in eligible and not draft.interventionapproval %}
+          <form method="post">{% csrf_token %}<input type="hidden" name="draft" value="{{ draft.pk }}">
+            <button class="button">Setujui sebagai wajib</button>
+          </form>
+        {% endif %}</td>
+      </tr>
+    {% empty %}<tr><td colspan="5">Belum ada draf intervensi.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

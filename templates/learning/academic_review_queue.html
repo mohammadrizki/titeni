@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% block title %}Penugasan pembimbing akademik · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Penugasan pembimbing akademik</h1>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Mahasiswa</th><th>Pendaftaran</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for assignment in assignments %}
+        <tr>
+          <th scope="row">{{ assignment.enrollment.learner }}</th>
+          <td>{{ assignment.enrollment.cohort }}</td>
+          <td>{% if assignment.enrollment.evidence_baseline %}
+            <a href="{% url 'academics:evidence:longitudinal_review' assignment.enrollment.cohort.period.program_id assignment.enrollment_id %}">Buka tinjauan</a>
+          {% else %}Baseline belum tersedia{% endif %}</td>
+        </tr>
+      {% empty %}<tr><td colspan="3">Belum ada penugasan aktif.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

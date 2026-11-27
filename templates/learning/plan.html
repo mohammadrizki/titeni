@@ -1,0 +1,78 @@
+{% extends "core/base.html" %}
+{% block title %}Tujuan belajar · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Tujuan belajar</h1>
+  <p class="mt-2">{{ enrollment.cohort.period.program }} · {{ enrollment.cohort }}</p>
+  {% if editing %}
+    <p><a href="{% url 'learning_plan' enrollment.pk %}">Kembali ke daftar</a></p>
+    <form method="post" class="mt-4">{% csrf_token %}{{ form.as_p }}
+      <button class="button">Simpan revisi</button>
+    </form>
+    <h2 class="section-title mt-4">Riwayat tujuan</h2>
+    {% for version in editing.revisions.all %}
+      <details><summary>{{ version }} · {{ version.recorded_at }}</summary>
+      <dl>
+        <dt>Kompetensi</dt><dd>{{ version.snapshot.competency }}</dd>
+        <dt>Versi refleksi asal</dt><dd>{{ version.snapshot.reflection_source|default:"—" }}</dd>
+        <dt>Rekomendasi asal</dt><dd>{{ version.snapshot.coaching_source|default:"—" }}</dd>
+        <dt>Alasan</dt><dd>{{ version.snapshot.rationale }}</dd>
+        <dt>Kegiatan</dt><dd>{{ version.snapshot.activity }}</dd>
+        <dt>Hasil yang diharapkan</dt><dd>{{ version.snapshot.expected_outcome }}</dd>
+        <dt>Bukti kemajuan</dt><dd>{{ version.snapshot.improvement_evidence }}</dd>
+        <dt>Kriteria penyelesaian</dt><dd>{{ version.snapshot.completion_criteria }}</dd>
+        <dt>Tenggat</dt><dd>{{ version.snapshot.due_on }}</dd>
+        <dt>Tinjauan</dt><dd>{{ version.snapshot.review_on }}</dd>
+      </dl></details>
+    {% empty %}<p>Belum ada revisi.</p>{% endfor %}
+  {% elif has_competencies %}
+    <form method="post" class="mt-4">{% csrf_token %}
+      {% include "core/add_row.html" with form=form only %}
+    </form>
+  {% else %}<p class="mt-4">Tujuan dapat ditambahkan setelah kompetensi baseline tersedia.</p>{% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Kompetensi</th><th scope="col">Kegiatan</th><th scope="col">Tenggat</th><th scope="col">Tinjauan</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for goal in goals %}
+          <tr>
+            <th scope="row">{{ goal.competency }}</th><td>{{ goal.activity }}</td><td>{{ goal.due_on }}</td><td>{{ goal.review_on }}</td>
+            <td><a href="{% url 'learning_goal_shares' enrollment.pk goal.pk %}">Berbagi dan tinjauan</a> {% if can_edit %}<a href="{% url 'learning_goal' enrollment.pk goal.pk %}">Sunting dan riwayat</a>{% endif %}<details><summary>Lihat rincian</summary><dl>
+              {% if goal.reflection_source or goal.coaching_source %}
+                <dt>Asal tujuan</dt>
+                {% if goal.reflection_source %}<dd>{{ goal.reflection_source }}</dd>
+                {% else %}<dd>{{ goal.coaching_source.body }}</dd>{% endif %}
+              {% endif %}
+              <dt>Penanggung jawab</dt><dd>Mahasiswa</dd>
+              <dt>Alasan</dt><dd>{{ goal.rationale }}</dd>
+              <dt>Hasil yang diharapkan</dt><dd>{{ goal.expected_outcome }}</dd>
+              <dt>Bukti kemajuan</dt><dd>{{ goal.improvement_evidence }}</dd>
+              <dt>Kriteria penyelesaian</dt><dd>{{ goal.completion_criteria }}</dd>
+            </dl></details></td>
+          </tr>
+        {% empty %}<tr><td colspan="5">Belum ada tujuan belajar.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if approved_interventions %}
+    <h2 class="section-title mt-4">Intervensi wajib</h2>
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Kegiatan</th><th>Alasan</th><th>Hasil yang diharapkan</th><th>Persetujuan</th><th>Pelaksanaan</th><th>Asesmen ulang</th><th>Aksi</th></tr></thead>
+      <tbody>{% for approval in approved_interventions %}
+        <tr><th scope="row">{{ approval.draft.activity }}</th><td>{{ approval.draft.rationale }}</td><td>{{ approval.draft.expected_outcome }}</td><td>{{ approval.approved_by }} · {{ approval.approved_at }}</td>
+          <td>{% if approval.interventioncompletionreport %}Dilaporkan selesai · {{ approval.interventioncompletionreport.reported_at }}{% else %}Belum dilaporkan{% endif %}</td>
+          <td>{% if approval.interventioncompletionreport.reassessment %}
+            Kebutuhan tercatat · {{ approval.draft.evaluation.rule.standard.standard.item }}
+          {% elif approval.interventioncompletionreport %}Menunggu verifikasi pembimbing{% else %}—{% endif %}</td>
+          <td>{% if can_report_completion and not approval.interventioncompletionreport %}
+            <form method="post" action="{% url 'intervention_completion_report' enrollment.pk approval.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="button">Laporkan selesai</button>
+            </form>
+          {% endif %}</td>
+        </tr>
+      {% endfor %}</tbody>
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

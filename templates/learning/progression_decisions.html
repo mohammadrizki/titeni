@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% block title %}Keputusan Progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% if decision %}
+    {% url 'progression_decisions' as parent %}
+    {% include "core/breadcrumbs.html" with current=decision.ballot.get_proposed_outcome_display parent_url=parent parent_label="Keputusan Progresi" only %}
+    <h1 class="heading mt-3">{{ decision.ballot.get_proposed_outcome_display }}</h1>
+    <p>{{ decision.ballot.enrollment }} · {{ decision.published_at }} · {{ decision.published_by }}</p>
+    {% if decision.ballot.standard %}<p>Standar {{ decision.ballot.standard }}</p>{% endif %}
+    {% if decision.ballot.conditions %}
+      <h2 class="section-title mt-4">Syarat atau kebutuhan bukti</h2>{{ decision.ballot.conditions|linebreaks }}
+    {% endif %}
+    <h2 class="section-title mt-4">Alasan keputusan</h2>
+    {{ decision.rationale|linebreaks }}
+    <p>{{ decision.ballot.tally.approvals }} suara setuju dari {{ decision.ballot.tally.eligible }} anggota yang memenuhi syarat.</p>
+    {% include "learning/progression_decision_evidence.html" with evidence=evidence only %}
+    {% if decision.replacement %}<p><a href="{% url 'progression_decision' decision.replacement.pk %}">Lihat keputusan pengganti</a></p>{% endif %}
+    {% if decision.replaces %}<p><a href="{% url 'progression_decision' decision.replaces.pk %}">Lihat keputusan awal dan hasil banding</a></p>{% endif %}
+    {% if decision.appeal_until %}<p>Tenggat banding {{ decision.appeal_until }}.</p>{% endif %}
+    {% if appeal %}
+      <h2 class="section-title mt-4">Banding</h2>
+      {{ appeal.reason|linebreaks }}
+      {% if appeal.resolved_at %}<p>{{ appeal.get_outcome_display }} · {{ appeal.resolved_at }}</p>{{ appeal.resolution|linebreaks }}
+      {% elif appeal.mandate_id %}<p>Dalam peninjauan komite banding.</p>
+      {% else %}<p>Menunggu penunjukan komite banding.</p>{% endif %}
+    {% elif appeal_form %}
+      <h2 class="section-title mt-4">Ajukan banding</h2>
+      <form method="post" class="mt-4">
+        {% csrf_token %}{{ appeal_form.as_p }}
+        <button class="button" type="submit">Ajukan banding</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <h1 class="heading">Keputusan Progresi</h1>
+    <div class="table-wrap mt-4"><table class="data-table">
+      <thead><tr><th>Pendaftaran</th><th>Hasil</th><th>Terbit</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for record in decisions %}
+        <tr><th scope="row">{{ record.ballot.enrollment }}</th><td>{{ record.ballot.get_proposed_outcome_display }}{% if record.replacement %} · Digantikan{% elif record.replaces %} · Pengganti{% endif %}</td><td>{{ record.published_at }}</td><td><a href="{% url 'progression_decision' record.pk %}">Buka keputusan</a></td></tr>
+      {% empty %}<tr><td colspan="4">Belum ada keputusan progresi.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

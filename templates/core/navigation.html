@@ -1,8 +1,42 @@
-{% load exam_adapters %}
+{% load adaptive_access epa_access exam_adapters progression_access %}
 {% with route=request.resolver_match.view_name %}
 <nav aria-label="Menu aplikasi" class="app-navigation grid gap-1">
   <a class="nav-link" href="{% url 'home' %}"{% if route == "home" %} aria-current="page"{% endif %}>Beranda</a>
   <a class="nav-link" href="{% url 'academics:programs' %}"{% if route == "academics:programs" %} aria-current="page"{% endif %}>Akademik</a>
+  {% can_open_assessor_assignments user as show_assessor_assignments %}
+  {% if show_assessor_assignments %}
+    <a class="nav-link" href="{% url 'assessor_assignments' %}"{% if route == "assessor_assignments" %} aria-current="page"{% endif %}>Penugasan Asesor</a>
+  {% endif %}
+  {% has_epa_assignments user as show_epa_assignments %}
+  {% if show_epa_assignments %}
+    <a class="nav-link" href="{% url 'epa_observations' %}"{% if route == "epa_observations" %} aria-current="page"{% elif route == "epa_observation_assignment" %} aria-current="location"{% endif %}>Observasi EPA</a>
+  {% endif %}
+  {% has_epa_reviews user as show_epa_reviews %}
+  {% if show_epa_reviews %}
+    <a class="nav-link" href="{% url 'epa_review_queue' %}"{% if route == "epa_review_queue" %} aria-current="page"{% elif route == "epa_review_draft" %} aria-current="location"{% endif %}>Peninjauan EPA</a>
+  {% endif %}
+  {% has_epa_committee_mandates user as show_epa_committee %}
+  {% if show_epa_committee %}
+    <a class="nav-link" href="{% url 'epa_participation_mandates' %}"{% if route == "epa_participation_mandates" %} aria-current="page"{% elif route == "epa_participation_cases" or route == "epa_participate" %} aria-current="location"{% endif %}>Partisipasi Komite EPA</a>
+  {% endif %}
+  {% has_epa_decisions user as show_epa_decisions %}
+  {% if show_epa_decisions %}
+    <a class="nav-link" href="{% url 'epa_student_decisions' %}">Keputusan EPA</a>
+  {% endif %}
+  {% has_progression_reviews user as show_progression_reviews %}
+  {% if show_progression_reviews %}
+    <a class="nav-link" href="{% url 'progression_review_queue' %}"{% if route == "progression_review_queue" %} aria-current="page"{% elif route == "progression_review_draft" %} aria-current="location"{% endif %}>Peninjauan Progresi</a>
+  {% endif %}
+  {% has_progression_mandate user as show_progression_committee %}
+  {% if show_progression_committee %}
+    <a class="nav-link" href="{% url 'progression_committee_queue' %}">Sidang Progresi</a>
+  {% endif %}
+  {% has_progression_decision user as show_progression_decisions %}
+  {% if show_progression_decisions %}
+    <a class="nav-link" href="{% url 'progression_decisions' %}">Keputusan Progresi</a>
+  {% endif %}
+  {% if user.is_authenticated %}<a class="nav-link" href="{% url 'reflection_index' %}">Refleksi Pribadi</a>{% endif %}
+  {% if user.is_authenticated %}<a class="nav-link" href="{% url 'learning_index' %}">Rencana Belajar</a>{% endif %}
   {% has_active_exam_protocols as show_exam_import %}
   {% if show_exam_import %}
     <a class="nav-link" href="{% url 'exam_imports:index' %}"{% if route == "exam_imports:index" %} aria-current="page"{% elif route == "exam_imports:adapter" or route == "exam_imports:batch" %} aria-current="location"{% endif %}>Impor Hasil Ujian</a>
@@ -26,6 +60,24 @@
         {% endif %}
         {% if perms.accounts.view_user %}
           <a class="nav-link" href="{% url 'accounts:directory' %}"{% if route == "accounts:directory" or route == "accounts:reset_account_password" or route == "accounts:delete_account" or route == "accounts:assign_roles" %} aria-current="page"{% endif %}>Pengguna</a>
+        {% endif %}
+        {% if perms.learning.view_progressioncommitteemandate %}
+          <a class="nav-link" href="{% url 'accounts:progression_committees' %}"{% if route == "accounts:progression_committees" %} aria-current="page"{% elif route == "accounts:progression_committee" %} aria-current="location"{% endif %}>Mandat Komite Progresi</a>
+        {% endif %}
+        {% if perms.epa.view_epacommitteemandate %}
+          <a class="nav-link" href="{% url 'accounts:epa_committees' %}"{% if route == "accounts:epa_committees" %} aria-current="page"{% elif route == "accounts:epa_committee" %} aria-current="location"{% endif %}>Mandat Komite EPA</a>
+        {% endif %}
+        {% if perms.epa.add_epaappealpolicy %}
+          <a class="nav-link" href="{% url 'accounts:epa_appeal_policies' %}">Tenggat Banding EPA</a>
+        {% endif %}
+        {% if perms.epa.change_epaappeal %}
+          <a class="nav-link" href="{% url 'accounts:epa_appeals' %}">Banding EPA</a>
+        {% endif %}
+        {% if perms.learning.add_progressionappealpolicy %}
+          <a class="nav-link" href="{% url 'accounts:progression_appeal_policies' %}">Tenggat Banding Progresi</a>
+        {% endif %}
+        {% if perms.learning.change_progressionappeal %}
+          <a class="nav-link" href="{% url 'accounts:progression_appeals' %}">Banding Progresi</a>
         {% endif %}
         {% if perms.accounts.add_programconfigurationgrant %}
           <a class="nav-link" href="{% url 'accounts:program_grants' %}"{% if route == "accounts:program_grants" %} aria-current="page"{% endif %}>Penugasan</a>

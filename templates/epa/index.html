@@ -1,0 +1,39 @@
+{% extends "core/base.html" %}
+{% block title %}EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:programs' as parent %}
+  {% include "core/breadcrumbs.html" with current="EPA" parent_url=parent parent_label="Akademik" only %}
+  <h1 class="heading mt-3">Entrustable Professional Activities</h1>
+  <p>{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="epa" only %}
+  <div class="academic-tab-panel">
+    <h2 class="section-title">Kegiatan profesional</h2>
+    <table class="data-table">
+      <thead><tr><th scope="col">Kode EPA</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for activity in activities %}
+        <tr><th scope="row">{{ activity.code }}</th><td><a href="{% url 'academics:epa:activity' program.pk activity.pk %}">Lihat versi</a></td></tr>
+      {% empty %}<tr><td colspan="2">Belum ada EPA.</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if activity_form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}<input type="hidden" name="action" value="activity">
+        {% include "core/add_row.html" with form=activity_form add_label="Tambah baris EPA" only %}
+      </form>
+    {% endif %}
+    <h2 class="section-title mt-6">Skala supervisi</h2>
+    <table class="data-table">
+      <thead><tr><th scope="col">Kode skala</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for scale in scales %}
+        <tr><th scope="row">{{ scale.code }}</th><td><a href="{% url 'academics:epa:scale' program.pk scale.pk %}">Lihat versi</a></td></tr>
+      {% empty %}<tr><td colspan="2">Belum ada skala supervisi.</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if scale_form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}<input type="hidden" name="action" value="scale">
+        {% include "core/add_row.html" with form=scale_form add_label="Tambah baris skala" only %}
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

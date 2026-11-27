@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block title %}Kebijakan percobaan tambahan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Kebijakan percobaan tambahan</h1>
+  <p class="mt-2">{{ program.name }}</p>
+  {% if escalation_reminders is not None %}
+    <p class="mt-4">
+      <a href="{% url 'academics:evidence:adaptive_escalation_queue' program.pk %}">
+        Antrean eskalasi{% if escalation_reminders %} · {{ escalation_reminders }} jatuh tempo hari ini atau lewat tenggat{% endif %}
+      </a>
+    </p>
+  {% endif %}
+  
+  {% if can_add %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {% include "core/add_row.html" with form=form only %}
+    </form>
+  {% endif %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Versi kebijakan</th><th scope="col">Batas kumulatif</th><th scope="col">Tenggat tinjauan (hari)</th><th scope="col">Penyusun</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for version in versions %}
+          <tr>
+            <th scope="row">{{ version }}</th><td>{{ version.maximum_attempts }}</td>
+            <td>{{ version.review_within_days }}</td><td>{{ version.created_by }}</td>
+            <td><a href="{% url 'academics:evidence:adaptive_policy' program.pk version.pk %}">{% if version.publication %}Buka versi terbit{% else %}Buka draf{% endif %}</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Belum ada draf kebijakan.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

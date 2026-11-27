@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+{% block title %}Partisipasi Komite EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Partisipasi Komite EPA</h1>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th>Mandat</th><th>Prodi</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>
+        {% for mandate in mandates %}
+          <tr><th scope="row">{{ mandate.name }}</th><td>{{ mandate.program }}</td><td><a href="{% url 'epa_participation_cases' mandate.pk %}">Lihat kasus</a></td></tr>
+        {% empty %}<tr><td colspan="3">Belum ada mandat aktif.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

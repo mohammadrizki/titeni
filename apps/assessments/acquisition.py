@@ -11,6 +11,8 @@ from django.views.decorators.http import require_http_methods
 from apps.academics.models import LearnerEnrollment, StudyProgram
 from apps.accounts.access import configurable_programs, program_role_permissions
 from apps.accounts.models import User
+from apps.adaptive.models import EvidenceEvaluation
+from apps.adaptive.recalculation import reevaluate_for_evidence
 from apps.assessments.models import (
     AssessmentAttempt,
     AssessmentEvent,
@@ -382,6 +384,12 @@ def verify_evidence(
                     pk=updated.source_link_id,
                 )
             updated.save()
+            trigger = {
+                "verify": EvidenceEvaluation.Trigger.VERIFICATION,
+                "correct": EvidenceEvaluation.Trigger.EVIDENCE_CORRECTION,
+                "invalidate": EvidenceEvaluation.Trigger.INVALIDATION,
+            }[action]
+            reevaluate_for_evidence(record, actor, trigger)
             return redirect(
                 "academics:assessments:attempt_evidence",
                 program_id=program_id,

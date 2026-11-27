@@ -1,0 +1,55 @@
+{% if versions %}
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Aturan</th>
+          <th scope="col">Minimum percobaan, konteks, verifikator, dan sumber</th>
+          <th scope="col">Usia maksimum (hari)</th>
+          {% if production %}<th scope="col">Ambang terbuka dan tertutup</th>{% endif %}
+          <th scope="col">Status</th>
+          {% if can_retire %}<th scope="col" class="table-action-column">Aksi</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for rule in versions %}
+          <tr>
+            <th scope="row">{{ rule }}</th>
+            <td>{{ rule.minimum_attempts }} / {{ rule.minimum_contexts }} / {{ rule.minimum_verifiers }} / {{ rule.minimum_sources|default_if_none:"—" }}</td>
+            <td>{{ rule.maximum_age_days|default_if_none:"—" }}</td>
+            {% if production %}
+              <td>{% if rule.publication %}{{ rule.publication.minimum_below }} / {{ rule.publication.minimum_meets }}{% else %}—{% endif %}</td>
+            {% endif %}
+            <td>
+              {% if rule.publication %}
+                Terbit {{ rule.publication.created_at }} oleh {{ rule.publication.created_by }}.
+              {% endif %}
+              {% if rule.retirement %}
+                Dihentikan {{ rule.retirement.created_at }} oleh {{ rule.retirement.created_by }}.
+                {{ rule.retirement.reason }}
+              {% elif production and not rule.publication %}Draf
+              {% elif not production %}Aktif{% endif %}
+            </td>
+            {% if can_retire %}
+              <td>
+                {% if not rule.retirement and rule.publication or not rule.retirement and not production %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="rule" value="{{ rule.pk }}">
+                    <label for="retirement-reason-{{ rule.pk }}">Alasan penghentian</label>
+                    <input type="text" name="reason" id="retirement-reason-{{ rule.pk }}" maxlength="500" required>
+                    <button class="button" type="submit" name="action" value="{{ action }}">Hentikan</button>
+                  </form>
+                {% endif %}
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif production %}
+  <p>Belum ada versi aturan produksi.</p>
+{% else %}
+  <p>Belum ada versi aturan demonstrasi.</p>
+{% endif %}

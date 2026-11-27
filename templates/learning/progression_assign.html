@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% block title %}Penugasan peninjau progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:enrollments' enrollment.cohort.period.program_id enrollment.cohort_id as parent %}
+  {% include "core/breadcrumbs.html" with current="Penugasan peninjau progresi" parent_url=parent parent_label="Pendaftaran mahasiswa" only %}
+  <h1 class="heading mt-3">Penugasan peninjau progresi</h1>
+  <p>{{ enrollment }} · {{ enrollment.cohort.period.program }}</p>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Peninjau</th><th>Ditugaskan</th><th>Versi draf</th></tr></thead>
+    <tbody>{% for assignment in assignments %}
+      <tr><th scope="row">{{ assignment.reviewer }}</th><td>{{ assignment.assigned_at }}</td><td>{{ assignment.draft_count }}</td></tr>
+    {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    {% include "core/add_row.html" with form=form add_label="Tambah baris peninjau" only %}
+  </form>
+</section>
+{% endblock %}

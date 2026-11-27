@@ -16,9 +16,11 @@ from apps.evidence.models import ArtifactMapVersion, LearnerEvidencePlan
 
 def can_access_plan(actor: User, program_id: int, action: str) -> bool:
     permission = f"evidence.{action}_learnerevidenceplan"
-    return actor.has_perm("academics.view_learnerenrollment") and (
-        actor.has_perm(permission) or permission in program_role_permissions(actor, program_id)
-    )
+    roles = program_role_permissions(actor, program_id)
+    return (
+        actor.has_perm("academics.view_learnerenrollment")
+        or "academics.view_learnerenrollment" in roles
+    ) and (actor.has_perm(permission) or permission in roles)
 
 
 class MapVersionChoiceField(forms.ModelChoiceField):

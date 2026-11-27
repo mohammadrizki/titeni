@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% block title %}Refleksi pribadi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Refleksi pribadi</h1>
+  <p class="mt-2">Draf hanya dapat dibuka oleh pemiliknya.</p>
+  <p class="mt-4"><a href="{% url 'reflection_drafts' enrollment.pk %}">Buat draf</a></p>
+  <ul>{% for draft in drafts %}<li><a href="{% url 'reflection_draft' enrollment.pk draft.pk %}">{{ draft }} · {{ draft.created_at }}</a></li>{% endfor %}</ul>
+  {% if evidence_summary %}
+    {% include "reflection/evidence_summary.html" with summary=evidence_summary only %}
+  {% endif %}
+  {% if program_prompts %}
+    <details class="mt-4">
+      <summary>Pemantik refleksi</summary>
+      <ul>{% for prompt in program_prompts %}<li>{{ prompt }}</li>{% endfor %}</ul>
+    </details>
+  {% elif use_default_prompts %}
+  <details class="mt-4">
+    <summary>Pemantik refleksi</summary>
+    <ul>
+      <li>Apa yang terjadi, dan apa yang saya pelajari?</li>
+      {% for competency in prompt_competencies %}
+        <li>Apa yang ditunjukkan pengalaman atau bukti saya tentang {{ competency.name }}?</li>
+      {% empty %}
+        <li>Bagian mana dari pengalaman ini yang masih perlu saya pahami?</li>
+      {% endfor %}
+      <li>Apa yang akan saya coba berikutnya, dan bukti apa yang dapat menunjukkan kemajuan?</li>
+    </ul>
+  </details>
+  {% endif %}
+  {% if not has_competency_choices %}<p class="mt-2">Pilihan kompetensi tersedia setelah pendaftaran memiliki baseline.</p>{% endif %}
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <p>Pilih bukti yang ingin Anda refleksikan. Bukti yang sudah tidak layak tidak dapat dipilih lagi.</p>
+    {{ form.as_p }}
+    <button class="button" type="submit">Simpan draf pribadi</button>
+  </form>
+  {% if revisions %}
+    <h2 class="section-title mt-4">Riwayat versi</h2>
+    {% for version in revisions %}
+      <details><summary>Versi {{ version.number }} · {{ version.created_at }}</summary><p class="whitespace-pre-wrap">{{ version.body }}</p><a href="{% url 'reflection_share' enrollment.pk version.pk %}">Atur berbagi versi {{ version.number }}</a> · <a href="{% url 'learning_plan' enrollment.pk %}?reflection_source={{ version.pk }}">Buat tujuan dari versi ini</a>{% if version.evidence.all %}<ul>{% for record in version.evidence.all %}<li>{{ record.reference }} · Versi {{ record.revision_number }}</li>{% endfor %}</ul>{% endif %}{% if version.competencies.all %}<ul>{% for competency in version.competencies.all %}<li>{{ competency }}</li>{% endfor %}</ul>{% endif %}</details>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

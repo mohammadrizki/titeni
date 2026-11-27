@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% block title %}Penugasan peninjau EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:epa:activity_version' program.pk publication.version.activity_id publication.version_id as parent %}
+  {% include "core/breadcrumbs.html" with current="Penugasan peninjau EPA" parent_url=parent parent_label=publication.version.title only %}
+  <h1 class="heading mt-3">Penugasan peninjau EPA</h1>
+  <p>{{ program.name }} · {{ publication.version }}</p>
+  <div class="table-wrap mt-4">
+    <table class="data-table">
+      <thead><tr><th scope="col">Mahasiswa</th><th scope="col">Peninjau</th><th scope="col">Versi draf tersimpan</th></tr></thead>
+      <tbody>
+        {% for assignment in assignments %}
+          <tr><th scope="row">{{ assignment.enrollment }}</th><td>{{ assignment.reviewer }}</td><td>{{ assignment.draft_count }}</td></tr>
+        {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if form %}
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      {% include "core/add_row.html" with form=form only %}
+    </form>
+  {% else %}
+    <p class="mt-4">Penugasan baru tersedia pada versi EPA yang berlaku.</p>
+  {% endif %}
+</section>
+{% endblock %}

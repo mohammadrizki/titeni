@@ -53,6 +53,19 @@ def test_blueprint_preserves_versioned_mapping_and_program_scope(client: Client)
     )
     index = reverse("academics:assessments:blueprints", args=[program.pk])
     assert client.get(index).status_code == 302
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            codename__in=[
+                "add_assessmentblueprintversion",
+                "add_blueprintitem",
+                "add_blueprintitemcompetency",
+                "add_assessmentsamplingrule",
+                "add_blueprintitemevidencesource",
+                "add_evidencerequirementtemplate",
+                "add_artifactmapversion",
+            ]
+        )
+    )
     client.force_login(manager)
     denied = reverse("academics:assessments:blueprints", args=[other.pk])
     assert (

@@ -25,6 +25,9 @@ class GroupedPermissionCheckboxes(forms.CheckboxSelectMultiple):
             "accounts": "Accounts",
             "competencies": "Kompetensi",
             "evidence": "Bukti",
+            "adaptive": "Evaluasi bukti",
+            "reflection": "Refleksi",
+            "learning": "Rencana belajar",
             "assessments": "Asesmen",
         }
         groups: dict[str, list[dict[str, Any]]] = {}
@@ -51,6 +54,9 @@ class AccessRoleForm(forms.ModelForm):
                 "assessments",
                 "competencies",
                 "evidence",
+                "adaptive",
+                "reflection",
+                "learning",
             ]
         )
         .select_related("content_type")

@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block title %}Tenggat Banding EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Tenggat Banding EPA</h1>
+  <p>Tenggat dihitung sejak keputusan diterbitkan. Perubahan berlaku untuk keputusan berikutnya.</p>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Prodi</th><th>Hari</th><th>Ditetapkan</th></tr></thead>
+    <tbody>{% for policy in policies %}
+      <tr><th scope="row">{{ policy.program }}</th><td>{{ policy.days }}</td><td>{{ policy.created_at }} · {{ policy.created_by }}</td></tr>
+    {% empty %}<tr><td colspan="3">Belum ada tenggat.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <form method="post" class="mt-4">{% csrf_token %}{% include "core/add_row.html" with form=form only %}</form>
+</section>
+{% endblock %}

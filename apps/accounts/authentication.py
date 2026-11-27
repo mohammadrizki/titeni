@@ -3,11 +3,13 @@ from typing import cast
 from django import forms
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import Permission
 from django.db.models import QuerySet, Value
 from django.db.models.functions import Lower
 from django.http import HttpRequest
 
-from apps.accounts.models import User
+from apps.accounts.models import AccessRole, User
+from apps.accounts.role_catalog import SYSTEM_ROLE_PERMISSIONS
 
 
 def accounts_with_email(email: str) -> QuerySet[User]:
@@ -19,6 +21,21 @@ def accounts_with_email(email: str) -> QuerySet[User]:
 
 
 class EmailBackend(ModelBackend):
+    def get_user_permissions(self, user_obj, obj=None) -> set[str]:
+        permissions = super().get_user_permissions(user_obj, obj)
+        if obj is not None or not user_obj.is_authenticated or not user_obj.is_active:
+            return permissions
+        if not hasattr(user_obj, "_system_role_perm_cache"):
+            assigned = Permission.objects.filter(
+                accessrole__scope=AccessRole.Scope.SYSTEM,
+                accessrole__assignments__account=user_obj,
+                accessrole__assignments__program__isnull=True,
+            ).values_list("content_type__app_label", "codename")
+            user_obj._system_role_perm_cache = {
+                f"{app}.{code}" for app, code in assigned
+            } & SYSTEM_ROLE_PERMISSIONS
+        return permissions | user_obj._system_role_perm_cache
+
     def authenticate(
         self,
         request: HttpRequest | None,

@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+{% block title %}Refleksi pribadi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Refleksi pribadi</h1>
+  <p class="mt-4"><a href="{% url 'shared_reflections' %}">Refleksi yang dibagikan kepada saya</a></p>
+  <ul class="mt-4">
+    {% for enrollment in enrollments %}
+      <li><a href="{% url 'reflection_drafts' enrollment.pk %}">{{ enrollment.cohort.period.program }} · {{ enrollment.cohort }} · {{ enrollment.cohort.period }}</a></li>
+    {% empty %}
+      <li>Belum ada pendaftaran dengan akses refleksi pribadi.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

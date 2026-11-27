@@ -1,0 +1,33 @@
+{% with latest=finding.revisions.all.0 %}
+  <details class="mt-4" {% if form.finding.value|stringformat:"s" == finding.pk|stringformat:"s" %}open{% endif %}>
+    <summary>{{ finding.assignment }} · Versi {{ latest.number|default:1 }}</summary>
+    <ol class="mt-2">
+      {% for revision in finding.revisions.all %}
+        <li>Versi {{ revision.number }} · {{ revision.get_outcome_display }} · {{ revision.rationale }} · Koreksi {{ revision.reason }} · {{ revision.created_at }}</li>
+      {% endfor %}
+      <li>Versi 1 · {{ finding.get_outcome_display }} · {{ finding.rationale }} · {{ finding.created_at }}</li>
+    </ol>
+    <form method="post" class="mt-4">
+      {% csrf_token %}
+      <input type="hidden" name="finding" value="{{ finding.pk }}">
+      <input type="hidden" name="previous_number" value="{{ latest.number|default:1 }}">
+      {% if form.finding.value|stringformat:"s" == finding.pk|stringformat:"s" %}
+        <div>{{ form.outcome.as_field_group }}</div>
+        <div>{{ form.rationale.as_field_group }}</div>
+        <div>{{ form.reason.as_field_group }}</div>
+      {% else %}
+        <label for="finding-outcome-{{ finding.pk }}">Temuan asesor</label>
+        <select name="outcome" id="finding-outcome-{{ finding.pk }}">
+          {% for value, label in outcomes %}
+            <option value="{{ value }}" {% if value == latest.outcome|default:finding.outcome %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <label for="finding-rationale-{{ finding.pk }}">Alasan temuan</label>
+        <input type="text" name="rationale" id="finding-rationale-{{ finding.pk }}" value="{{ latest.rationale|default:finding.rationale }}" maxlength="500" required>
+        <label for="finding-reason-{{ finding.pk }}">Alasan koreksi</label>
+        <input type="text" name="reason" id="finding-reason-{{ finding.pk }}" maxlength="500" required>
+      {% endif %}
+      <button class="button" type="submit" name="action" value="revise-finding">Simpan koreksi</button>
+    </form>
+  </details>
+{% endwith %}

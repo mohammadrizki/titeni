@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% block title %}Uji rencana percobaan tambahan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Uji rencana percobaan tambahan</h1>
+  <p class="mt-2">{{ program.name }} · Data sintetis</p>
+  <p>Gunakan jumlah contoh untuk menguji bagaimana celah, ketersediaan, dan batas memengaruhi rencana.</p>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Hitung usulan</button>
+  </form>
+  {% if proposal %}
+    <h2 class="section-title mt-4">{{ route_label }}</h2>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th scope="col">Perubahan</th><th scope="col">Rincian</th></tr></thead>
+        <tbody>
+          {% for attempt in proposal.keep %}
+            <tr><th scope="row">Pertahankan</th><td>{{ attempt }}</td></tr>
+          {% endfor %}
+          {% for attempt in proposal.supersede %}
+            <tr><th scope="row">Hentikan kebutuhan</th><td>{{ attempt }}</td></tr>
+          {% endfor %}
+          {% for attempt in proposal.additional %}
+            <tr><th scope="row">Percobaan baru</th><td>{{ attempt.option.code }} · {{ attempt.targets|join:", " }}</td></tr>
+          {% endfor %}
+          {% for gap, amount in proposal.remaining.items %}
+            <tr><th scope="row">Celah tersisa</th><td>{{ gap }} · {{ amount }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

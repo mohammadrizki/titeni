@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% block title %}Banding Progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% if policy_form %}
+    <h1 class="heading">Tenggat Banding Progresi</h1>
+    <p>Tenggat dihitung sejak keputusan diterbitkan.</p>
+    <div class="table-wrap mt-4"><table class="data-table">
+      <thead><tr><th>Prodi</th><th>Hari</th><th>Ditetapkan</th></tr></thead>
+      <tbody>{% for policy in policies %}
+        <tr><th scope="row">{{ policy.program }}</th><td>{{ policy.days }}</td><td>{{ policy.created_at }} · {{ policy.created_by }}</td></tr>
+      {% empty %}<tr><td colspan="3">Belum ada tenggat.</td></tr>{% endfor %}</tbody>
+    </table></div>
+    <form method="post" class="mt-4">{% csrf_token %}{% include "core/add_row.html" with form=policy_form only %}</form>
+  {% elif appeal %}
+    {% url 'accounts:progression_appeals' as parent %}
+    {% include "core/breadcrumbs.html" with current="Penunjukan komite" parent_url=parent parent_label="Banding Progresi" only %}
+    <h1 class="heading mt-3">Komite Banding Progresi</h1>
+    <p>{{ appeal.decision.ballot }}</p>
+    {% if appeal.mandate_id %}
+      <p>{{ appeal.mandate }} · {{ appeal.assigned_by }} · {{ appeal.assigned_at }}</p>
+      {% if appeal.resolved_at %}<p>{{ appeal.get_outcome_display }} · {{ appeal.resolved_at }}</p>{% endif %}
+    {% elif assign_form.mandate.field.queryset %}
+      <form method="post" class="mt-4">{% csrf_token %}{{ assign_form.as_p }}<button class="button" type="submit">Tunjuk komite banding</button></form>
+    {% else %}
+      <p>Belum ada komite independen dengan mandat aktif untuk prodi ini.</p>
+      {{ assign_form.errors }}
+    {% endif %}
+  {% else %}
+    <h1 class="heading">Banding Progresi</h1>
+    <div class="table-wrap mt-4"><table class="data-table">
+      <thead><tr><th>Kasus</th><th>Pengajuan</th><th>Komite banding</th><th class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for record in appeals %}
+        <tr><th scope="row">{{ record.decision.ballot }}</th><td>{{ record.created_at }}</td><td>{{ record.mandate|default:"Menunggu penunjukan" }}</td>
+          <td><a href="{% url 'accounts:assign_progression_appeal' record.pk %}">Buka banding</a></td></tr>
+      {% empty %}<tr><td colspan="4">Belum ada banding.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

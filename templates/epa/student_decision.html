@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block title %}Keputusan EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'epa_student_decisions' as parent %}
+  {% include "core/breadcrumbs.html" with current=decision.ballot.publication.version.title parent_url=parent parent_label="Keputusan EPA" only %}
+  <h1 class="heading mt-3">{{ decision.ballot.publication.version }}</h1>
+  <dl class="mt-4">
+    <dt>Tingkat supervisi</dt><dd>{{ decision.ballot.level }} · {{ decision.ballot.level.version }}</dd>
+    <dt>Diterbitkan</dt><dd>{{ decision.created_at }} · {{ decision.created_by }}</dd>
+    <dt>Hasil suara</dt><dd>{{ decision.ballot.result.approvals }} setuju dari {{ decision.ballot.result.eligible }} anggota yang memenuhi syarat</dd>
+    {% if decision.appeal_until %}<dt>Tenggat banding</dt><dd>{{ decision.appeal_until }}</dd>{% endif %}
+  </dl>
+  {% if decision.replacement %}<p><a href="{% url 'epa_student_decision' decision.replacement.pk %}">Lihat keputusan pengganti</a></p>{% endif %}
+  {% if decision.replaces %}<p><a href="{% url 'epa_student_decision' decision.replaces.pk %}">Lihat keputusan awal dan hasil banding</a></p>{% endif %}
+  <h2 class="section-title mt-4">Alasan keputusan</h2>
+  {{ decision.ballot.rationale|linebreaks }}
+  <h2 class="section-title mt-4">Bukti pendukung</h2>
+  <ul>{% for observation in evidence %}<li>Observasi #{{ observation.pk }} · {{ observation.occurred_on }} · {{ observation.level }}</li>{% empty %}<li>Belum ada bukti tercatat.</li>{% endfor %}</ul>
+  {% if appeal %}
+    <h2 class="section-title mt-4">Banding</h2>
+    {{ appeal.reason|linebreaks }}
+    {% if appeal.resolved_at %}<p>{{ appeal.get_outcome_display }} · {{ appeal.resolved_at }}</p>{{ appeal.resolution|linebreaks }}
+    {% elif appeal.mandate_id %}<p>Dalam peninjauan komite banding.</p>
+    {% else %}<p>Menunggu penunjukan komite banding.</p>{% endif %}
+  {% elif form %}
+    <h2 class="section-title mt-4">Ajukan banding</h2>
+    <form method="post" class="mt-4">{% csrf_token %}{{ form.as_p }}<button class="button" type="submit">Ajukan banding</button></form>
+  {% endif %}
+</section>
+{% endblock %}

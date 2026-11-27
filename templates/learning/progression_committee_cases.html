@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+{% block title %}Kasus Progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'progression_committee_queue' as parent %}
+  {% include "core/breadcrumbs.html" with current=mandate.name parent_url=parent parent_label="Sidang Progresi" only %}
+  <h1 class="heading mt-3">{{ mandate.name }}</h1>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Pendaftaran mahasiswa</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for enrollment in page %}
+      <tr><th scope="row">{{ enrollment }}</th><td><a href="{% url 'progression_committee_case' mandate.pk enrollment.pk %}">Buka kasus</a></td></tr>
+    {% empty %}<tr><td colspan="2">Belum ada pendaftaran dengan draf peninjauan.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% include "core/page_navigation.html" with page=page only %}
+</section>
+{% endblock %}

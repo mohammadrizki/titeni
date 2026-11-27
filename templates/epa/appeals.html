@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block title %}Banding EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Banding EPA</h1>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Kasus</th><th>Pengajuan</th><th>Komite banding</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for appeal in appeals %}
+      <tr><th scope="row">{{ appeal.decision.ballot }}</th><td>{{ appeal.created_at }}</td><td>{{ appeal.mandate|default:"Menunggu penunjukan" }}</td>
+        <td><a href="{% url 'accounts:epa_assign_appeal' appeal.pk %}">Buka banding</a></td></tr>
+    {% empty %}<tr><td colspan="4">Belum ada banding.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

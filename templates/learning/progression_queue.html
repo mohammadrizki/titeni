@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+{% block title %}Peninjauan Progresi · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Peninjauan Progresi</h1>
+  <div class="table-wrap mt-4"><table class="data-table">
+    <thead><tr><th>Mahasiswa</th><th>Prodi</th><th class="table-action-column">Aksi</th></tr></thead>
+    <tbody>{% for assignment in assignments %}
+      <tr><th scope="row">{{ assignment.enrollment }}</th><td>{{ assignment.enrollment.cohort.period.program }}</td>
+        <td><a href="{% url 'progression_review_draft' assignment.pk %}">Buka peninjauan</a></td></tr>
+    {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% block title %}EPA {{ activity.code }} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:epa:index' program.pk as parent %}
+  {% include "core/breadcrumbs.html" with current=activity.code parent_url=parent parent_label="EPA" only %}
+  <h1 class="heading mt-3">{% if version %}{{ version.title }}{% else %}EPA {{ activity.code }}{% endif %}</h1>
+  <p>{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="epa_detail" only %}
+  <div class="academic-tab-panel">
+    {% if version %}
+      <p><a href="{% url 'academics:epa:activity' program.pk activity.pk %}">Daftar versi {{ activity.code }}</a> · Versi {{ version.number }}</p>
+      <p>{{ version.description }}</p>
+      <dl class="mt-4">
+        {% if version.practice_scope %}<dt>Cakupan praktik</dt><dd>{{ version.practice_scope }}</dd>{% endif %}
+        {% if version.limitations %}<dt>Batasan praktik</dt><dd>{{ version.limitations }}</dd>{% endif %}
+        {% if published %}<dt>Status</dt><dd>Pernah diberlakukan · konfigurasi terkunci</dd>{% endif %}
+        <dt>Versi kerangka kompetensi</dt><dd>{{ version.framework }}</dd>
+        <dt>Versi skala supervisi</dt><dd><a href="{% url 'academics:epa:scale_version' program.pk version.scale.scale_id version.scale_id %}">{{ version.scale }}</a></dd>
+      </dl>
+      {% if can_manage %}
+        <p class="mt-4"><a href="{% url 'academics:epa:manage' program.pk activity.pk version.pk %}">Pemberlakuan dan penugasan asesor</a></p>
+      {% endif %}
+      {% if can_assign_review %}
+        <p class="mt-4"><a href="{% url 'academics:epa:review_assignments' program.pk activity.pk version.pk %}">Penugasan peninjau EPA</a></p>
+      {% endif %}
+      <h2 class="section-title mt-4">Pemetaan kompetensi</h2>
+      <table class="data-table">
+        <thead><tr><th scope="col">Butir</th><th scope="col">Peran</th></tr></thead>
+        <tbody>{% for link in competencies %}
+          <tr><th scope="row">{{ link.item }}</th><td>{{ link.get_kind_display }}</td></tr>
+        {% empty %}<tr><td colspan="2">Belum ada kompetensi yang dipetakan.</td></tr>{% endfor %}</tbody>
+      </table>
+    {% else %}
+      <h2 class="section-title">Versi kegiatan</h2>
+      <table class="data-table">
+        <thead><tr><th scope="col">Versi</th><th scope="col">Nama kegiatan</th><th scope="col">Status</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>{% for draft in versions %}
+          <tr><th scope="row">{{ draft.number }}</th><td>{{ draft.title }}</td><td>{% if draft.publication %}Pernah diberlakukan{% else %}Draf{% endif %}</td><td><a href="{% url 'academics:epa:activity_version' program.pk activity.pk draft.pk %}">Buka</a></td></tr>
+        {% empty %}<tr><td colspan="4">Belum ada versi.</td></tr>{% endfor %}</tbody>
+      </table>
+    {% endif %}
+    {% if form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {% include "core/add_row.html" with form=form only %}
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

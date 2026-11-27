@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block title %}Skala {{ scale.code }} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'academics:epa:index' program.pk as parent %}
+  {% include "core/breadcrumbs.html" with current=scale.code parent_url=parent parent_label="EPA" only %}
+  <h1 class="heading mt-3">{% if version %}{{ version.name }}{% else %}Skala {{ scale.code }}{% endif %}</h1>
+  <p>{{ program.name }}</p>
+  {% include "academics/program_tabs.html" with program=program active="epa_detail" only %}
+  <div class="academic-tab-panel">
+    {% if version %}
+      <p><a href="{% url 'academics:epa:scale' program.pk scale.pk %}">Daftar versi {{ scale.code }}</a> · Versi {{ version.number }}</p>
+      {% if published %}<p>Versi skala ini terkunci karena digunakan pada EPA yang sudah diberlakukan.</p>{% endif %}
+      <h2 class="section-title mt-4">Tingkat supervisi</h2>
+      <table class="data-table">
+        <thead><tr><th scope="col">Urutan</th><th scope="col">Tingkat</th><th scope="col">Deskripsi</th></tr></thead>
+        <tbody>{% for level in version.levels.all %}
+          <tr><th scope="row">{{ level.position }}</th><td>{{ level.label }}</td><td>{{ level.description }}</td></tr>
+        {% empty %}<tr><td colspan="3">Belum ada tingkat supervisi.</td></tr>{% endfor %}</tbody>
+      </table>
+    {% else %}
+      <h2 class="section-title">Versi skala</h2>
+      <table class="data-table">
+        <thead><tr><th scope="col">Versi</th><th scope="col">Nama skala</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+        <tbody>{% for draft in versions %}
+          <tr><th scope="row">{{ draft.number }}</th><td>{{ draft.name }}</td><td><a href="{% url 'academics:epa:scale_version' program.pk scale.pk draft.pk %}">Buka</a></td></tr>
+        {% empty %}<tr><td colspan="3">Belum ada versi.</td></tr>{% endfor %}</tbody>
+      </table>
+    {% endif %}
+    {% if form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {% include "core/add_row.html" with form=form only %}
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

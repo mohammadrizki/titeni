@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block title %}Observasi EPA · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% if assignment %}
+    {% url 'epa_observations' as parent %}
+    {% include "core/breadcrumbs.html" with current=assignment.publication.version.title parent_url=parent parent_label="Observasi EPA" only %}
+    <h1 class="heading mt-3">{{ assignment.publication.version.title }}</h1>
+    <p>{{ assignment.enrollment }} · Versi EPA {{ assignment.publication.version.number }} · {{ assignment.publication.version.scale }}</p>
+    {% if form %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {% include "core/add_row.html" with form=form add_label="Tambah baris observasi" only %}
+      </form>
+    {% else %}
+      <p>Versi EPA ini telah digantikan. Riwayat observasi tetap tersedia.</p>
+    {% endif %}
+    <h2 class="section-title mt-4">Riwayat observasi</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Tanggal</th><th>Konteks</th><th>Kompleksitas kasus</th><th>Tingkat supervisi</th><th>Umpan balik</th></tr></thead>
+        <tbody>
+          {% for observation in observations %}
+            <tr><th scope="row">{{ observation.occurred_on }}</th><td>{{ observation.context }}</td><td>{{ observation.case_complexity }}</td><td>{{ observation.level }}</td><td>{{ observation.feedback|linebreaks }}</td></tr>
+          {% empty %}<tr><td colspan="5">Belum ada observasi.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <h1 class="heading">Penugasan observasi EPA</h1>
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th>Mahasiswa</th><th>EPA</th><th class="table-action-column">Aksi</th></tr></thead>
+        <tbody>
+          {% for pending in assignments %}
+            <tr><th scope="row">{{ pending.enrollment }}</th><td>{{ pending.publication }}</td><td><a href="{% url 'epa_observation_assignment' pending.pk %}">Buka penugasan</a></td></tr>
+          {% empty %}<tr><td colspan="3">Belum ada penugasan.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

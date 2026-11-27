@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% block title %}{{ mandate.name }} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% url 'accounts:progression_committees' as parent %}
+  {% include "core/breadcrumbs.html" with current=mandate.name parent_url=parent parent_label="Mandat Komite Progresi" only %}
+  <h1 class="heading mt-3">{{ mandate.name }}</h1>
+  <p>{{ mandate.program }} · {% include "core/committee_status.html" %}</p>
+  <dl class="mt-4">
+    <dt>Cakupan</dt><dd>Capaian kompetensi dan kelanjutan studi di prodi ini</dd>
+    <dt>Masa berlaku</dt><dd>{{ mandate.starts_on|date:"d M Y" }} – {{ mandate.ends_on|date:"d M Y" }}</dd>
+    <dt>Kuorum minimum</dt><dd>{{ mandate.quorum }}</dd>
+    {% if mandate.issued_at %}
+      <dt>Ketua</dt><dd>{{ mandate.chair.account }}</dd>
+      <dt>Ditetapkan</dt><dd>{{ mandate.issued_at }} · {{ mandate.issued_by }}</dd>
+    {% endif %}
+    {% if mandate.revoked_at %}<dt>Dicabut</dt><dd>{{ mandate.revoked_at }} · {{ mandate.revoked_by }}</dd>{% endif %}
+  </dl>
+  {% if mandate.issued_at and perms.learning.view_progressionballot %}
+    <p class="mt-4"><a href="{% url 'accounts:progression_ballot_audit' mandate.pk %}">Riwayat pemungutan suara</a></p>
+  {% endif %}
+  {% if form %}
+    <details class="mt-4"{% if form.errors %} open{% endif %}>
+      <summary>Ubah draf mandat</summary>
+      <form method="post" class="mt-4">
+        {% csrf_token %}{{ form.as_p }}
+        <button class="button" name="action" value="update">Simpan perubahan</button>
+      </form>
+    </details>
+  {% endif %}
+  <h2 class="section-title mt-4">Anggota</h2>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Anggota</th><th>Status akun</th>{% if may_remove_member %}<th class="table-action-column">Aksi</th>{% endif %}</tr></thead>
+    <tbody>{% for member in members %}
+      <tr><th scope="row">{{ member.account }}</th><td>{% if member.account.is_active %}Aktif{% else %}Nonaktif{% endif %}</td>
+        {% if may_remove_member %}<td><form method="post">
+          {% csrf_token %}<input type="hidden" name="row" value="{{ member.pk }}"><button class="button" name="action" value="remove-member">Hapus</button>
+        </form></td>{% endif %}
+      </tr>
+    {% empty %}<tr><td colspan="{% if may_remove_member %}3{% else %}2{% endif %}">Belum ada anggota.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if member_form %}
+    <form class="mt-4" method="post">
+      {% csrf_token %}<input type="hidden" name="action" value="member">
+      {% include "core/add_row.html" with form=member_form add_label="Tambah baris anggota" only %}
+    </form>
+  {% endif %}
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if issue_form %}
+    <form class="mt-4" method="post">
+      {% csrf_token %}{{ issue_form.as_p }}
+      <p>Penetapan mengunci konfigurasi mandat, anggota, dan ketua.</p>
+      <button class="button" name="action" value="issue">Tetapkan mandat</button>
+    </form>
+  {% elif may_revoke %}
+    <form class="mt-4" method="post">{% csrf_token %}<button class="button" name="action" value="revoke">Cabut mandat</button></form>
+  {% endif %}
+</section>
+{% endblock %}

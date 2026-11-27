@@ -19,10 +19,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.accounts",
     "apps.academics",
+    "apps.adaptive",
     "apps.assessments",
     "apps.competencies",
     "apps.core",
     "apps.evidence",
+    "apps.epa",
+    "apps.reflection",
+    "apps.learning",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

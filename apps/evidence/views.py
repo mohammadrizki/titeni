@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import configurable_programs, require_program_permission
 from apps.accounts.models import User
 from apps.evidence.forms import CapabilityForm, EvidenceTypeForm, SourceCompetencyForm, SourceForm
 from apps.evidence.models import (
@@ -38,6 +38,9 @@ def registry(request: HttpRequest, program_id: int) -> HttpResponse:
     }
     if action is not None:
         form = forms[action]
+        require_program_permission(
+            actor, program_id, f"evidence.add_{form._meta.model._meta.model_name}"
+        )
         if form.is_valid():
             try:
                 with transaction.atomic():

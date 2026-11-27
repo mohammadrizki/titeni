@@ -11,9 +11,15 @@ from django.views.decorators.http import require_http_methods
 
 from apps.academics.enrollment import enroll_account
 from apps.academics.models import AcademicPeriod, Cohort, StudyProgram
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import (
+    configurable_programs,
+    has_program_permission,
+    require_program_permission,
+)
 from apps.accounts.models import User
 from apps.evidence.plans import can_access_plan
+from apps.learning.academic_advisors import ASSIGN_PERMISSION, kaprodi_has_permission
+from apps.learning.progression import ASSIGN as ASSIGN_PROGRESSION
 
 
 class CohortForm(forms.ModelForm):
@@ -40,6 +46,8 @@ class EnrollmentForm(forms.Form):
 def cohorts(request: HttpRequest, program_id: int) -> HttpResponse:
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
+    if request.method == "POST":
+        require_program_permission(actor, program_id, "academics.add_cohort")
     form = CohortForm(request.POST if request.method == "POST" else None, program=program)
     if request.method == "POST" and form.is_valid():
         cohort = form.save(commit=False)
@@ -70,7 +78,7 @@ def cohorts(request: HttpRequest, program_id: int) -> HttpResponse:
 @login_required
 def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpResponse:
     actor = cast(User, request.user)
-    if not actor.has_perm("academics.view_learnerenrollment"):
+    if not has_program_permission(actor, program_id, "academics.view_learnerenrollment"):
         raise PermissionDenied
     cohort = get_object_or_404(
         Cohort.objects.select_related("period__program"),
@@ -78,7 +86,7 @@ def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpRe
         period__program_id=program_id,
         period__program__in=configurable_programs(actor),
     )
-    can_enroll = actor.has_perm("academics.add_learnerenrollment")
+    can_enroll = has_program_permission(actor, program_id, "academics.add_learnerenrollment")
     form = EnrollmentForm(request.POST if request.method == "POST" else None)
     if request.method == "POST":
         if not can_enroll:
@@ -104,6 +112,15 @@ def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpRe
             "program": cohort.period.program,
             "cohort": cohort,
             "form": form if can_enroll else None,
+            "can_assign_progression_reviews": kaprodi_has_permission(
+                actor, program_id, ASSIGN_PROGRESSION
+            ),
+            "can_assign_academic_advisors": kaprodi_has_permission(
+                actor, program_id, ASSIGN_PERMISSION
+            ),
+            "can_assign_reflection_advisors": has_program_permission(
+                actor, program_id, "reflection.add_reflectionadvisorassignment"
+            ),
             "can_view_plans": can_access_plan(actor, program_id, "view"),
             "enrollments": cohort.enrollments.select_related("learner__account"),
         },

@@ -9,7 +9,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.academics.models import Curriculum, CurriculumStage, CurriculumVersion
-from apps.accounts.access import configurable_programs
+from apps.accounts.access import (
+    configurable_programs,
+    has_program_permission,
+    require_program_permission,
+)
 from apps.accounts.models import User
 
 
@@ -30,6 +34,8 @@ class StageForm(forms.ModelForm):
 def curricula(request: HttpRequest, program_id: int) -> HttpResponse:
     actor = cast(User, request.user)
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
+    if request.method == "POST":
+        require_program_permission(actor, program_id, "academics.add_curriculum")
     form = CurriculumForm(request.POST if request.method == "POST" else None)
     if request.method == "POST" and form.is_valid():
         curriculum = form.save(commit=False)
@@ -53,6 +59,9 @@ def curricula(request: HttpRequest, program_id: int) -> HttpResponse:
         {
             "program": program,
             "form": form,
+            "can_view_reflection_prompts": has_program_permission(
+                actor, program_id, "reflection.view_reflectionprompt"
+            ),
             "curricula": Curriculum.objects.filter(program=program).prefetch_related("versions"),
         },
     )
@@ -72,6 +81,7 @@ def new_curriculum_version(
             program_id=program_id,
             pk=curriculum_id,
         )
+        require_program_permission(actor, program_id, "academics.add_curriculumversion")
         latest = curriculum.versions.first()
         version = curriculum.versions.create(
             number=latest.number + 1 if latest else 1, created_by=actor
@@ -90,6 +100,8 @@ def curriculum_version(request: HttpRequest, program_id: int, version_id: int) -
         curriculum__program_id=program_id,
         curriculum__program__in=configurable_programs(actor),
     )
+    if request.method == "POST":
+        require_program_permission(actor, program_id, "academics.add_curriculumstage")
     form = StageForm(request.POST if request.method == "POST" else None)
     if request.method == "POST" and form.is_valid():
         stage = form.save(commit=False)

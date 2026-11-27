@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import Permission
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
@@ -42,6 +43,16 @@ def test_evidence_registry_keeps_sources_types_and_mappings_program_scoped(clien
     )
     url = reverse("academics:evidence:registry", args=[program.pk])
     assert client.get(url).status_code == 302
+    manager.user_permissions.add(
+        *Permission.objects.filter(
+            codename__in=[
+                "add_evidencesource",
+                "add_evidencetype",
+                "add_evidencesourcecapability",
+                "add_evidencesourcecompetency",
+            ]
+        )
+    )
     client.force_login(manager)
     assert client.get(reverse("academics:evidence:registry", args=[other.pk])).status_code == 404
 
