@@ -31,7 +31,7 @@ from .models import (
     SupervisionScale,
     SupervisionScaleVersion,
 )
-from .observations import ASSIGN, PUBLISH, kaprodi_can
+from .observations import ASSIGN, PUBLISH, program_lead_can
 from .reviews import ASSIGN_REVIEW
 
 
@@ -146,9 +146,12 @@ def activity_detail(
             if version is not None
             else (),
             "published": published,
-            "can_assign_review": published and kaprodi_can(actor, program_id, ASSIGN_REVIEW),
+            "can_assign_review": published and program_lead_can(actor, program_id, ASSIGN_REVIEW),
             "can_manage": version is not None
-            and (kaprodi_can(actor, program_id, PUBLISH) or kaprodi_can(actor, program_id, ASSIGN)),
+            and (
+                program_lead_can(actor, program_id, PUBLISH)
+                or program_lead_can(actor, program_id, ASSIGN)
+            ),
             "form": form
             if not published and has_program_permission(actor, program_id, permission)
             else None,

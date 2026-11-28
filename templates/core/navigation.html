@@ -91,5 +91,7 @@
       </div>
     </details>
   {% endif %}
+  <a class="nav-link glossary-link" href="{% url 'glossary' %}"{% if route == "glossary" %} aria-current="page"{% endif %}>Istilah</a>
+  <a class="nav-link role-guide-link" href="{% url 'role_guide' %}"{% if route == "role_guide" %} aria-current="page"{% elif route == "onboarding_guide" %} aria-current="location"{% endif %}>Panduan</a>
 </nav>
 {% endwith %}

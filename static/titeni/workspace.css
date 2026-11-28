@@ -247,3 +247,94 @@
   right: 0;
   background: linear-gradient(to left, var(--ox-background), transparent);
 }
+
+.glossary-link {
+  border-block-start: 1px solid var(--ox-border);
+}
+
+.role-guide-steps {
+  list-style: decimal;
+  padding-inline-start: 1.5rem;
+}
+
+.role-guide-steps li + li {
+  margin-block-start: .35rem;
+}
+
+@media (min-width: 64rem) {
+  .sidebar > .app-navigation {
+    display: flex;
+    flex-direction: column;
+    min-block-size: calc(100svh - 6rem);
+  }
+
+  .sidebar .glossary-link {
+    margin-block-start: auto;
+  }
+}
+
+
+.glossary-terms dt {
+  font-weight: 650;
+}
+
+.glossary-terms dd {
+  margin: .25rem 0 1rem;
+}
+
+.glossary-terms dd:last-child {
+  margin-block-end: 0;
+}
+
+.onboarding-checklist {
+  list-style: decimal inside;
+}
+
+.onboarding-step {
+  padding: .75rem;
+  margin-block-start: .4rem;
+  border: 1px solid var(--ox-border);
+  border-radius: .5rem;
+}
+
+.onboarding-step > div {
+  display: inline-block;
+  vertical-align: top;
+  max-inline-size: calc(100% - 2rem);
+}
+
+.onboarding-step-title {
+  font-weight: 650;
+}
+
+.onboarding-step-role {
+  color: var(--ox-muted-foreground);
+}
+
+.onboarding-step-status {
+  display: block;
+  margin: .3rem 0 0 1.5rem;
+  font-weight: 600;
+}
+
+.onboarding-step-complete {
+  background: var(--ox-muted-surface);
+  color: var(--ox-muted-foreground);
+}
+
+.onboarding-instructions li + li {
+  margin-block-start: 1rem;
+}
+
+.onboarding-program-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+.onboarding-step-title a {
+  color: var(--ox-accent);
+  text-decoration: underline;
+  text-underline-offset: .15em;
+}

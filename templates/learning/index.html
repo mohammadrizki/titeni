@@ -3,7 +3,7 @@
 {% block content %}
 <section class="mx-auto max-w-4xl px-4 py-12">
   <h1 class="heading">Rencana belajar</h1>
-  <p><a href="{% url 'academic_review_queue' %}">Penugasan pembimbing akademik</a></p>
+  <p><a href="{% url 'academic_review_queue' %}">Penugasan Peninjau Sintesis</a></p>
   <p><a href="{% url 'learning_review_queue' %}">Tujuan yang dibagikan kepada saya</a></p>
   <ul class="mt-4">{% for enrollment in enrollments %}
     <li><a href="{% url 'learning_plan' enrollment.pk %}">{{ enrollment.cohort.period.program }} · {{ enrollment.cohort }}</a></li>

@@ -14,6 +14,17 @@ Portofolio reflektif dan pengembangan kompetensi.
 8. Untuk pengujian, arahkan `DATABASE_URL` ke PostgreSQL khusus tes dengan izin membuat basis data tes, lalu jalankan `uv run pytest`.
 9. Untuk membangun ulang CSS, gunakan `npm ci` dan `npm run css:build`.
 
+## Memulai penggunaan Titeni
+
+Setelah masuk, buka **Panduan → Panduan Memulai Titeni** untuk mengikuti
+langkah penyiapan fakultas, prodi, peta artefak, dan pendaftaran mahasiswa.
+Checklist **Memulai Titeni** di Beranda membaca data yang sudah tersimpan
+dan meredupkan langkah yang selesai. Klik judul langkah yang belum selesai
+untuk membuka halaman pengerjaannya. Setiap akun melihat langkah yang
+menjadi tanggung jawab perannya. Pilih prodi bila memiliki lebih dari satu
+cakupan konfigurasi. Mahasiswa melihat rekap pendaftaran sendiri dan
+tautan ke Refleksi Pribadi serta Rencana Belajar ketika siap.
+
 ## Deployment produksi
 
 Contoh ini memakai **Linux, systemd, Gunicorn, Nginx, dan PostgreSQL**.
@@ -242,3 +253,24 @@ sudo journalctl -u titeni -n 50 --no-pager
   Jika perlu pemulihan, gunakan cadangan basis data dan media dari titik
   yang sama. Uji keduanya pada target terisolasi sebelum mengalihkan
   layanan ke target itu.
+
+### Pulihkan akses superuser
+
+Jalankan dari direktori aplikasi dengan lingkungan deployment yang benar.
+Untuk produksi, muat konfigurasi lingkungan dan cocokkan target PostgreSQL
+seperti pada langkah 3. Jika lupa nama pengguna, tampilkan daftar
+superuser aktif dan email masuknya dari terminal yang berwenang.
+
+```sh
+uv run --no-sync python manage.py shell -c \
+  'from apps.accounts.models import User; print(*User.objects.filter(is_superuser=True, is_active=True).order_by("username").values_list("username", "email"), sep="\n")'
+```
+
+Pilih nama pengguna akun yang akan dipulihkan, lalu jalankan perintah berikut.
+
+```sh
+uv run --no-sync python manage.py changepassword NAMA_PENGGUNA
+```
+
+Masukkan kata sandi baru dua kali di prompt terminal. Masuk kembali melalui
+`/masuk/` menggunakan **email akun** dan kata sandi baru.

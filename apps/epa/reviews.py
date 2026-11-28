@@ -22,7 +22,7 @@ from .models import (
     EPAPublication,
     EPAReviewAssignment,
 )
-from .observations import active_publication, kaprodi_can, program_grants
+from .observations import active_publication, program_grants, program_lead_can
 
 ASSIGN_REVIEW = "add_epareviewassignment"
 REVIEW = "add_entrustmentreview"
@@ -123,7 +123,7 @@ def assign(
     request: HttpRequest, program_id: int, activity_id: int, version_id: int
 ) -> HttpResponse:
     actor = cast(User, request.user)
-    if not kaprodi_can(actor, program_id, ASSIGN_REVIEW):
+    if not program_lead_can(actor, program_id, ASSIGN_REVIEW):
         raise PermissionDenied
     program = get_object_or_404(configurable_programs(actor), pk=program_id)
     publication = get_object_or_404(

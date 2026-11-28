@@ -17,7 +17,7 @@ from apps.accounts.models import User
 from apps.adaptive.models import EvidenceEvaluation
 from apps.epa.models import EntrustmentDecision
 
-from .academic_advisors import kaprodi_has_permission, role_grants
+from .academic_advisors import program_lead_has_permission, role_grants
 from .models import ProgressionReview, ProgressionReviewAssignment, ProgressionReviewEvidence
 
 ASSIGN = "add_progressionreviewassignment"
@@ -106,7 +106,7 @@ class DraftForm(forms.ModelForm):
 @require_http_methods(["GET", "POST"])
 def assign(request: HttpRequest, program_id: int, enrollment_id: int) -> HttpResponse:
     actor = cast(User, request.user)
-    if not kaprodi_has_permission(actor, program_id, ASSIGN):
+    if not program_lead_has_permission(actor, program_id, ASSIGN):
         raise PermissionDenied
     enrollment = get_object_or_404(
         LearnerEnrollment.objects.select_related("learner__account", "cohort__period__program"),

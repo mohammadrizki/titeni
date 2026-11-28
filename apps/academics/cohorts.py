@@ -17,8 +17,9 @@ from apps.accounts.access import (
     require_program_permission,
 )
 from apps.accounts.models import User
+from apps.accounts.role_catalog import ENROLLMENT_READ_PERMISSION
 from apps.evidence.plans import can_access_plan
-from apps.learning.academic_advisors import ASSIGN_PERMISSION, kaprodi_has_permission
+from apps.learning.academic_advisors import ASSIGN_PERMISSION, program_lead_has_permission
 from apps.learning.progression import ASSIGN as ASSIGN_PROGRESSION
 
 
@@ -70,6 +71,9 @@ def cohorts(request: HttpRequest, program_id: int) -> HttpResponse:
             "program": program,
             "form": form,
             "cohorts": Cohort.objects.filter(period__program=program).select_related("period"),
+            "can_view_enrollments": has_program_permission(
+                actor, program_id, ENROLLMENT_READ_PERMISSION
+            ),
         },
     )
 
@@ -78,7 +82,7 @@ def cohorts(request: HttpRequest, program_id: int) -> HttpResponse:
 @login_required
 def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpResponse:
     actor = cast(User, request.user)
-    if not has_program_permission(actor, program_id, "academics.view_learnerenrollment"):
+    if not has_program_permission(actor, program_id, ENROLLMENT_READ_PERMISSION):
         raise PermissionDenied
     cohort = get_object_or_404(
         Cohort.objects.select_related("period__program"),
@@ -112,10 +116,10 @@ def enrollments(request: HttpRequest, program_id: int, cohort_id: int) -> HttpRe
             "program": cohort.period.program,
             "cohort": cohort,
             "form": form if can_enroll else None,
-            "can_assign_progression_reviews": kaprodi_has_permission(
+            "can_assign_progression_reviews": program_lead_has_permission(
                 actor, program_id, ASSIGN_PROGRESSION
             ),
-            "can_assign_academic_advisors": kaprodi_has_permission(
+            "can_assign_academic_advisors": program_lead_has_permission(
                 actor, program_id, ASSIGN_PERMISSION
             ),
             "can_assign_reflection_advisors": has_program_permission(

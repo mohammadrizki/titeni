@@ -43,7 +43,7 @@ def test_faculty_mandate_requires_scoped_activities_and_quorum_before_issuance(c
     )
     UserRoleAssignment.objects.create(
         account=head,
-        role=AccessRole.objects.get(name="Kaprodi"),
+        role=AccessRole.objects.get(name="Penanggung Jawab Akademik Prodi"),
         program=program,
         assigned_by=admin,
     )

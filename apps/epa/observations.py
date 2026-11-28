@@ -15,6 +15,7 @@ from django.views.decorators.http import require_http_methods
 from apps.academics.models import LearnerEnrollment
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import AccessRole, User, UserRoleAssignment
+from apps.accounts.role_catalog import PROGRAM_LEAD_ROLE
 
 from .models import (
     EntrustableProfessionalActivity,
@@ -39,9 +40,11 @@ def program_grants(role: str, permission: str) -> QuerySet[UserRoleAssignment]:
     )
 
 
-def kaprodi_can(actor: User, program_id: int, permission: str) -> bool:
+def program_lead_can(actor: User, program_id: int, permission: str) -> bool:
     return (
-        program_grants("Kaprodi", permission).filter(account=actor, program_id=program_id).exists()
+        program_grants(PROGRAM_LEAD_ROLE, permission)
+        .filter(account=actor, program_id=program_id)
+        .exists()
     )
 
 
@@ -93,8 +96,8 @@ def manage(
     request: HttpRequest, program_id: int, activity_id: int, version_id: int
 ) -> HttpResponse:
     actor = cast(User, request.user)
-    can_publish = kaprodi_can(actor, program_id, PUBLISH)
-    can_assign = kaprodi_can(actor, program_id, ASSIGN)
+    can_publish = program_lead_can(actor, program_id, PUBLISH)
+    can_assign = program_lead_can(actor, program_id, ASSIGN)
     if not (can_publish or can_assign):
         raise PermissionDenied
     program = get_object_or_404(configurable_programs(actor), pk=program_id)

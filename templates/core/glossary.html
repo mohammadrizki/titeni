@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% block title %}Istilah · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="heading">Istilah di Titeni</h1>
+  <nav class="mt-4" aria-label="Indeks istilah">
+    <ul class="flex flex-wrap gap-2">
+      {% for letter, terms in term_groups %}
+        <li><a class="nav-link" href="#huruf-{{ letter }}" aria-label="Istilah berawalan {{ letter }}">{{ letter }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  {% for letter, terms in term_groups %}
+    <section class="panel mt-4" aria-labelledby="huruf-{{ letter }}">
+      <h2 id="huruf-{{ letter }}" class="section-title" tabindex="-1">{{ letter }}</h2>
+      <dl class="glossary-terms mt-3">
+        {% for term, definition in terms %}
+          <dt>{{ term }}</dt>
+          <dd>{{ definition }}</dd>
+        {% endfor %}
+      </dl>
+    </section>
+  {% endfor %}
+</section>
+{% endblock %}

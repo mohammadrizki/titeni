@@ -1,10 +1,12 @@
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
-from django.views.generic import TemplateView
 
 from apps.accounts.authentication import EmailAuthenticationForm
+from apps.accounts.role_guide import index as role_guide
 from apps.adaptive.analytics_views import index as program_analytics
 from apps.adaptive.assessor_views import assessor_artifact, assessor_assignments
+from apps.core import onboarding
+from apps.core.glossary import index as glossary
 from apps.epa import participation as epa_participation
 from apps.epa.appeals import resolve as epa_resolve_appeal
 from apps.epa.ballots import discussion as epa_discussion
@@ -30,6 +32,9 @@ from apps.reflection.sharing import coaching, share_revision, shared_reflections
 from apps.reflection.views import drafts, index
 
 urlpatterns = [
+    path("panduan/memulai/", onboarding.guide, name="onboarding_guide"),
+    path("panduan/", role_guide, name="role_guide"),
+    path("istilah/", glossary, name="glossary"),
     path("analitik-prodi/", program_analytics, name="program_analytics"),
     path("sidang-progresi/", progression_voting.queue, name="progression_committee_queue"),
     path(
@@ -126,7 +131,7 @@ urlpatterns = [
     ),
     path("impor-hasil-ujian/", include("apps.assessments.exam_imports.urls")),
     path("integrasi/v1/bukti/", receive_external_evidence, name="receive_external_evidence"),
-    path("", TemplateView.as_view(template_name="core/home.html"), name="home"),
+    path("", onboarding.home, name="home"),
     path(
         "masuk/",
         auth_views.LoginView.as_view(

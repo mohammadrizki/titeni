@@ -25,7 +25,7 @@ from apps.learning.academic_advisors import (
     WRITE_PERMISSION,
     SynthesisForm,
     advisor_assignments,
-    kaprodi_has_permission,
+    program_lead_has_permission,
 )
 from apps.learning.intervention_eligibility import current_intervention_evaluations
 from apps.learning.interventions import can_approve_interventions
@@ -184,7 +184,7 @@ def longitudinal_review(request: HttpRequest, program_id: int, enrollment_id: in
     actor = cast(User, request.user)
     scope = {"enrollment_id": enrollment_id, "enrollment__cohort__period__program_id": program_id}
     advisor = advisor_assignments(actor).filter(**scope).exists()
-    head = kaprodi_has_permission(actor, program_id, READ_PERMISSION)
+    head = program_lead_has_permission(actor, program_id, READ_PERMISSION)
     if advisor or head:
         program = get_object_or_404(StudyProgram, pk=program_id)
         baseline = review_baseline(program, enrollment_id)

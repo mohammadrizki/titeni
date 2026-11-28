@@ -14,11 +14,11 @@ from django.views.decorators.http import require_GET, require_http_methods
 from apps.academics.models import LearnerEnrollment
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import AccessRole, User, UserRoleAssignment
+from apps.accounts.role_catalog import PROGRAM_LEAD_ROLE, SYNTHESIS_REVIEWER_ROLE
 from apps.reflection.sharing import posted_pk
 
 from .models import AcademicAdvisorAssignment, LongitudinalSynthesis
 
-ADVISOR_ROLE = "Dosen Pembimbing Akademik"
 ASSIGN_PERMISSION = "add_academicadvisorassignment"
 READ_PERMISSION = "view_longitudinalsynthesis"
 WRITE_PERMISSION = "add_longitudinalsynthesis"
@@ -34,14 +34,20 @@ def role_grants(role: str, permission: str) -> QuerySet[UserRoleAssignment]:
     )
 
 
-def kaprodi_has_permission(actor: User, program_id: int, permission: str) -> bool:
-    return role_grants("Kaprodi", permission).filter(account=actor, program_id=program_id).exists()
+def program_lead_has_permission(actor: User, program_id: int, permission: str) -> bool:
+    return (
+        role_grants(PROGRAM_LEAD_ROLE, permission)
+        .filter(account=actor, program_id=program_id)
+        .exists()
+    )
 
 
 def advisor_assignments(
     actor: User, permission: str = READ_PERMISSION
 ) -> QuerySet[AcademicAdvisorAssignment]:
-    programs = role_grants(ADVISOR_ROLE, permission).filter(account=actor).values("program_id")
+    programs = (
+        role_grants(SYNTHESIS_REVIEWER_ROLE, permission).filter(account=actor).values("program_id")
+    )
     return AcademicAdvisorAssignment.objects.filter(
         advisor=actor,
         revoked_at__isnull=True,
@@ -50,9 +56,7 @@ def advisor_assignments(
 
 
 class AdvisorForm(forms.Form):
-    advisor = forms.ModelChoiceField(
-        label="Dosen Pembimbing Akademik", queryset=User.objects.none()
-    )
+    advisor = forms.ModelChoiceField(label="Peninjau Sintesis", queryset=User.objects.none())
 
 
 class SynthesisForm(forms.ModelForm):
@@ -66,7 +70,7 @@ class SynthesisForm(forms.ModelForm):
 @require_http_methods(["GET", "POST"])
 def manage_advisors(request: HttpRequest, program_id: int, enrollment_id: int) -> HttpResponse:
     actor = cast(User, request.user)
-    if not kaprodi_has_permission(actor, program_id, ASSIGN_PERMISSION):
+    if not program_lead_has_permission(actor, program_id, ASSIGN_PERMISSION):
         raise PermissionDenied
     enrollment = get_object_or_404(
         LearnerEnrollment,
@@ -79,7 +83,7 @@ def manage_advisors(request: HttpRequest, program_id: int, enrollment_id: int) -
     form = AdvisorForm(request.POST if action == "assign" else None)
     cast(forms.ModelChoiceField, form.fields["advisor"]).queryset = (
         User.objects.filter(
-            pk__in=role_grants(ADVISOR_ROLE, WRITE_PERMISSION)
+            pk__in=role_grants(SYNTHESIS_REVIEWER_ROLE, WRITE_PERMISSION)
             .filter(program_id=program_id)
             .values("account_id")
         )

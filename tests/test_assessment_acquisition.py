@@ -786,7 +786,7 @@ def test_assessment_event_attempt_and_reference_permissions_and_scope(
     reviewer.user_permissions.add(publish_permission)
     assert client.post(evaluation_url, production_data).status_code == 403
     kaprodi = AccessRole.objects.create(
-        name="Kaprodi", scope=AccessRole.Scope.PROGRAM, updated_by=actor
+        name="Penanggung Jawab Akademik Prodi", scope=AccessRole.Scope.PROGRAM, updated_by=actor
     )
     kaprodi.permissions.add(publish_permission)
     UserRoleAssignment.objects.create(

@@ -40,7 +40,7 @@ def test_epa_review_versions_preserve_selected_observations_and_restrict_access(
     ]
     synchronize_roles(admin, apply=True)
     for account, role, scope in (
-        (head, "Kaprodi", program),
+        (head, "Penanggung Jawab Akademik Prodi", program),
         (reviewer, "Peninjau EPA", program),
         (other, "Peninjau EPA", foreign),
     ):

@@ -1,0 +1,9 @@
+<ol class="role-guide-steps onboarding-instructions mt-3">
+  {% for step in steps %}
+    <li>
+      <h3 class="onboarding-step-title">{{ step.title }}</h3>
+      <p class="onboarding-step-role">{{ step.role_names }}</p>
+      <p>{{ step.instruction }}</p>
+    </li>
+  {% endfor %}
+</ol>

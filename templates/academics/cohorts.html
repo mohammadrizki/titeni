@@ -17,7 +17,7 @@
           {% for cohort in cohorts %}
             <tr>
               <td>{{ cohort.code }}</td><td>{{ cohort.name }}</td><td>{{ cohort.period.name }}</td>
-              <td>{% academic_row cohort "kohort" program user %} {% if perms.academics.view_learnerenrollment %}<a class="nav-link" href="{% url 'academics:enrollments' program.pk cohort.pk %}">Daftar mahasiswa</a>{% endif %}</td>
+              <td>{% academic_row cohort "kohort" program user %} {% if can_view_enrollments %}<a class="nav-link" href="{% url 'academics:enrollments' program.pk cohort.pk %}">Daftar mahasiswa</a>{% endif %}</td>
             </tr>
           {% empty %}
             <tr><td colspan="4">Belum ada kohort.</td></tr>

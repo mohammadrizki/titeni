@@ -13,6 +13,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import AccessRole, User, UserRoleAssignment
+from apps.accounts.role_catalog import PROGRAM_LEAD_ROLE
 from apps.adaptive.models import EvaluationRuleVersion, EvidenceEvaluation
 from apps.evidence.models import LearnerEvidenceBaseline
 from apps.reflection.models import ReflectionAdvisorAssignment
@@ -109,7 +110,7 @@ def can_approve_interventions(actor: User, program_id: int) -> bool:
         account__is_active=True,
         program_id=program_id,
         role__scope=AccessRole.Scope.PROGRAM,
-        role__name="Kaprodi",
+        role__name=PROGRAM_LEAD_ROLE,
         role__permissions__content_type__app_label="learning",
         role__permissions__codename="add_interventionapproval",
     ).exists()

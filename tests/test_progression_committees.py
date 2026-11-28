@@ -33,7 +33,7 @@ def test_faculty_can_issue_and_revoke_progression_mandate_without_epa(client: Cl
     synchronize_roles(admin, apply=True)
     for account, role, scope in (
         (operator, "Administrator Fakultas", None),
-        (head, "Kaprodi", program),
+        (head, "Penanggung Jawab Akademik Prodi", program),
     ):
         UserRoleAssignment.objects.create(
             account=account,

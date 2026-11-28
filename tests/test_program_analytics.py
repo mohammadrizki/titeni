@@ -68,9 +68,9 @@ def test_program_analytics_freezes_safe_aggregates_and_denies_other_scopes(clien
     ]
     today = timezone.localdate()
     for account, name, target in (
-        (kaprodi, "Kaprodi", program),
+        (kaprodi, "Penanggung Jawab Akademik Prodi", program),
         (curriculum_manager, "Pengelola Kurikulum", program),
-        (outsider, "Kaprodi", foreign),
+        (outsider, "Penanggung Jawab Akademik Prodi", foreign),
     ):
         UserRoleAssignment.objects.create(
             account=account,

@@ -7,12 +7,12 @@
     {% include "core/breadcrumbs.html" with current="Tinjauan kompetensi longitudinal" parent_url=evaluation_url parent_label="Evaluasi bukti" only %}
   {% elif synthesis_form %}
     {% url 'academic_review_queue' as queue_url %}
-    {% include "core/breadcrumbs.html" with current="Tinjauan kompetensi longitudinal" parent_url=queue_url parent_label="Penugasan pembimbing akademik" only %}
+    {% include "core/breadcrumbs.html" with current="Tinjauan kompetensi longitudinal" parent_url=queue_url parent_label="Penugasan Peninjau Sintesis" only %}
   {% endif %}
   <h1 class="heading mt-3">Tinjauan kompetensi longitudinal</h1>
   <p>{{ program }} · {{ baseline.enrollment.learner }} · {{ baseline.enrollment.cohort }}</p>
   {% if can_read_syntheses %}
-    <h2 class="section-title mt-4">Sintesis pembimbing akademik</h2>
+    <h2 class="section-title mt-4">Sintesis peninjau</h2>
     {% for synthesis in syntheses %}
       <article class="mt-4">
         <p><strong>{{ synthesis.assignment.advisor }}</strong> · {{ synthesis.created_at }}</p>
@@ -22,7 +22,7 @@
     {% if synthesis_form %}
       <form method="post" class="mt-4">
         {% csrf_token %}
-        <p>Kaprodi dan pembimbing akademik yang ditugaskan dapat membaca catatan ini meskipun pembagian materi sumber dicabut.</p>
+        <p>Penanggung Jawab Akademik Prodi dan Peninjau Sintesis yang ditugaskan dapat membaca catatan ini meskipun pembagian materi sumber dicabut.</p>
         {{ synthesis_form.as_p }}
         <button class="button" type="submit">Simpan sintesis</button>
       </form>

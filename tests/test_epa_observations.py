@@ -37,7 +37,7 @@ def test_published_epa_preserves_scale_and_limits_recording_to_assigned_assessor
     ]
     synchronize_roles(admin, apply=True)
     for account, role, scope in (
-        (head, "Kaprodi", program),
+        (head, "Penanggung Jawab Akademik Prodi", program),
         (staff, "Pengelola Kurikulum", program),
         (assessor, "Asesor", program),
         (other, "Asesor", foreign),

@@ -4,6 +4,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
+from . import guide_content
 from .models import AccessRole, User
 
 
@@ -134,12 +135,26 @@ SYSTEM_ROLE_PERMISSIONS = FACULTY | {"academics.delete_studyprogram"}
 class RoleDefinition:
     scope: AccessRole.Scope
     grants: frozenset[str]
+    guide: guide_content.RoleGuide
 
 
 PROGRAM = AccessRole.Scope.PROGRAM
+PROGRAM_LEAD_ROLE = "Penanggung Jawab Akademik Prodi"
+FACULTY_ADMIN_ROLE = "Administrator Fakultas"
+ACADEMIC_MANAGER_ROLE = "Pengelola Akademik"
+CURRICULUM_MANAGER_ROLE = "Pengelola Kurikulum"
+ASSESSMENT_MANAGER_ROLE = "Pengelola Asesmen"
+PORTFOLIO_MANAGER_ROLE = "Pengelola Portofolio"
+STUDENT_ROLE = "Mahasiswa"
+SUPERUSER = "Superuser"
+# Shared by the enrollment views and onboarding checklist.
+ENROLLMENT_READ_PERMISSION = "academics.view_learnerenrollment"
+SYNTHESIS_REVIEWER_ROLE = "Peninjau Sintesis"
 ROLE_CATALOG = {
-    "Administrator Fakultas": RoleDefinition(AccessRole.Scope.SYSTEM, FACULTY),
-    "Kaprodi": RoleDefinition(
+    FACULTY_ADMIN_ROLE: RoleDefinition(
+        AccessRole.Scope.SYSTEM, FACULTY, guide_content.faculty_admin
+    ),
+    PROGRAM_LEAD_ROLE: RoleDefinition(
         PROGRAM,
         ACADEMIC
         | ENROLLMENT
@@ -162,26 +177,42 @@ ROLE_CATALOG = {
             "learning.view_longitudinalsynthesis",
             "adaptive.add_evaluationrulepublication",
         },
+        guide_content.program_lead,
     ),
-    "Pengelola Akademik": RoleDefinition(PROGRAM, ACADEMIC | ENROLLMENT),
-    "Pengelola Kurikulum": RoleDefinition(
-        PROGRAM, CURRICULUM | EPA_CONFIGURATION | PROGRAM_ANALYTICS
+    ACADEMIC_MANAGER_ROLE: RoleDefinition(
+        PROGRAM, ACADEMIC | ENROLLMENT, guide_content.academic_manager
     ),
-    "Pengelola Asesmen": RoleDefinition(PROGRAM, BLUEPRINT | OPERATE_ASSESSMENTS),
-    "Pengelola Portofolio": RoleDefinition(PROGRAM, PORTFOLIO),
+    CURRICULUM_MANAGER_ROLE: RoleDefinition(
+        PROGRAM,
+        CURRICULUM | EPA_CONFIGURATION | PROGRAM_ANALYTICS,
+        guide_content.curriculum_manager,
+    ),
+    ASSESSMENT_MANAGER_ROLE: RoleDefinition(
+        PROGRAM, BLUEPRINT | OPERATE_ASSESSMENTS, guide_content.assessment_manager
+    ),
+    PORTFOLIO_MANAGER_ROLE: RoleDefinition(PROGRAM, PORTFOLIO, guide_content.portfolio_manager),
     "Verifikator Bukti": RoleDefinition(
-        PROGRAM, EVIDENCE_READ | {"evidence.add_evidenceverification"}
+        PROGRAM,
+        EVIDENCE_READ | {"evidence.add_evidenceverification"},
+        guide_content.evidence_verifier,
     ),
     "Asesor": RoleDefinition(
-        PROGRAM, frozenset({"adaptive.add_assessorfinding", "epa.add_epaobservation"})
+        PROGRAM,
+        frozenset({"adaptive.add_assessorfinding", "epa.add_epaobservation"}),
+        guide_content.assessor,
     ),
-    "Peninjau Progresi": RoleDefinition(PROGRAM, frozenset({"learning.add_progressionreview"})),
-    "Peninjau EPA": RoleDefinition(PROGRAM, frozenset({"epa.add_entrustmentreview"})),
-    "Pengelola Adaptasi": RoleDefinition(PROGRAM, ADAPTATION),
-    "Dosen": RoleDefinition(PROGRAM, frozenset()),
-    "Dosen Pembimbing Akademik": RoleDefinition(
+    "Peninjau Progresi": RoleDefinition(
+        PROGRAM, frozenset({"learning.add_progressionreview"}), guide_content.progression_reviewer
+    ),
+    "Peninjau EPA": RoleDefinition(
+        PROGRAM, frozenset({"epa.add_entrustmentreview"}), guide_content.epa_reviewer
+    ),
+    "Pengelola Adaptasi": RoleDefinition(PROGRAM, ADAPTATION, guide_content.adaptation_manager),
+    "Dosen": RoleDefinition(PROGRAM, frozenset(), guide_content.lecturer),
+    SYNTHESIS_REVIEWER_ROLE: RoleDefinition(
         PROGRAM,
         frozenset({"learning.view_longitudinalsynthesis", "learning.add_longitudinalsynthesis"}),
+        guide_content.synthesis_reviewer,
     ),
     "Pembimbing Refleksi": RoleDefinition(
         PROGRAM,
@@ -195,8 +226,9 @@ ROLE_CATALOG = {
                 "learning.add_reassessmentrequirement",
             }
         ),
+        guide_content.reflection_advisor,
     ),
-    "Mahasiswa": RoleDefinition(
+    STUDENT_ROLE: RoleDefinition(
         PROGRAM,
         frozenset(
             {
@@ -213,6 +245,7 @@ ROLE_CATALOG = {
                 "reflection.complete_coachingrecommendation",
             }
         ),
+        guide_content.student,
     ),
 }
 

@@ -1,0 +1,28 @@
+<section class="mt-4" aria-labelledby="checklist-mahasiswa">
+  <h3 class="section-title" id="checklist-mahasiswa">Rekap penyiapan Mahasiswa</h3>
+  {% for item in recap %}
+    <div class="onboarding-step">
+      <h4 class="onboarding-step-title">{{ item.program_name }} · {{ item.cohort_name }}</h4>
+      <p class="mt-2">Akun Mahasiswa dan pendaftaran kohort sudah tersedia.</p>
+      {% if item.has_baseline %}
+        <p class="mt-2">Baseline bukti sudah tersedia.{% if item.can_reflect and item.can_plan %} Penyiapan selesai.{% endif %}</p>
+        {% if item.can_reflect or item.can_plan %}
+          <ul class="mt-3 flex flex-wrap gap-2" aria-label="Tugas Mahasiswa">
+            {% if item.can_reflect %}
+              <li><a class="button" href="{% url 'reflection_drafts' item.pk %}">Mulai Refleksi Pribadi</a></li>
+            {% endif %}
+            {% if item.can_plan %}
+              <li><a class="button" href="{% url 'learning_plan' item.pk %}">Buka Rencana Belajar</a></li>
+            {% endif %}
+          </ul>
+        {% else %}
+          <p class="mt-2">Akses tugas belum tersedia. Hubungi pengelola prodi.</p>
+        {% endif %}
+      {% else %}
+        <p class="mt-2">Baseline bukti belum tersedia. Hubungi pengelola prodi.</p>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="mt-2">Pendaftaran kohort belum tersedia. Hubungi pengelola prodi.</p>
+  {% endfor %}
+</section>

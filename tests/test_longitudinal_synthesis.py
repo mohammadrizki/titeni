@@ -74,7 +74,10 @@ def test_longitudinal_synthesis_authorization_and_source_revocation(client: Clie
     foreign_review = reverse(review, args=[foreign.pk, enrollment.pk])
     academic_advisor = User.objects.create_user(username="dosen-pa")
     head = User.objects.create_user(username="kaprodi-sintesis")
-    for account, name in ((academic_advisor, "Dosen Pembimbing Akademik"), (head, "Kaprodi")):
+    for account, name in (
+        (academic_advisor, "Peninjau Sintesis"),
+        (head, "Penanggung Jawab Akademik Prodi"),
+    ):
         UserRoleAssignment.objects.create(
             account=account,
             role=AccessRole.objects.get(name=name),
@@ -115,7 +118,7 @@ def test_longitudinal_synthesis_authorization_and_source_revocation(client: Clie
     share = ReflectionShare.objects.create(revision=revision, assignment=reflection_assignment)
     shared_url = reverse("shared_reflection", args=[share.pk])
     assert shared_url in advisor_client.get(review_url).content.decode()
-    synthesis_body = "Tindak lanjut kompetensi dari pembimbing akademik."
+    synthesis_body = "Tindak lanjut kompetensi dari Peninjau Sintesis."
     assert advisor_client.post(review_url, {"body": synthesis_body}).status_code == 302
     synthesis = LongitudinalSynthesis.objects.get()
     assert synthesis.assignment.advisor == academic_advisor

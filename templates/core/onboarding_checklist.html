@@ -1,0 +1,15 @@
+<ol class="onboarding-checklist mt-3">
+  {% for item in steps %}
+    <li class="onboarding-step{% if item.done %} onboarding-step-complete{% endif %}">
+      <div>
+        <h4 class="onboarding-step-title">
+          {% if item.url %}<a href="{{ item.url }}">{{ item.step.title }}</a>{% else %}{{ item.step.title }}{% endif %}
+        </h4>
+        <p class="onboarding-step-role">{{ item.step.role_names }}</p>
+      </div>
+      <span class="onboarding-step-status">
+        {% if item.done %}Selesai{% else %}Belum selesai{% endif %}
+      </span>
+    </li>
+  {% endfor %}
+</ol>

@@ -13,6 +13,7 @@ from django.views.decorators.http import require_http_methods, require_safe
 from apps.academics.models import AcademicPeriod, StudyProgram
 from apps.accounts.access import configurable_programs
 from apps.accounts.models import AccessRole, User, UserRoleAssignment
+from apps.accounts.role_catalog import PROGRAM_LEAD_ROLE
 
 from .models import ProgramAnalyticsReport
 from .program_analytics import MINIMUM_GROUP_SIZE, build_snapshot
@@ -22,7 +23,7 @@ def analytics_programs(actor: User) -> QuerySet[StudyProgram]:
     grants = UserRoleAssignment.objects.filter(
         account=actor,
         role__scope=AccessRole.Scope.PROGRAM,
-        role__name__in=("Kaprodi", "Pengelola Kurikulum"),
+        role__name__in=(PROGRAM_LEAD_ROLE, "Pengelola Kurikulum"),
         role__permissions__content_type__app_label="adaptive",
         role__permissions__codename="view_programanalyticsreport",
     ).values("program_id")

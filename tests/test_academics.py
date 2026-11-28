@@ -301,7 +301,7 @@ def test_program_role_can_manage_curriculum_only_in_assigned_program(client: Cli
             account=manager, program=program, granted_by=manager, starts_on=timezone.localdate()
         )
     role = AccessRole.objects.create(
-        name="Kaprodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
+        name="Penanggung Jawab Akademik Prodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
     )
     role.permissions.add(
         *Permission.objects.filter(

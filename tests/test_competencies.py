@@ -170,7 +170,7 @@ def test_competency_drafts_scope_hierarchy_and_milestones(client: Client) -> Non
     delete = reverse("academics:row_action", args=[program.pk, "butir", item.pk, "hapus"])
     assert client.get(edit).status_code == 403
     role = AccessRole.objects.create(
-        name="Kaprodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
+        name="Penanggung Jawab Akademik Prodi", scope=AccessRole.Scope.PROGRAM, updated_by=manager
     )
     role.permissions.add(
         *Permission.objects.filter(

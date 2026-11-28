@@ -4,6 +4,41 @@
   <h1 class="heading">Titeni</h1>
   {% if user.is_authenticated %}
     <p class="mt-3">Selamat datang, {{ user.get_username }}.</p>
+    {% if show_onboarding %}<section class="panel mt-4" aria-labelledby="checklist-memulai">
+      <h2 class="section-title" id="checklist-memulai">Memulai Titeni</h2>
+      <p class="mt-2"><a class="nav-link" href="{% url 'onboarding_guide' %}">Baca Panduan Memulai</a></p>
+      {% if institution_steps or program_steps %}
+        <p class="mt-2">Status mengikuti data Titeni. Pekerjaan yang selesai diredupkan.</p>
+      {% endif %}
+      {% if institution_steps %}
+        <section class="mt-4" aria-labelledby="checklist-fakultas">
+          <h3 class="section-title" id="checklist-fakultas">Penyiapan fakultas</h3>
+          {% include "core/onboarding_checklist.html" with steps=institution_steps only %}
+        </section>
+      {% endif %}
+      {% if program_steps %}
+        <section class="mt-4" aria-labelledby="checklist-prodi">
+          <h3 class="section-title" id="checklist-prodi">Penyiapan prodi {{ program.name }}</h3>
+          {% if programs|length > 1 %}
+            <form class="onboarding-program-picker mt-3" method="get" action="{% url 'home' %}#checklist-prodi">
+              <label for="onboarding-program">Program studi</label>
+              <select id="onboarding-program" name="prodi">
+                {% for option in programs %}
+                  <option value="{{ option.pk }}"{% if option == program %} selected{% endif %}>{{ option.name }}</option>
+                {% endfor %}
+              </select>
+              <button class="button" type="submit">Tampilkan</button>
+            </form>
+          {% endif %}
+          {% include "core/onboarding_checklist.html" with steps=program_steps only %}
+        </section>
+      {% elif institution_steps %}
+        <p class="mt-3">Checklist prodi muncul setelah akun Anda menerima penugasan konfigurasi yang berlaku.</p>
+      {% endif %}
+      {% if is_student %}
+        {% include "core/onboarding_student.html" with recap=student_recap only %}
+      {% endif %}
+    </section>{% endif %}
   {% else %}
     <p class="mt-3">Portofolio reflektif dan pengembangan kompetensi.</p>
   {% endif %}

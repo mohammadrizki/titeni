@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+{% block title %}Panduan · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="heading">Panduan</h1>
+  <p class="mt-3"><a class="nav-link" href="{% url 'onboarding_guide' %}">Panduan Memulai Titeni</a></p>
+  {% if role_guides %}
+    {% if role_guides|length > 1 %}
+      <nav class="mt-4" aria-label="Panduan peran Anda">
+        <ul class="flex flex-wrap gap-2">
+          {% for item in role_guides %}
+            <li><a class="nav-link" href="#peran-{{ item.role.pk }}">{{ item.role.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+    {% for item in role_guides %}
+      <section class="panel mt-4" aria-labelledby="peran-{{ item.role.pk }}">
+        <h2 class="section-title" id="peran-{{ item.role.pk }}" tabindex="-1">{{ item.role.name }}</h2>
+        {% if item.programs %}<p class="mt-2">Prodi {{ item.programs|join:", " }}</p>{% endif %}
+        {% if item.guide %}
+          <p class="mt-2">{{ item.guide.summary }}</p>
+          <ol class="role-guide-steps mt-3">
+            {% for step in item.guide.steps %}<li>{{ step }}</li>{% endfor %}
+          </ol>
+        {% else %}
+          <p class="mt-2">Panduan tersendiri untuk peran ini belum tersedia. Hubungi pengelola akun untuk langkah yang berlaku.</p>
+        {% endif %}
+      </section>
+    {% endfor %}
+  {% else %}
+    <p class="mt-4">Belum ada peran yang ditugaskan ke akun Anda.</p>
+  {% endif %}
+</section>
+{% endblock %}
