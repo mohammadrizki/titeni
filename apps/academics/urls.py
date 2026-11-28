@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from apps.academics import cohorts, curriculum, row_actions, views
+from apps.adaptive import analytics_views
 from apps.learning.academic_advisors import manage_advisors
 from apps.learning.progression import assign as assign_progression_review
 from apps.reflection.prompt_views import manage_prompts
@@ -8,6 +9,16 @@ from apps.reflection.sharing import advisors
 
 app_name = "academics"
 urlpatterns = [
+    path(
+        "prodi/<int:program_id>/analitik/",
+        analytics_views.report,
+        name="program_analytics",
+    ),
+    path(
+        "prodi/<int:program_id>/analitik/<int:period_id>/",
+        analytics_views.report,
+        name="program_analytics_period",
+    ),
     path(
         "prodi/<int:program_id>/progresi/<int:enrollment_id>/",
         assign_progression_review,

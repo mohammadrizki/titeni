@@ -28,6 +28,7 @@ CURRICULUM = (
         "performancestandardversion",
     )
 )
+PROGRAM_ANALYTICS = permissions("adaptive", "view", "programanalyticsreport")
 EPA_CONFIGURATION = permissions(
     "epa",
     "view add",
@@ -144,6 +145,7 @@ ROLE_CATALOG = {
         | ENROLLMENT
         | CURRICULUM
         | EPA_CONFIGURATION
+        | PROGRAM_ANALYTICS
         | BLUEPRINT
         | OPERATE_ASSESSMENTS
         | PORTFOLIO
@@ -162,7 +164,9 @@ ROLE_CATALOG = {
         },
     ),
     "Pengelola Akademik": RoleDefinition(PROGRAM, ACADEMIC | ENROLLMENT),
-    "Pengelola Kurikulum": RoleDefinition(PROGRAM, CURRICULUM | EPA_CONFIGURATION),
+    "Pengelola Kurikulum": RoleDefinition(
+        PROGRAM, CURRICULUM | EPA_CONFIGURATION | PROGRAM_ANALYTICS
+    ),
     "Pengelola Asesmen": RoleDefinition(PROGRAM, BLUEPRINT | OPERATE_ASSESSMENTS),
     "Pengelola Portofolio": RoleDefinition(PROGRAM, PORTFOLIO),
     "Verifikator Bukti": RoleDefinition(

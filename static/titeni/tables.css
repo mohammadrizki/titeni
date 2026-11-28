@@ -40,3 +40,13 @@
 .data-table .table-action-column {
   width: 15%;
 }
+
+
+.table-wrap.keyboard-scroll:focus-visible {
+  outline: 2px solid var(--ox-foreground);
+  outline-offset: 2px;
+}
+
+.keyboard-scroll th[scope="col"] {
+  white-space: normal;
+}

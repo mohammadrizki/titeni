@@ -8,7 +8,7 @@
   <script src="{% static 'titeni/theme.js' %}"></script>
   <script src="{% static 'titeni/frontoffice.js' %}?v=academic-tabs-1" defer></script>
   <link rel="stylesheet" href="{% static 'titeni/evidence.css' %}?v=oxbow-6">
-  <link rel="stylesheet" href="{% static 'titeni/tables.css' %}?v=5">
+  <link rel="stylesheet" href="{% static 'titeni/tables.css' %}?v=6">
   <link rel="stylesheet" href="{% static 'titeni/workspace.css' %}?v=academic-tabs-1">
 </head>
 <body>
@@ -76,7 +76,7 @@
         {% include "core/navigation.html" %}
       </details>
     {% endif %}
-    <main id="main" {% if user.is_authenticated %}class="workspace-main"{% endif %}>
+    <main id="main" tabindex="-1" {% if user.is_authenticated %}class="workspace-main"{% endif %}>
       {% if messages %}
         {% for message in messages %}
           <p class="rounded-lg border-l-4 border-green-ink bg-green-soft px-4 py-3 text-sm text-green-ink" role="status">

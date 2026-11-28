@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% block title %}Analitik Prodi · {{ program.name }} · Titeni{% endblock %}
+{% block content %}
+<section class="mx-auto max-w-5xl px-4 py-12">
+  {% if period %}
+    {% url 'academics:program_analytics' program.pk as parent %}
+    {% include "core/breadcrumbs.html" with current=period.name parent_url=parent parent_label=program.name only %}
+    <h1 class="heading mt-3">{{ period.name }}</h1>
+    <p>{{ program.name }} · {% if report %}{{ report.starts_on|date:"d M Y" }} – {{ report.ends_on|date:"d M Y" }}{% else %}{{ period.starts_on|date:"d M Y" }} – {{ period.ends_on|date:"d M Y" }}{% endif %}</p>
+    {% if report %}
+      <p class="mt-2">Disimpan {{ report.created_at }} · Ambang {{ report.minimum_group_size }} mahasiswa unik.</p>
+      <h2 id="analytics-gaps-title" class="section-title mt-4">Kesenjangan bukti dan performa</h2>
+      {% if report.snapshot.competencies %}
+        <div class="table-wrap keyboard-scroll mt-4" role="region" aria-labelledby="analytics-gaps-title" tabindex="0"><table class="data-table" aria-labelledby="analytics-gaps-title">
+          <thead><tr><th scope="col">Kompetensi</th><th scope="col">Versi kerangka</th><th scope="col">Bukti belum cukup dari yang dievaluasi</th><th scope="col">Kesenjangan terbuka dari hasil performa yang ditentukan</th></tr></thead>
+          <tbody>{% for row in report.snapshot.competencies %}
+            <tr><th scope="row">{{ row.code }} · {{ row.name }}</th><td>{{ row.version }}</td><td>{{ row.insufficient }} dari {{ row.evaluated }}</td><td>{% if row.performance_known %}{{ row.open }} dari {{ row.performance_known }}{% else %}Belum ditentukan{% endif %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+      {% else %}<p>Belum ada data yang dapat ditampilkan.</p>{% endif %}
+      <h2 id="analytics-burden-title" class="section-title mt-4">Beban asesmen tambahan</h2>
+      {% with burden=report.snapshot.burden %}
+        {% if burden %}
+          <div class="table-wrap keyboard-scroll mt-4" role="region" aria-labelledby="analytics-burden-title" tabindex="0"><table class="data-table" aria-labelledby="analytics-burden-title">
+            <thead><tr><th scope="col">Mahasiswa dengan reservasi</th><th scope="col">Total reservasi</th><th scope="col">Percobaan tertaut</th><th scope="col">Dilepas</th><th scope="col">Masih dipesan</th></tr></thead>
+            <tbody><tr><td>{{ burden.learners }}</td><td>{{ burden.total }}</td><td>{{ burden.linked }}</td><td>{{ burden.released }}</td><td>{{ burden.reserved }}</td></tr></tbody>
+          </table></div>
+        {% else %}<p>Belum ada data yang dapat ditampilkan.</p>{% endif %}
+      {% endwith %}
+    {% else %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <p>Laporan menyimpan hasil agregat periode ini saat dibuat.</p>
+        <button class="button" type="submit">Buat laporan</button>
+      </form>
+    {% endif %}
+  {% else %}
+    {% url 'program_analytics' as parent %}
+    {% include "core/breadcrumbs.html" with current=program.name parent_url=parent parent_label="Analitik Prodi" only %}
+    <h1 class="heading mt-3">{{ program.name }}</h1>
+    <h2 id="analytics-periods-title" class="section-title mt-4">Periode akademik tertutup</h2>
+    <div class="table-wrap keyboard-scroll mt-4" role="region" aria-labelledby="analytics-periods-title" tabindex="0"><table class="data-table" aria-labelledby="analytics-periods-title">
+      <thead><tr><th scope="col">Periode akademik</th><th scope="col">Tanggal selesai</th><th scope="col" class="table-action-column">Aksi</th></tr></thead>
+      <tbody>{% for closed in periods %}
+        <tr><th scope="row">{{ closed.name }}</th><td>{{ closed.ends_on|date:"d M Y" }}</td><td><a href="{% url 'academics:program_analytics_period' program.pk closed.pk %}">Buka laporan<span class="sr-only"> {{ closed.name }}</span></a></td></tr>
+      {% empty %}<tr><td colspan="3">Belum ada periode yang berakhir.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

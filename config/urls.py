@@ -3,6 +3,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 from apps.accounts.authentication import EmailAuthenticationForm
+from apps.adaptive.analytics_views import index as program_analytics
 from apps.adaptive.assessor_views import assessor_artifact, assessor_assignments
 from apps.epa import participation as epa_participation
 from apps.epa.appeals import resolve as epa_resolve_appeal
@@ -29,6 +30,7 @@ from apps.reflection.sharing import coaching, share_revision, shared_reflections
 from apps.reflection.views import drafts, index
 
 urlpatterns = [
+    path("analitik-prodi/", program_analytics, name="program_analytics"),
     path("sidang-progresi/", progression_voting.queue, name="progression_committee_queue"),
     path(
         "sidang-progresi/<int:mandate_id>/",

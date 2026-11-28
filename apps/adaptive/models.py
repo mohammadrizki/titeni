@@ -484,3 +484,16 @@ class AdaptiveEscalation(models.Model):
 
     def __str__(self) -> str:
         return f"{self.target} · {self.due_on}"
+
+
+class ProgramAnalyticsReport(models.Model):
+    period = models.OneToOneField("academics.AcademicPeriod", on_delete=models.PROTECT)
+    starts_on = models.DateField()
+    ends_on = models.DateField()
+    minimum_group_size = models.PositiveSmallIntegerField()
+    snapshot = models.JSONField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return str(self.period)

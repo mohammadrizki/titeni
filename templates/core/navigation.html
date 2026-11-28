@@ -1,4 +1,4 @@
-{% load adaptive_access epa_access exam_adapters progression_access %}
+{% load adaptive_access analytics_access epa_access exam_adapters progression_access %}
 {% with route=request.resolver_match.view_name %}
 <nav aria-label="Menu aplikasi" class="app-navigation grid gap-1">
   <a class="nav-link" href="{% url 'home' %}"{% if route == "home" %} aria-current="page"{% endif %}>Beranda</a>
@@ -34,6 +34,12 @@
   {% has_progression_decision user as show_progression_decisions %}
   {% if show_progression_decisions %}
     <a class="nav-link" href="{% url 'progression_decisions' %}">Keputusan Progresi</a>
+  {% endif %}
+  {% if user.is_authenticated %}
+    {% has_analytics_programs user as show_analytics %}
+    {% if show_analytics %}
+      <a class="nav-link" href="{% url 'program_analytics' %}"{% if route == "program_analytics" %} aria-current="page"{% elif route == "academics:program_analytics" or route == "academics:program_analytics_period" %} aria-current="location"{% endif %}>Analitik Prodi</a>
+    {% endif %}
   {% endif %}
   {% if user.is_authenticated %}<a class="nav-link" href="{% url 'reflection_index' %}">Refleksi Pribadi</a>{% endif %}
   {% if user.is_authenticated %}<a class="nav-link" href="{% url 'learning_index' %}">Rencana Belajar</a>{% endif %}
